@@ -5,6 +5,7 @@ import (
 
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	api "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -12,12 +13,14 @@ import (
 type AuthHandler struct {
 	api.UnimplementedAuthServiceServer
 	service service.AuthService
+	Logger  *zap.Logger
 }
 
 // NewAuthHandler создаёт gRPC-хендлер с внедрённым AuthService
-func NewAuthHandler(authSvc service.AuthService) *AuthHandler {
+func NewAuthHandler(authSvc service.AuthService, log *zap.Logger) *AuthHandler {
 	return &AuthHandler{
 		service: authSvc,
+		Logger:  log,
 	}
 }
 

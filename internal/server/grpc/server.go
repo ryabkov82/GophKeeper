@@ -20,7 +20,7 @@ func StartGRPCServer(log *zap.Logger, cfg *config.Config, services *service.Serv
 
 	s := grpc.NewServer()
 
-	authHandler := NewAuthHandler(services.Auth)
+	authHandler := NewAuthHandler(services.Auth, log)
 	api.RegisterAuthServiceServer(s, authHandler)
 
 	// Other handlers: proto.RegisterDataServiceServer(s, handler.NewDataHandler(services.Data))
