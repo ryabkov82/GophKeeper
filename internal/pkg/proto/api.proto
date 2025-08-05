@@ -1,0 +1,37 @@
+edition = "2023";
+
+package gophkeeper.proto;
+
+import "google/protobuf/go_features.proto";
+option features.(pb.go).api_level = API_OPAQUE;
+
+option go_package = "github.com/ryabkov82/gophkeeper/internal/pkg/proto";
+
+// Запрос на регистрацию
+message RegisterRequest {
+  string login = 1;
+  string password = 2;
+}
+
+// Ответ на регистрацию
+message RegisterResponse {
+  string message = 1;
+}
+
+// Запрос на вход
+message LoginRequest {
+  string login = 1;
+  string password = 2;
+}
+
+// Ответ на вход
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2; // если используется
+}
+
+// gRPC-сервис аутентификации
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+}
