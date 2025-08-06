@@ -1,4 +1,3 @@
-// internal/pkg/config/config.go
 package config
 
 import (
@@ -67,12 +66,12 @@ func validateCertFiles(certFile, keyFile string) error {
 func Load() (*Config, error) {
 	cfg := &Config{
 		GRPCServerAddr: "localhost:50051",
-		DBConnect:      "postgres://user:pass@localhost:5432/gophkeeper?sslmode=disable",
+		DBConnect:      "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable",
 		LogLevel:       "info",
 		JwtKey:         "your_strong_secret_here",
 		EnableTLS:      false,
-		SSLCertFile:    "cert.pem",
-		SSLKeyFile:     "key.pem",
+		SSLCertFile:    "certs/server.crt",
+		SSLKeyFile:     "certs/server.key",
 	}
 
 	// 1. Сначала загрузка из JSON-файла (если указан)
@@ -201,7 +200,7 @@ func loadFromEnv(cfg *Config) error {
 		}
 		cfg.GRPCServerAddr = val
 	}
-	if val := os.Getenv("DATABASE_DSN"); val != "" {
+	if val := os.Getenv("DATABASE_KEEPER"); val != "" {
 		cfg.DBConnect = val
 	}
 

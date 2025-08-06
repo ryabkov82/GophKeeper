@@ -11,17 +11,22 @@ require (
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pressly/goose/v3 v3.24.3 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
@@ -39,6 +44,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/stretchr/testify v1.10.0
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.40.0 // indirect

@@ -24,6 +24,20 @@ func NewAuthService(userRepo repository.UserRepository, tm *jwtutils.TokenManage
 	}
 }
 
+// Register выполняет регистрацию нового пользователя.
+//
+// Выполняет валидацию входных данных (логин и пароль не должны быть пустыми),
+// хеширует пароль с солью и сохраняет пользователя в хранилище.
+//
+// Параметры:
+//   - ctx: контекст выполнения (может содержать таймаут или отмену);
+//   - login: логин пользователя;
+//   - password: пароль пользователя (в открытом виде).
+//
+// Возвращает ошибку, если:
+//   - логин или пароль пустые;
+//   - произошла ошибка при хешировании пароля;
+//   - не удалось создать пользователя в хранилище.
 func (s *authService) Register(ctx context.Context, login, password string) error {
 	if login == "" || password == "" {
 		return errors.New("login and password must not be empty")
@@ -37,6 +51,20 @@ func (s *authService) Register(ctx context.Context, login, password string) erro
 	return s.userRepo.CreateUser(ctx, login, hash, salt)
 }
 
+// Login выполняет аутентификацию пользователя.
+//
+// Получает пользователя из хранилища по логину, сравнивает сохранённый хеш пароля
+// с введённым паролем, и в случае успеха — генерирует JWT-токен.
+//
+// Параметры:
+//   - ctx: контекст выполнения (может содержать таймаут или отмену);
+//   - login: логин пользователя;
+//   - password: введённый пользователем пароль (в открытом виде).
+//
+// Возвращает:
+//   - строку с JWT-токеном в случае успеха;
+//   - ошибку, если пользователь не найден, пароль не совпадает,
+//     либо возникли проблемы при генерации токена.
 func (s *authService) Login(ctx context.Context, login, password string) (string, error) {
 	user, err := s.userRepo.GetUserByLogin(ctx, login)
 	if err != nil {

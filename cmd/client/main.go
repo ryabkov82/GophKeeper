@@ -8,6 +8,14 @@ import (
 )
 
 func main() {
+
+	/*
+	   cfg, err := config.Load()
+	   if err != nil {
+	       log.Fatalf("Failed to load config: %v", err)
+	   }
+	*/
+
 	if len(os.Args) > 1 && os.Args[1] == "--tui" {
 		//exec.Command("cmd", "/c", "chcp 65001 > nul").Run()
 
