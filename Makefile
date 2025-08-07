@@ -1,7 +1,7 @@
 .PHONY: run-client run-server generate test coverage-html
 
 run-client:
-	go run ./cmd/client --tui  # Запуск TUI
+	go run ./cmd/client
 
 run-server:
 	go run ./cmd/server

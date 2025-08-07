@@ -32,7 +32,7 @@ const (
 // DefaultConfig возвращает конфигурацию по умолчанию
 func DefaultConfig() *ClientConfig {
 	return &ClientConfig{
-		ServerAddress: "localhost:50051",
+		ServerAddress: "127.0.0.1:50051",
 		UseTLS:        false,
 		TLSSkipVerify: false,
 		CACertPath:    "certs/ca.crt",

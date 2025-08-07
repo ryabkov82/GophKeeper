@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"context"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -20,10 +22,15 @@ type Model struct {
 	focusedInput int
 
 	// Данные приложения
-	user *User
-	//credentials []Credential
-	//errorMsg    string
+	services    *AppServices
+	ctx         context.Context
+	user        *User
+	registerErr error // Добавляем поле для ошибок
 }
+
+// Добавляем сообщения для системы
+type RegisterSuccessMsg struct{}
+type RegisterFailedMsg struct{ Err error }
 
 // menuItem - элемент меню
 type menuItem struct {
@@ -46,8 +53,9 @@ type Credential struct {
 }
 
 // NewModel создает новую модель приложения
-func NewModel() Model {
-	return Model{
+func NewModel(ctx context.Context, services *AppServices) *Model {
+
+	return &Model{
 		currentState: "menu",
 		menuItems: []menuItem{
 			{"Login", "Войти в систему"},
@@ -57,6 +65,8 @@ func NewModel() Model {
 		},
 		inputs:       make([]textinput.Model, 0),
 		focusedInput: 0,
+		ctx:          ctx,
+		services:     services,
 	}
 }
 

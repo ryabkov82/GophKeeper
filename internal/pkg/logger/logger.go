@@ -3,6 +3,9 @@
 package logger
 
 import (
+	"path/filepath"
+	"time"
+
 	"go.uber.org/zap"
 )
 
@@ -14,6 +17,7 @@ var Log *zap.Logger = zap.NewNop()
 //
 // Параметры:
 //   - level: строка, определяющая уровень логирования (debug, info, warn, error, dpanic, panic, fatal)
+//   - logFilePath — путь к лог-файлу. Если пусто, используется stdout.
 //
 // Возвращает:
 //   - error: ошибка, если передан некорректный уровень логирования или возникла проблема при создании логера
@@ -25,7 +29,7 @@ var Log *zap.Logger = zap.NewNop()
 //	    // обработка ошибки инициализации
 //	}
 //	logger.Log.Info("Логер успешно инициализирован")
-func Initialize(level string) error {
+func Initialize(level string, logFilePath string) error {
 	// Преобразование строкового уровня в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -38,6 +42,16 @@ func Initialize(level string) error {
 	// Установка уровня логирования
 	cfg.Level = lvl
 
+	if logFilePath != "" {
+		// Лог в файл
+		cfg.OutputPaths = []string{logFilePath}
+		cfg.ErrorOutputPaths = []string{logFilePath}
+	} else {
+		// Лог в stdout
+		cfg.OutputPaths = []string{"stdout"}
+		cfg.ErrorOutputPaths = []string{"stderr"}
+	}
+
 	// Создание логера на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
@@ -47,4 +61,29 @@ func Initialize(level string) error {
 	// Замена глобального логера
 	Log = zl
 	return nil
+}
+
+// InitializeWithTimestamp инициализирует глобальный логгер zap и сохраняет логи в файл с временной меткой.
+//
+// Лог-файл будет создан в указанной директории с именем вида:
+//
+//	client_YYYY-MM-DD_HH-MM.log
+//
+// Параметры:
+//   - level: строка, определяющая уровень логирования (например, "debug", "info", "warn", "error").
+//   - logDir: путь к директории, где будет создан лог-файл.
+//
+// Возвращает:
+//   - error: ошибку при разборе уровня логирования, создании каталога или инициализации логгера.
+//
+// Пример использования:
+//
+//	err := logger.InitializeWithTimestamp("debug", "logs")
+//	if err != nil {
+//	    log.Fatalf("Не удалось инициализировать логгер: %v", err)
+//	}
+//	logger.Log.Info("Логгер инициализирован")
+func InitializeWithTimestamp(level, logDir string) error {
+	filename := filepath.Join(logDir, time.Now().Format("client_2006-01-02_15-04")+".log")
+	return Initialize(level, filename)
 }

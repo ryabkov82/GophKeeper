@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("config load failed: %v", err)
 	}
 
-	if err := logger.Initialize(cfg.LogLevel); err != nil {
+	if err := logger.Initialize(cfg.LogLevel, ""); err != nil {
 		log.Fatalf("logger initialize failed: %v", err)
 	}
 

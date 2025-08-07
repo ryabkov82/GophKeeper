@@ -7,7 +7,7 @@ import (
 )
 
 func TestInitialize_ValidLevel(t *testing.T) {
-	err := logger.Initialize("debug")
+	err := logger.Initialize("debug", "")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -28,7 +28,7 @@ func TestInitialize_ValidLevel(t *testing.T) {
 }
 
 func TestInitialize_InvalidLevel(t *testing.T) {
-	err := logger.Initialize("invalid_level")
+	err := logger.Initialize("invalid_level", "")
 	if err == nil {
 		t.Fatal("expected error for invalid log level, got nil")
 	}

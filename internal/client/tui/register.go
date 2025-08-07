@@ -1,11 +1,14 @@
 package tui
 
 import (
+	"context"
+	"errors"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ryabkov82/gophkeeper/internal/client/auth"
 )
 
 var fieldLabels = []string{
@@ -45,30 +48,46 @@ func updateRegister(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "enter":
+			if m.focusedInput == len(m.inputs)-1 {
+				// Логика регистрации
+				if m.inputs[1].Value() != m.inputs[2].Value() {
+					m.registerErr = errors.New("пароли не совпадают")
+					return m, nil
+				}
+
+				return m, tea.Batch(
+					tea.Printf("Регистрируем пользователя..."),
+					registerUser(m.ctx, m.services.AuthManager, m.inputs[0].Value(), m.inputs[1].Value()),
+				)
+			}
+
+			// Переход к следующему полю
+			m.focusedInput = (m.focusedInput + 1) % len(m.inputs)
+			return updateInputFocus(m), nil
+
 		case "esc":
 			m.currentState = "menu"
 			return m, nil
 		case "ctrl+c":
 			return m, tea.Quit
-		case "tab", "shift+tab", "up", "down", "enter":
+		case "tab", "shift+tab", "up", "down":
 			s := msg.String()
-			if s == "enter" && m.focusedInput == len(m.inputs)-1 {
-				// Нажали Enter на пароле - выполняем вход
-				m.currentState = "menu"
-			}
 			if s == "up" || s == "shift+tab" {
 				m.focusedInput = (m.focusedInput - 1 + len(m.inputs)) % len(m.inputs)
 			} else {
 				m.focusedInput = (m.focusedInput + 1) % len(m.inputs)
 			}
-			for i := range m.inputs {
-				if i == m.focusedInput {
-					m.inputs[i].Focus()
-				} else {
-					m.inputs[i].Blur()
-				}
-			}
+			return updateInputFocus(m), nil
 		}
+	case RegisterSuccessMsg:
+		m.currentState = "menu"
+		m.registerErr = nil
+		return m, tea.Printf("Успешная регистрация!")
+
+	case RegisterFailedMsg:
+		m.registerErr = msg.Err
+		return m, nil
 	}
 
 	var cmd tea.Cmd
@@ -99,10 +118,38 @@ func renderRegister(m Model) string {
 		builder.WriteString(label + input.View() + "\n")
 	}
 
+	// Отображение ошибки
+	if m.registerErr != nil {
+		builder.WriteString("\n" + errorStyle.Render("Ошибка: "+m.registerErr.Error()))
+	}
+
 	// Подсказки
 	builder.WriteString("\n" + hintStyle.Render(
 		"Tab: переключение • Enter: подтвердить • Esc: назад • Ctrl+C: выход",
 	))
 
 	return builder.String()
+}
+
+// Команда для регистрации
+func registerUser(ctx context.Context, authManager *auth.AuthManager, login, password string) tea.Cmd {
+	return func() tea.Msg {
+		err := authManager.Register(ctx, login, password)
+		if err != nil {
+			return RegisterFailedMsg{Err: err}
+		}
+		return RegisterSuccessMsg{}
+	}
+}
+
+// Вспомогательная функция для обновления фокуса
+func updateInputFocus(m Model) Model {
+	for i := range m.inputs {
+		if i == m.focusedInput {
+			m.inputs[i].Focus()
+		} else {
+			m.inputs[i].Blur()
+		}
+	}
+	return m
 }
