@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -25,32 +27,81 @@ type Config struct {
 	ConnectTimeout time.Duration // Таймаут подключения
 }
 
+// ConnManager определяет интерфейс для менеджера подключений к gRPC серверу.
+//
+// Метод Connect устанавливает соединение с сервером и возвращает
+// активное gRPC-соединение в виде интерфейса GrpcConn,
+// который оборачивает *grpc.ClientConn и предоставляет необходимые методы,
+// либо ошибку, если соединение не удалось установить.
+type ConnManager interface {
+	Connect(ctx context.Context) (GrpcConn, error)
+}
+
+// grpcConn описывает минимальный набор методов, которые мы используем от *grpc.ClientConn.
+type GrpcConn interface {
+	grpc.ClientConnInterface
+	GetState() connectivity.State
+	Close() error
+	Connect()
+	WaitForStateChange(ctx context.Context, s connectivity.State) bool
+}
+
+type tlsConn interface {
+	ConnectionState() tls.ConnectionState
+	Close() error
+}
+
+type tlsConnAdapter struct {
+	conn *tls.Conn
+}
+
+func (a *tlsConnAdapter) ConnectionState() tls.ConnectionState {
+	return a.conn.ConnectionState()
+}
+
+func (a *tlsConnAdapter) Close() error {
+	return a.conn.Close()
+}
+
+func tlsDialAdapter(network, addr string, config *tls.Config) (tlsConn, error) {
+	c, err := tls.Dial(network, addr, config)
+	if err != nil {
+		return nil, err
+	}
+	return &tlsConnAdapter{conn: c}, nil
+}
+
 // Manager управляет состоянием и установкой gRPC-подключения.
 // Он обеспечивает потокобезопасное использование соединения и автоматическое переподключение.
 type Manager struct {
 	config *Config
-	conn   *grpc.ClientConn
+	conn   GrpcConn
 	mu     sync.RWMutex
 	logger *zap.Logger
+
+	dialFunc    func(target string, opts ...grpc.DialOption) (GrpcConn, error)
+	tlsDialFunc func(network, addr string, config *tls.Config) (tlsConn, error)
 }
 
 type connectionResult struct {
-	conn *grpc.ClientConn
+	conn GrpcConn
 	err  error
 }
 
 // New создаёт новый экземпляр Manager с заданной конфигурацией и логгером.
 func New(cfg *Config, logger *zap.Logger) *Manager {
 	return &Manager{
-		config: cfg,
-		logger: logger,
+		config:      cfg,
+		logger:      logger,
+		dialFunc:    defaultDialFunc,
+		tlsDialFunc: tlsDialAdapter,
 	}
 }
 
 // Connect устанавливает или повторно использует gRPC-соединение.
 // При повторном вызове повторно использует текущее соединение, если оно активно.
 // Иначе создаёт новое. Поддерживает таймаут через контекст.
-func (m *Manager) Connect(ctx context.Context) (*grpc.ClientConn, error) {
+func (m *Manager) Connect(ctx context.Context) (GrpcConn, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -95,12 +146,18 @@ func (m *Manager) Connect(ctx context.Context) (*grpc.ClientConn, error) {
 // createConnection выполняет реальную установку соединения с gRPC-сервером.
 // Учитывает параметры TLS, таймаут и состояние соединения.
 // Используется внутри Connect и не предназначен для прямого вызова.
-func (m *Manager) createConnection(ctx context.Context) (*grpc.ClientConn, error) {
+func (m *Manager) createConnection(ctx context.Context) (GrpcConn, error) {
 	var dialOpts []grpc.DialOption
 
 	if m.config.UseTLS {
+		host, _, err := net.SplitHostPort(m.config.ServerAddress)
+		if err != nil {
+			host = m.config.ServerAddress
+		}
+
 		tlsConfig := &tls.Config{
 			InsecureSkipVerify: m.config.TLSSkipVerify,
+			ServerName:         host,
 		}
 
 		if m.config.CACertPath != "" {
@@ -109,6 +166,7 @@ func (m *Manager) createConnection(ctx context.Context) (*grpc.ClientConn, error
 				m.logger.Error("Failed to read CA certificate", zap.String("path", m.config.CACertPath), zap.Error(err))
 				return nil, err
 			}
+			//m.logger.Debug("caCert", zap.String("caCert", string(caCert)))
 
 			certPool := x509.NewCertPool()
 			if !certPool.AppendCertsFromPEM(caCert) {
@@ -116,6 +174,15 @@ func (m *Manager) createConnection(ctx context.Context) (*grpc.ClientConn, error
 				return nil, errors.New("failed to add CA certificate")
 			}
 			tlsConfig.RootCAs = certPool
+
+			m.logger.Debug("TLS ServerName", zap.String("ServerName", tlsConfig.ServerName))
+
+		}
+
+		// Диагностическая проверка TLS перед gRPC
+		if err := m.testTLSConnection(tlsConfig); err != nil {
+			m.logger.Error("TLS handshake failed", zap.Error(err))
+			return nil, err
 		}
 
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
@@ -126,7 +193,7 @@ func (m *Manager) createConnection(ctx context.Context) (*grpc.ClientConn, error
 	}
 
 	m.logger.Debug("Dialing gRPC server", zap.String("address", m.config.ServerAddress))
-	conn, err := grpc.NewClient(m.config.ServerAddress, dialOpts...)
+	conn, err := m.dialFunc(m.config.ServerAddress, dialOpts...)
 	if err != nil {
 		m.logger.Error("Failed to dial gRPC server", zap.Error(err))
 		return nil, err
@@ -185,8 +252,64 @@ func (m *Manager) Close() error {
 
 // Conn возвращает текущий *grpc.ClientConn без проверки его состояния.
 // Может вернуть nil, если соединение ещё не было установлено.
-func (m *Manager) Conn() *grpc.ClientConn {
+func (m *Manager) Conn() GrpcConn {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.conn
+}
+
+// testTLSConnection выполняет прямое TLS-соединение и печатает причину сбоя
+func (m *Manager) testTLSConnection(tlsConfig *tls.Config) error {
+	_, _, err := net.SplitHostPort(m.config.ServerAddress)
+	if err != nil {
+		return fmt.Errorf("invalid server address: %w", err)
+	}
+
+	conn, err := m.tlsDialFunc("tcp", m.config.ServerAddress, tlsConfig)
+	if err != nil {
+		// Ошибки верификации сертификата
+		var certErr x509.CertificateInvalidError
+		if errors.As(err, &certErr) {
+			return fmt.Errorf("certificate invalid: %v", certErr)
+		}
+
+		var unknownCA x509.UnknownAuthorityError
+		if errors.As(err, &unknownCA) {
+			return fmt.Errorf("unknown CA: %v", unknownCA)
+		}
+
+		var hostnameErr x509.HostnameError
+		if errors.As(err, &hostnameErr) {
+			return fmt.Errorf("hostname mismatch: %v", hostnameErr)
+		}
+
+		return fmt.Errorf("TLS dial error: %w", err)
+	}
+	defer conn.Close()
+
+	state := conn.ConnectionState()
+	for i, cert := range state.PeerCertificates {
+		var ipAddresses []string
+		for _, ip := range cert.IPAddresses {
+			ipAddresses = append(ipAddresses, ip.String())
+		}
+
+		m.logger.Debug("Peer certificate",
+			zap.Int("index", i),
+			zap.String("CN", cert.Subject.CommonName),
+			zap.Strings("DNS SANs", cert.DNSNames),
+			zap.Strings("IP SANs", ipAddresses),
+			zap.Time("NotBefore", cert.NotBefore),
+			zap.Time("NotAfter", cert.NotAfter))
+	}
+
+	return nil
+}
+
+func defaultDialFunc(target string, opts ...grpc.DialOption) (GrpcConn, error) {
+	conn, err := grpc.NewClient(target, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }

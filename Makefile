@@ -1,10 +1,10 @@
 .PHONY: run-client run-server generate test coverage-html
 
 run-client:
-	go run ./cmd/client
+	go run ./cmd/client --tls=true --skip-verify=false --log-level='debug'
 
 run-server:
-	go run ./cmd/server
+	go run ./cmd/server --s=true
 
 generate:
 	protoc --go_out=. \

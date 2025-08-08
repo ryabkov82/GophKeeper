@@ -63,8 +63,8 @@ func LoggingInterceptor(log *zap.Logger) grpc.UnaryServerInterceptor {
 			st, _ := status.FromError(err)
 
 			log.Info("gRPC request completed",
-				zap.String("method", info.FullMethod),     // Полное имя метода (например /shortener.Shortener/CreateShortURL)
-				zap.Any("request", req),                   // Входные параметры
+				zap.String("method", info.FullMethod), // Полное имя метода
+				//zap.Any("request", req),                   // Входные параметры, не выводим, приватная информация
 				zap.Int("status_code", int(st.Code())),    // Код статуса gRPC
 				zap.String("status", st.Code().String()),  // Текстовый статус
 				zap.String("duration", duration.String()), // Время обработки

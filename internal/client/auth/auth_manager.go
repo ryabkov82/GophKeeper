@@ -7,6 +7,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 // AuthManager управляет авторизацией пользователя, включая хранение токена,
@@ -14,8 +15,9 @@ import (
 type AuthManager struct {
 	token       string       // Текущий токен (в памяти)
 	tokenStore  TokenStorage // Постоянное хранилище (файл, keychain и т.д.)
-	connManager *connection.Manager
+	connManager connection.ConnManager
 	Logger      *zap.Logger
+	Client      proto.AuthServiceClient // добавлено для инъекции моков
 }
 
 // TokenStorage описывает интерфейс для сохранения, загрузки и очистки токена.
@@ -30,7 +32,7 @@ type TokenStorage interface {
 // connManager — менеджер подключения к gRPC-серверу,
 // store — реализация хранения токена,
 // logger — логгер.
-func NewAuthManager(connManager *connection.Manager, store TokenStorage, logger *zap.Logger) *AuthManager {
+func NewAuthManager(connManager connection.ConnManager, store TokenStorage, logger *zap.Logger) *AuthManager {
 	return &AuthManager{
 		tokenStore:  store,
 		connManager: connManager,
@@ -75,6 +77,13 @@ func (a *AuthManager) Clear() error {
 	return nil
 }
 
+func (a *AuthManager) getClient(conn grpc.ClientConnInterface) proto.AuthServiceClient {
+	if a.Client != nil {
+		return a.Client
+	}
+	return proto.NewAuthServiceClient(conn)
+}
+
 // Login выполняет аутентификацию пользователя через gRPC,
 // получает access token и сохраняет его в хранилище.
 func (a *AuthManager) Login(ctx context.Context, login, password string) error {
@@ -90,7 +99,7 @@ func (a *AuthManager) Login(ctx context.Context, login, password string) error {
 	req.SetLogin(login)
 	req.SetPassword(password)
 
-	client := proto.NewAuthServiceClient(conn)
+	client := a.getClient(conn) // используем инжектированный клиент, если есть
 	resp, err := client.Login(ctx, req)
 	if err != nil {
 		a.Logger.Error("Login RPC failed", zap.Error(err))
@@ -120,7 +129,7 @@ func (a *AuthManager) Register(ctx context.Context, login, password string) erro
 	req.SetLogin(login)
 	req.SetPassword(password)
 
-	client := proto.NewAuthServiceClient(conn)
+	client := a.getClient(conn)
 	_, err = client.Register(ctx, req)
 	if err != nil {
 		a.Logger.Error("Register RPC failed", zap.Error(err))

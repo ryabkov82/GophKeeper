@@ -24,8 +24,8 @@ type Model struct {
 	// Данные приложения
 	services    *AppServices
 	ctx         context.Context
-	user        *User
 	registerErr error // Добавляем поле для ошибок
+	loginErr    error
 }
 
 // Добавляем сообщения для системы
@@ -82,8 +82,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return updateMenu(m, msg)
 	case "login":
 		return updateLogin(m, msg)
+	case "loginSuccess":
+		return updateLoginSuccess(m, msg)
 	case "register":
 		return updateRegister(m, msg)
+	case "registerSuccess":
+		return updateRegisterSuccess(m, msg)
 	case "view_data":
 		return updateViewData(m, msg)
 	default:
@@ -98,8 +102,12 @@ func (m Model) View() string {
 		return renderMenu(m)
 	case "login":
 		return renderLogin(m)
+	case "loginSuccess":
+		return renderLoginSuccess(m)
 	case "register":
 		return renderRegister(m)
+	case "registerSuccess":
+		return renderRegisterSuccess(m)
 	case "view_data":
 		return renderViewData(m)
 	default:

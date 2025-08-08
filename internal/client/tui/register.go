@@ -81,9 +81,9 @@ func updateRegister(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			return updateInputFocus(m), nil
 		}
 	case RegisterSuccessMsg:
-		m.currentState = "menu"
+		m.currentState = "registerSuccess" // переход в промежуточное состояние
 		m.registerErr = nil
-		return m, tea.Printf("Успешная регистрация!")
+		return m, nil
 
 	case RegisterFailedMsg:
 		m.registerErr = msg.Err
@@ -152,4 +152,24 @@ func updateInputFocus(m Model) Model {
 		}
 	}
 	return m
+}
+
+func updateRegisterSuccess(m Model, msg tea.Msg) (Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			m.currentState = "menu" // переход в меню по Enter
+			return m, nil
+		case "ctrl+c":
+			return m, tea.Quit
+		}
+	}
+	return m, nil
+}
+
+func renderRegisterSuccess(m Model) string {
+	return titleStyle.Render("Регистрация") + "\n\n" +
+		lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Render("Успешная регистрация!") + "\n\n" +
+		hintStyle.Render("Нажмите Enter для перехода в меню или Ctrl+C для выхода")
 }
