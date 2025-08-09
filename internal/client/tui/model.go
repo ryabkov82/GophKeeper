@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ryabkov82/gophkeeper/internal/client/app"
 )
 
 // Model - основная модель приложения, реализующая tea.Model
@@ -22,7 +23,7 @@ type Model struct {
 	focusedInput int
 
 	// Данные приложения
-	services    *AppServices
+	services    *app.AppServices
 	ctx         context.Context
 	registerErr error // Добавляем поле для ошибок
 	loginErr    error
@@ -53,7 +54,7 @@ type Credential struct {
 }
 
 // NewModel создает новую модель приложения
-func NewModel(ctx context.Context, services *AppServices) *Model {
+func NewModel(ctx context.Context, services *app.AppServices) *Model {
 
 	return &Model{
 		currentState: "menu",

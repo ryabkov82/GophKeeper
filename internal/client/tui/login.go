@@ -139,7 +139,7 @@ func renderLoginSuccess(m Model) string {
 }
 
 // Команда для авторизации
-func loginUser(ctx context.Context, authManager *auth.AuthManager, login, password string) tea.Cmd {
+func loginUser(ctx context.Context, authManager auth.AuthManagerIface, login, password string) tea.Cmd {
 	return func() tea.Msg {
 		err := authManager.Login(ctx, login, password)
 		if err != nil {

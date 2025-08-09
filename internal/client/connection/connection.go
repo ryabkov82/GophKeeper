@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"fmt"
 	"net"
 	"os"
 	"sync"
@@ -35,40 +34,16 @@ type Config struct {
 // либо ошибку, если соединение не удалось установить.
 type ConnManager interface {
 	Connect(ctx context.Context) (GrpcConn, error)
+	Close() error
 }
 
-// grpcConn описывает минимальный набор методов, которые мы используем от *grpc.ClientConn.
+// GrpcConn описывает минимальный набор методов, которые мы используем от *grpc.ClientConn.
 type GrpcConn interface {
 	grpc.ClientConnInterface
 	GetState() connectivity.State
 	Close() error
 	Connect()
 	WaitForStateChange(ctx context.Context, s connectivity.State) bool
-}
-
-type tlsConn interface {
-	ConnectionState() tls.ConnectionState
-	Close() error
-}
-
-type tlsConnAdapter struct {
-	conn *tls.Conn
-}
-
-func (a *tlsConnAdapter) ConnectionState() tls.ConnectionState {
-	return a.conn.ConnectionState()
-}
-
-func (a *tlsConnAdapter) Close() error {
-	return a.conn.Close()
-}
-
-func tlsDialAdapter(network, addr string, config *tls.Config) (tlsConn, error) {
-	c, err := tls.Dial(network, addr, config)
-	if err != nil {
-		return nil, err
-	}
-	return &tlsConnAdapter{conn: c}, nil
 }
 
 // Manager управляет состоянием и установкой gRPC-подключения.
@@ -79,8 +54,7 @@ type Manager struct {
 	mu     sync.RWMutex
 	logger *zap.Logger
 
-	dialFunc    func(target string, opts ...grpc.DialOption) (GrpcConn, error)
-	tlsDialFunc func(network, addr string, config *tls.Config) (tlsConn, error)
+	dialFunc func(target string, opts ...grpc.DialOption) (GrpcConn, error)
 }
 
 type connectionResult struct {
@@ -91,10 +65,9 @@ type connectionResult struct {
 // New создаёт новый экземпляр Manager с заданной конфигурацией и логгером.
 func New(cfg *Config, logger *zap.Logger) *Manager {
 	return &Manager{
-		config:      cfg,
-		logger:      logger,
-		dialFunc:    defaultDialFunc,
-		tlsDialFunc: tlsDialAdapter,
+		config:   cfg,
+		logger:   logger,
+		dialFunc: defaultDialFunc,
 	}
 }
 
@@ -179,11 +152,13 @@ func (m *Manager) createConnection(ctx context.Context) (GrpcConn, error) {
 
 		}
 
-		// Диагностическая проверка TLS перед gRPC
-		if err := m.testTLSConnection(tlsConfig); err != nil {
-			m.logger.Error("TLS handshake failed", zap.Error(err))
-			return nil, err
-		}
+		/*
+			// Диагностическая проверка TLS перед gRPC
+			if err := m.testTLSConnection(tlsConfig); err != nil {
+				m.logger.Error("TLS handshake failed", zap.Error(err))
+				return nil, err
+			}
+		*/
 
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
 		m.logger.Debug("Using TLS for gRPC connection")
@@ -258,6 +233,7 @@ func (m *Manager) Conn() GrpcConn {
 	return m.conn
 }
 
+/*
 // testTLSConnection выполняет прямое TLS-соединение и печатает причину сбоя
 func (m *Manager) testTLSConnection(tlsConfig *tls.Config) error {
 	_, _, err := net.SplitHostPort(m.config.ServerAddress)
@@ -305,6 +281,7 @@ func (m *Manager) testTLSConnection(tlsConfig *tls.Config) error {
 
 	return nil
 }
+*/
 
 func defaultDialFunc(target string, opts ...grpc.DialOption) (GrpcConn, error) {
 	conn, err := grpc.NewClient(target, opts...)

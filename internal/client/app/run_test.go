@@ -8,40 +8,40 @@ import (
 
 	"github.com/ryabkov82/gophkeeper/internal/client/app"
 	"github.com/ryabkov82/gophkeeper/internal/client/config"
-	"github.com/ryabkov82/gophkeeper/internal/client/tui"
+	"github.com/ryabkov82/gophkeeper/internal/client/tuiiface"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunWithServices(t *testing.T) {
-	// Мок конфигурации
 	cfg := &config.ClientConfig{
 		ServerAddress: "localhost:50051",
 		UseTLS:        false,
 		LogLevel:      "debug",
 		Timeout:       2 * time.Second,
 	}
+	tempLogDir := t.TempDir()
 
-	tempLogDir := t.TempDir() // создаем временную директорию для логов
-
-	// Переменная для проверки вызова runTUI
 	var runTUICalled bool
 
-	mockRunTUI := func(ctx context.Context, services *tui.AppServices) error {
+	mockRunTUI := func(ctx context.Context, services *app.AppServices, progFactory tuiiface.ProgramFactory) error {
 		runTUICalled = true
-		return nil // имитируем успешный запуск
+
+		assert.NotNil(t, ctx)
+		assert.NotNil(t, services)
+		// progFactory может быть nil, проверять не обязательно
+		return nil
 	}
 
 	err := app.RunWithServices(cfg, tempLogDir, mockRunTUI)
-	assert.NoError(t, err, "runWithServices должен завершиться без ошибки")
-	assert.True(t, runTUICalled, "runTUI должен быть вызван")
+	assert.NoError(t, err)
+	assert.True(t, runTUICalled)
 }
 
 func TestRunWithServices_MkdirFail(t *testing.T) {
 	cfg := &config.ClientConfig{}
-	// Указываем директорию, которая не может быть создана (например, корневая Windows)
 	badDir := string([]byte{0})
 
-	mockRunTUI := func(ctx context.Context, services *tui.AppServices) error {
+	mockRunTUI := func(ctx context.Context, services *app.AppServices, progFactory tuiiface.ProgramFactory) error {
 		return nil
 	}
 
@@ -56,10 +56,9 @@ func TestRunWithServices_RunTUIFail(t *testing.T) {
 		LogLevel:      "debug",
 		Timeout:       2 * time.Second,
 	}
-
 	tempLogDir := t.TempDir()
 
-	mockRunTUI := func(ctx context.Context, services *tui.AppServices) error {
+	mockRunTUI := func(ctx context.Context, services *app.AppServices, progFactory tuiiface.ProgramFactory) error {
 		return errors.New("TUI error")
 	}
 

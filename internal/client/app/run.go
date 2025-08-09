@@ -2,63 +2,56 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/auth"
 	"github.com/ryabkov82/gophkeeper/internal/client/config"
-	"github.com/ryabkov82/gophkeeper/internal/client/connection"
-	"github.com/ryabkov82/gophkeeper/internal/client/tui"
+	"github.com/ryabkov82/gophkeeper/internal/client/tuiiface"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/logger"
 	"go.uber.org/zap"
 )
 
-// runWithServices выполняет инициализацию и запуск TUI,
-// принимает готовую конфигурацию, директорию для логов и функцию запуска TUI.
+// RunWithServices выполняет инициализацию всех необходимых сервисов и
+// запускает TUI-приложение с учётом обработки системных сигналов.
+//
+// Аргументы:
+//   - cfg: готовая конфигурация клиента, содержащая настройки подключения,
+//     логирования и другие параметры.
+//   - logDir: путь к директории, где будут сохраняться логи приложения.
+//   - runTUI: функция запуска TUI, принимающая контекст, контейнер сервисов,
+//     фабрику создания TUI-программы и канал системных сигналов.
+//
+// Логика:
+//  1. Создаёт контейнер сервисов (AppServices) с инициализацией логгера,
+//     менеджера соединений и других зависимостей.
+//  2. Создаёт контекст, который будет отменён при получении сигнала
+//     завершения (SIGINT, SIGTERM).
+//  3. Создаёт фабрику progFactory для создания TUI-программы на базе bubbletea,
+//     с включённым альтернативным экраном.
+//  4. Вызывает runTUI, передавая контекст, сервисы, фабрику программы.
+//  5. Обеспечивает корректное освобождение ресурсов (закрытие сервисов) при завершении.
+//
+// Возвращает:
+//   - ошибку, возникшую при инициализации сервисов или при выполнении runTUI.
 func RunWithServices(
 	cfg *config.ClientConfig,
 	logDir string,
-	runTUI func(ctx context.Context, services *tui.AppServices) error,
+	runTUI func(ctx context.Context, services *AppServices, progFactory tuiiface.ProgramFactory) error,
 ) error {
-
-	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-		return fmt.Errorf("failed to create log directory: %w", err)
+	services, err := NewAppServices(cfg, logDir)
+	if err != nil {
+		return err
 	}
-
-	if err := logger.InitializeWithTimestamp(cfg.LogLevel, logDir); err != nil {
-		return fmt.Errorf("logger initialize failed: %w", err)
-	}
+	defer services.Close()
 	defer logger.Close()
 
-	log := logger.Log
-	log.Info("Конфигурация загружена", zap.Any("config", cfg))
-
-	connConfig := &connection.Config{
-		ServerAddress:  cfg.ServerAddress,
-		UseTLS:         cfg.UseTLS,
-		TLSSkipVerify:  cfg.TLSSkipVerify,
-		CACertPath:     cfg.CACertPath,
-		ConnectTimeout: cfg.Timeout,
-	}
-
-	log.Debug("Создание менеджера соединений", zap.Any("connConfig", connConfig))
-
-	connManager := connection.New(connConfig, log)
-	tokenStore := auth.NewFileTokenStorage(".token")
-	authManager := auth.NewAuthManager(connManager, tokenStore, log)
-
-	// Контекст обработки сигналов
+	// Контекст с автоматической отменой при получении SIGINT или SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	services := &tui.AppServices{
-		AuthManager: authManager,
-		ConnManager: connManager,
-		Logger:      log,
-	}
+	services.Logger.Info("Конфигурация загружена", zap.Any("config", cfg))
+	services.Logger.Info("Запуск TUI...")
 
-	log.Info("Запуск TUI...")
-	return runTUI(ctx, services)
+	return runTUI(ctx, services, nil)
 }

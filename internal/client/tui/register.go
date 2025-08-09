@@ -132,7 +132,7 @@ func renderRegister(m Model) string {
 }
 
 // Команда для регистрации
-func registerUser(ctx context.Context, authManager *auth.AuthManager, login, password string) tea.Cmd {
+func registerUser(ctx context.Context, authManager auth.AuthManagerIface, login, password string) tea.Cmd {
 	return func() tea.Msg {
 		err := authManager.Register(ctx, login, password)
 		if err != nil {

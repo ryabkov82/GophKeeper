@@ -36,6 +36,9 @@ type mockConnManager struct{}
 func (m *mockConnManager) Connect(ctx context.Context) (connection.GrpcConn, error) {
 	return nil, nil // не используется, тк клиент мокируется напрямую
 }
+func (m *mockConnManager) Close() error {
+	return nil
+}
 
 func TestAuthManager_Login(t *testing.T) {
 	ctrl := gomock.NewController(t)

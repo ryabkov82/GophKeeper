@@ -20,6 +20,20 @@ type AuthManager struct {
 	Client      proto.AuthServiceClient // добавлено для инъекции моков
 }
 
+// AuthManagerIface описывает интерфейс для управления аутентификацией и регистрацией пользователей.
+// Включает методы для регистрации, входа и других операций, связанных с авторизацией.
+// Используется для абстрагирования реальной реализации AuthManager,
+// что облегчает подмену в тестах и повышает модульность кода.
+type AuthManagerIface interface {
+	// Register регистрирует нового пользователя с заданным логином и паролем.
+	// Возвращает ошибку, если регистрация не удалась.
+	Register(ctx context.Context, login, password string) error
+
+	// Login выполняет аутентификацию пользователя с заданным логином и паролем.
+	// Возвращает ошибку, если вход не удался.
+	Login(ctx context.Context, login, password string) error
+}
+
 // TokenStorage описывает интерфейс для сохранения, загрузки и очистки токена.
 type TokenStorage interface {
 	Save(token string) error

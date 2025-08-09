@@ -12,11 +12,11 @@ func updateMenu(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "up", "k":
+		case "up", "shift+tab":
 			if m.menuCursor > 0 {
 				m.menuCursor--
 			}
-		case "down", "j":
+		case "down", "tab":
 			if m.menuCursor < len(m.menuItems)-1 {
 				m.menuCursor++
 			}

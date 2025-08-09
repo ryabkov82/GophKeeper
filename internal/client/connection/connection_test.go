@@ -2,7 +2,6 @@ package connection
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"testing"
 	"time"
@@ -49,16 +48,17 @@ func (f *fakeConn) NewStream(ctx context.Context, desc *grpc.StreamDesc, method 
 	return nil, nil
 }
 
+/*
 type fakeTLSConn struct{}
 
-func (f *fakeTLSConn) ConnectionState() tls.ConnectionState {
-	return tls.ConnectionState{} // можно заполнить нужные поля
-}
+	func (f *fakeTLSConn) ConnectionState() tls.ConnectionState {
+		return tls.ConnectionState{} // можно заполнить нужные поля
+	}
 
-func (f *fakeTLSConn) Close() error {
-	return nil
-}
-
+	func (f *fakeTLSConn) Close() error {
+		return nil
+	}
+*/
 func TestConnect_Success(t *testing.T) {
 	logger := zap.NewNop()
 	cfg := &Config{
@@ -101,6 +101,7 @@ func TestConnect_DialError(t *testing.T) {
 	require.Nil(t, conn)
 }
 
+/*
 func TestTestTLSConnection_Success(t *testing.T) {
 	logger := zap.NewNop()
 	cfg := &Config{
@@ -136,6 +137,7 @@ func TestTestTLSConnection_Error(t *testing.T) {
 	err := mgr.testTLSConnection(&tls.Config{})
 	require.Error(t, err)
 }
+*/
 
 func TestClose_WithOpenConnection(t *testing.T) {
 	logger := zap.NewNop()
