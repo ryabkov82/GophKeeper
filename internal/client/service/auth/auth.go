@@ -8,6 +8,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 // AuthManager управляет авторизацией пользователя, включая хранение токена,
@@ -32,6 +33,9 @@ type AuthManagerIface interface {
 	// Login выполняет аутентификацию пользователя с заданным логином и паролем.
 	// Возвращает ошибку, если вход не удался.
 	Login(ctx context.Context, login, password string) error
+
+	// contextWithToken возвращает новый контекст с установленным в метаданные токеном авторизации.
+	ContextWithToken(ctx context.Context) context.Context
 }
 
 // TokenStorage описывает интерфейс для сохранения, загрузки и очистки токена.
@@ -158,4 +162,21 @@ func (a *AuthManager) Register(ctx context.Context, login, password string) erro
 	}
 
 	return a.Login(ctx, login, password)
+}
+
+// contextWithToken возвращает новый контекст с установленным в метаданные токеном авторизации.
+func (a *AuthManager) ContextWithToken(ctx context.Context) context.Context {
+	token := a.GetToken()
+	if token == "" {
+		return ctx
+	}
+
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		md = metadata.New(nil)
+	} else {
+		md = md.Copy()
+	}
+	md.Set("authorization", "Bearer "+token)
+	return metadata.NewOutgoingContext(ctx, md)
 }

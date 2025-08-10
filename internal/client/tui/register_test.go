@@ -26,6 +26,10 @@ func (m *mockAuthManager) Login(ctx context.Context, login, password string) err
 	return m.loginErr
 }
 
+func (m *mockAuthManager) ContextWithToken(ctx context.Context) context.Context {
+	return ctx
+}
+
 // Помощник для создания модели с заполненными моками
 func makeTestModel(t *testing.T, authMgr *mockAuthManager) Model {
 	m := Model{

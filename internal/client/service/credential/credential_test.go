@@ -28,21 +28,22 @@ var testCredential = &model.Credential{
 	UpdatedAt: time.Now(),
 }
 
-func setup(t *testing.T) (*credential.CredentialManager, *gomock.Controller, *mocks.MockCredentialServiceClient) {
-	ctrl := gomock.NewController(t)
-	mockClient := mocks.NewMockCredentialServiceClient(ctrl)
+// --- Ручной мок AuthManagerIface для минимального интерфейса ---
 
-	logger := zaptest.NewLogger(t)
+type mockAuthManager struct {
+	// тут можно добавить счетчик вызовов, если надо
+}
 
-	// Заглушка ConnManager, который возвращает mockClient как клиент gRPC
-	connManager := &mockConnManager{}
+func (m *mockAuthManager) Register(ctx context.Context, login, password string) error {
+	return nil
+}
 
-	manager := credential.NewCredentialManager(connManager, logger)
+func (m *mockAuthManager) Login(ctx context.Context, login, password string) error {
+	return nil
+}
 
-	// Внедрим мок-клиент (чтобы не создавать соединение в тестах)
-	manager.SetClient(mockClient)
-
-	return manager, ctrl, mockClient
+func (m *mockAuthManager) ContextWithToken(ctx context.Context) context.Context {
+	return ctx // просто возвращаем контекст без изменений
 }
 
 // Заглушка для connManager
@@ -53,6 +54,34 @@ func (m *mockConnManager) Connect(ctx context.Context) (connection.GrpcConn, err
 }
 func (m *mockConnManager) Close() error {
 	return nil
+}
+
+type failConnManager struct{}
+
+func (f *failConnManager) Connect(ctx context.Context) (connection.GrpcConn, error) {
+	return nil, errors.New("failed to connect")
+}
+
+func (f *failConnManager) Close() error {
+	return nil
+}
+
+func setup(t *testing.T) (*credential.CredentialManager, *gomock.Controller, *mocks.MockCredentialServiceClient) {
+	ctrl := gomock.NewController(t)
+	mockClient := mocks.NewMockCredentialServiceClient(ctrl)
+
+	logger := zaptest.NewLogger(t)
+
+	// Заглушка ConnManager, который возвращает mockClient как клиент gRPC
+	connManager := &mockConnManager{}
+
+	authMock := &mockAuthManager{}
+	manager := credential.NewCredentialManager(connManager, authMock, logger)
+
+	// Внедрим мок-клиент (чтобы не создавать соединение в тестах)
+	manager.SetClient(mockClient)
+
+	return manager, ctrl, mockClient
 }
 
 func TestCreateCredential_Success(t *testing.T) {
@@ -76,22 +105,13 @@ func TestCreateCredential_FailConnection(t *testing.T) {
 
 	logger := zaptest.NewLogger(t)
 	connManager := &failConnManager{}
-	manager := credential.NewCredentialManager(connManager, logger)
+	authMock := &mockAuthManager{}
+	manager := credential.NewCredentialManager(connManager, authMock, logger)
 
 	err := manager.CreateCredential(context.Background(), testCredential)
 	if err == nil {
 		t.Fatalf("Expected connection failure error, got nil")
 	}
-}
-
-type failConnManager struct{}
-
-func (f *failConnManager) Connect(ctx context.Context) (connection.GrpcConn, error) {
-	return nil, errors.New("failed to connect")
-}
-
-func (f *failConnManager) Close() error {
-	return nil
 }
 
 func TestGetCredentialByID_Success(t *testing.T) {

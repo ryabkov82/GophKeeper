@@ -10,6 +10,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/client/config"
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/credential"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -23,9 +24,10 @@ import (
 //   - ConnManager: управляет подключением к gRPC-серверу.
 //   - Logger: структурированный логгер для записи отладочной и диагностической информации.
 type AppServices struct {
-	AuthManager auth.AuthManagerIface
-	ConnManager connection.ConnManager
-	Logger      *zap.Logger
+	AuthManager       auth.AuthManagerIface
+	CredentialManager credential.CredentialManagerIface // новое поле
+	ConnManager       connection.ConnManager
+	Logger            *zap.Logger
 	// Будущие зависимости:
 	// DataService *data.Service
 
@@ -57,10 +59,14 @@ func NewAppServices(cfg *config.ClientConfig, logDir string) (*AppServices, erro
 	tokenStore := auth.NewFileTokenStorage(".token")
 	authManager := auth.NewAuthManager(connManager, tokenStore, log)
 
+	// Создаем CredentialManager, передав connManager, authManager и logger
+	credentialManager := credential.NewCredentialManager(connManager, authManager, log)
+
 	return &AppServices{
-		AuthManager: authManager,
-		ConnManager: connManager,
-		Logger:      log,
+		AuthManager:       authManager,
+		CredentialManager: credentialManager,
+		ConnManager:       connManager,
+		Logger:            log,
 	}, nil
 }
 

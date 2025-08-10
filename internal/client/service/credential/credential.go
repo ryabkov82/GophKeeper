@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
@@ -26,13 +27,15 @@ type CredentialManagerIface interface {
 type CredentialManager struct {
 	connManager connection.ConnManager
 	logger      *zap.Logger
+	auth        auth.AuthManagerIface
 	client      pb.CredentialServiceClient // для инъекции моков в тестах
 }
 
 // NewCredentialManager создаёт новый CredentialManager.
-func NewCredentialManager(connManager connection.ConnManager, logger *zap.Logger) *CredentialManager {
+func NewCredentialManager(connManager connection.ConnManager, authManager auth.AuthManagerIface, logger *zap.Logger) *CredentialManager {
 	return &CredentialManager{
 		connManager: connManager,
+		auth:        authManager,
 		logger:      logger,
 	}
 }
@@ -73,6 +76,8 @@ func (m *CredentialManager) CreateCredential(ctx context.Context, cred *model.Cr
 		zap.String("title", cred.Title),
 	)
 
+	ctx = m.auth.ContextWithToken(ctx)
+
 	return m.withClient(ctx, func(client pb.CredentialServiceClient) error {
 		req := &pb.CreateCredentialRequest{}
 		req.SetCredential(toProtoCredential(cred))
@@ -97,6 +102,7 @@ func (m *CredentialManager) GetCredentialByID(ctx context.Context, id string) (*
 		zap.String("credentialID", id),
 	)
 
+	ctx = m.auth.ContextWithToken(ctx)
 	var cred *model.Credential
 	err := m.withClient(ctx, func(client pb.CredentialServiceClient) error {
 		req := &pb.GetCredentialByIDRequest{}
@@ -128,6 +134,7 @@ func (m *CredentialManager) GetCredentialsByUserID(ctx context.Context, userID s
 		zap.String("userID", userID),
 	)
 
+	ctx = m.auth.ContextWithToken(ctx)
 	var creds []model.Credential
 	err := m.withClient(ctx, func(client pb.CredentialServiceClient) error {
 		req := &pb.GetCredentialsByUserIDRequest{}
@@ -163,6 +170,7 @@ func (m *CredentialManager) UpdateCredential(ctx context.Context, cred *model.Cr
 		zap.String("credentialID", cred.ID),
 	)
 
+	ctx = m.auth.ContextWithToken(ctx)
 	return m.withClient(ctx, func(client pb.CredentialServiceClient) error {
 		req := &pb.UpdateCredentialRequest{}
 		req.SetCredential(toProtoCredential(cred))
@@ -186,6 +194,7 @@ func (m *CredentialManager) DeleteCredential(ctx context.Context, id string) err
 		zap.String("credentialID", id),
 	)
 
+	ctx = m.auth.ContextWithToken(ctx)
 	return m.withClient(ctx, func(client pb.CredentialServiceClient) error {
 		req := &pb.DeleteCredentialRequest{}
 		req.SetId(id)

@@ -11,6 +11,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto/mocks"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/metadata"
 )
 
 // Заглушка для TokenStorage
@@ -118,4 +119,41 @@ func TestAuthManager_Register(t *testing.T) {
 
 	err := authMgr.Register(context.Background(), "user", "pass")
 	require.NoError(t, err)
+}
+
+func TestAuthManager_ContextWithToken(t *testing.T) {
+	store := &mockTokenStorage{}
+	connManager := &mockConnManager{}
+
+	authMgr := auth.NewAuthManager(connManager, store, zap.NewNop())
+
+	// Случай 1: токен пустой
+	ctx := context.Background()
+	ctxOut := authMgr.ContextWithToken(ctx)
+	if ctxOut != ctx {
+		t.Error("Expected context to be unchanged when token is empty")
+	}
+
+	// Случай 2: токен установлен
+	const token = "mytoken123"
+	authMgr.SetToken(token) // устанавливаем токен в AuthManager
+
+	ctx = context.Background()
+	ctxOut = authMgr.ContextWithToken(ctx)
+
+	// Извлекаем метаданные из контекста
+	md, ok := metadata.FromOutgoingContext(ctxOut)
+	if !ok {
+		t.Fatal("Expected metadata in outgoing context")
+	}
+
+	authHeader := md.Get("authorization")
+	if len(authHeader) == 0 {
+		t.Fatal("Authorization header missing in metadata")
+	}
+
+	expected := "Bearer " + token
+	if authHeader[0] != expected {
+		t.Errorf("Authorization header = %q, want %q", authHeader[0], expected)
+	}
 }
