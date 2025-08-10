@@ -1,4 +1,4 @@
-.PHONY: run-client run-server generate test coverage-html
+.PHONY: run-client run-server generate test coverage-html mocks
 
 run-client:
 	go run ./cmd/client --tls=true --skip-verify=false --log-level='debug'
@@ -33,3 +33,10 @@ endif
 
 coverage-html: test
 	go tool cover -html=coverage.out -o coverage.html
+
+MOCKGEN=mockgen
+PROTO_DIR=internal/pkg/proto
+MOCKS_DIR=internal/pkg/proto/mocks
+
+mocks:
+	$(MOCKGEN) -source=$(PROTO_DIR)/api_grpc.pb.go -destination=$(MOCKS_DIR)/mock_api.go -package=mocks

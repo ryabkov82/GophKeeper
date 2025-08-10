@@ -9,6 +9,7 @@ import (
 
 func NewRepositories(db *sql.DB) *repository.Repositories {
 	return &repository.Repositories{
-		User: postgres.NewUserStorage(db),
+		User:       postgres.NewUserStorage(db),
+		Credential: postgres.NewCredentialStorage(db),
 	}
 }

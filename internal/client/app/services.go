@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/auth"
 	"github.com/ryabkov82/gophkeeper/internal/client/config"
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/logger"
 	"go.uber.org/zap"
 )

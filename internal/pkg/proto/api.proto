@@ -2,6 +2,7 @@ edition = "2023";
 
 package gophkeeper.proto;
 
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/go_features.proto";
 option features.(pb.go).api_level = API_OPAQUE;
 
@@ -34,4 +35,65 @@ message LoginResponse {
 service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
+}
+
+// Сообщения для Credential
+message Credential {
+    string id = 1;
+    string user_id = 2;
+    string title = 3;
+    string login = 4;
+    string password = 5;
+    string metadata = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateCredentialRequest {
+    Credential credential = 1;
+}
+
+message CreateCredentialResponse {
+    Credential credential = 1;
+}
+
+message GetCredentialByIDRequest {
+    string id = 1;
+}
+
+message GetCredentialByIDResponse {
+    Credential credential = 1;
+}
+
+message GetCredentialsByUserIDRequest {
+    string user_id = 1;
+}
+
+message GetCredentialsByUserIDResponse {
+    repeated Credential credentials = 1;
+}
+
+message UpdateCredentialRequest {
+    Credential credential = 1;
+}
+
+message UpdateCredentialResponse {
+    Credential credential = 1;
+}
+
+message DeleteCredentialRequest {
+    string id = 1;
+}
+
+message DeleteCredentialResponse {
+    bool success = 1;
+}
+
+// Сервис для работы с Credential
+service CredentialService {
+    rpc CreateCredential(CreateCredentialRequest) returns (CreateCredentialResponse);
+    rpc GetCredentialByID(GetCredentialByIDRequest) returns (GetCredentialByIDResponse);
+    rpc GetCredentialsByUserID(GetCredentialsByUserIDRequest) returns (GetCredentialsByUserIDResponse);
+    rpc UpdateCredential(UpdateCredentialRequest) returns (UpdateCredentialResponse);
+    rpc DeleteCredential(DeleteCredentialRequest) returns (DeleteCredentialResponse);
 }

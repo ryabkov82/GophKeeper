@@ -9,7 +9,8 @@ import (
 // NewServices создает и возвращает набор сервисов с реализациями интерфейсов domain/service.
 func NewServices(repo *repository.Repositories, jwt *jwtutils.TokenManager) *service.Services {
 	return &service.Services{
-		Auth: NewAuthService(repo.User, jwt),
+		Auth:       NewAuthService(repo.User, jwt),
+		Credential: NewCredentialService(repo.Credential),
 		// Data: NewDataService(repo.Data),
 	}
 }

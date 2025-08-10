@@ -1,7 +1,8 @@
 package service
 
 type Services struct {
-	Auth AuthService
+	Auth       AuthService
+	Credential CredentialService
 	// Data  DataService
 	// Vault VaultService
 }

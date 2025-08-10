@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.6
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.6.0
 	github.com/pressly/goose/v3 v3.24.3
 	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.6

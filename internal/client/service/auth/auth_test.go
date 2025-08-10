@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/ryabkov82/gophkeeper/internal/client/auth"
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto/mocks"
 	"github.com/stretchr/testify/require"

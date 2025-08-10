@@ -98,34 +98,40 @@ func (a *AuthManager) getClient(conn grpc.ClientConnInterface) proto.AuthService
 	return proto.NewAuthServiceClient(conn)
 }
 
-// Login выполняет аутентификацию пользователя через gRPC,
-// получает access token и сохраняет его в хранилище.
-func (a *AuthManager) Login(ctx context.Context, login, password string) error {
-	a.Logger.Info("Attempting login", zap.String("login", login))
-
+func (a *AuthManager) withClient(ctx context.Context, fn func(client proto.AuthServiceClient) error) error {
 	conn, err := a.connManager.Connect(ctx)
 	if err != nil {
 		a.Logger.Error("Connection failed", zap.Error(err))
 		return fmt.Errorf("connection failed: %w", err)
 	}
 
-	req := &proto.LoginRequest{}
-	req.SetLogin(login)
-	req.SetPassword(password)
+	client := a.getClient(conn)
+	return fn(client)
+}
 
-	client := a.getClient(conn) // используем инжектированный клиент, если есть
-	resp, err := client.Login(ctx, req)
-	if err != nil {
-		a.Logger.Error("Login RPC failed", zap.Error(err))
-		return fmt.Errorf("login RPC failed: %w", err)
-	}
+// Login выполняет аутентификацию пользователя через gRPC,
+// получает access token и сохраняет его в хранилище.
+func (a *AuthManager) Login(ctx context.Context, login, password string) error {
+	a.Logger.Info("Attempting login", zap.String("login", login))
 
-	if err := a.SetToken(resp.GetAccessToken()); err != nil {
-		return fmt.Errorf("failed to save token: %w", err)
-	}
+	return a.withClient(ctx, func(client proto.AuthServiceClient) error {
+		req := &proto.LoginRequest{}
+		req.SetLogin(login)
+		req.SetPassword(password)
 
-	a.Logger.Info("Login successful", zap.String("login", login))
-	return nil
+		resp, err := client.Login(ctx, req)
+		if err != nil {
+			a.Logger.Error("Login RPC failed", zap.Error(err))
+			return fmt.Errorf("login RPC failed: %w", err)
+		}
+
+		if err := a.SetToken(resp.GetAccessToken()); err != nil {
+			return fmt.Errorf("failed to save token: %w", err)
+		}
+
+		a.Logger.Info("Login successful", zap.String("login", login))
+		return nil
+	})
 }
 
 // Register выполняет регистрацию пользователя через gRPC.
@@ -133,23 +139,23 @@ func (a *AuthManager) Login(ctx context.Context, login, password string) error {
 func (a *AuthManager) Register(ctx context.Context, login, password string) error {
 	a.Logger.Info("Attempting registration", zap.String("login", login))
 
-	conn, err := a.connManager.Connect(ctx)
+	err := a.withClient(ctx, func(client proto.AuthServiceClient) error {
+		req := &proto.RegisterRequest{}
+		req.SetLogin(login)
+		req.SetPassword(password)
+
+		_, err := client.Register(ctx, req)
+		if err != nil {
+			a.Logger.Error("Register RPC failed", zap.Error(err))
+			return fmt.Errorf("register RPC failed: %w", err)
+		}
+
+		a.Logger.Info("Registration successful, proceeding to login", zap.String("login", login))
+		return nil
+	})
 	if err != nil {
-		a.Logger.Error("Connection failed", zap.Error(err))
-		return fmt.Errorf("connection failed: %w", err)
+		return err
 	}
 
-	req := &proto.RegisterRequest{}
-	req.SetLogin(login)
-	req.SetPassword(password)
-
-	client := a.getClient(conn)
-	_, err = client.Register(ctx, req)
-	if err != nil {
-		a.Logger.Error("Register RPC failed", zap.Error(err))
-		return fmt.Errorf("register RPC failed: %w", err)
-	}
-
-	a.Logger.Info("Registration successful, proceeding to login", zap.String("login", login))
 	return a.Login(ctx, login, password)
 }

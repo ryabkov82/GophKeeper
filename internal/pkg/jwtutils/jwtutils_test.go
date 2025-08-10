@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateToken(t *testing.T) {
@@ -68,4 +69,61 @@ func TestGenerateToken(t *testing.T) {
 	if expTime.Sub(iatTime) != ttl {
 		t.Errorf("expected ttl %v, got %v", ttl, expTime.Sub(iatTime))
 	}
+}
+
+func TestParseToken(t *testing.T) {
+	secret := "mysecretkey"
+	tm := jwtutils.New(secret, time.Minute*10)
+
+	userID := "user123"
+	login := "testlogin"
+
+	// Генерируем корректный токен
+	tokenStr, err := tm.GenerateToken(userID, login)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, tokenStr)
+
+	// Парсим корректный токен
+	claims, err := tm.ParseToken(tokenStr)
+	assert.NoError(t, err)
+	assert.Equal(t, userID, claims["sub"])
+	assert.Equal(t, login, claims["login"])
+
+	// Парсим токен с неправильной подписью (подделанный токен)
+	badToken := tokenStr + "invalid"
+	_, err = tm.ParseToken(badToken)
+	assert.Error(t, err)
+
+	// Парсим пустую строку
+	_, err = tm.ParseToken("")
+	assert.Error(t, err)
+
+	// Парсим токен с истекшим сроком (создадим вручную с отрицательным временем exp)
+	expiredToken := createExpiredToken(t, secret, userID, login)
+	_, err = tm.ParseToken(expiredToken)
+	assert.Error(t, err)
+}
+
+// createExpiredToken создает JWT токен с истекшим сроком (для теста).
+func createExpiredToken(t *testing.T, secret, userID, login string) string {
+	claims := map[string]interface{}{
+		"sub":   userID,
+		"login": login,
+		"exp":   time.Now().Add(-time.Hour).Unix(), // истекший час назад
+		"iat":   time.Now().Add(-2 * time.Hour).Unix(),
+	}
+
+	token := jwtutils.New(secret, time.Minute*10)
+	jwtToken := jwtTokenWithClaims(t, token, claims)
+	return jwtToken
+}
+
+func jwtTokenWithClaims(t *testing.T, tm *jwtutils.TokenManager, claims map[string]interface{}) string {
+	t.Helper()
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims(claims))
+	tokenStr, err := token.SignedString(tm.Secret())
+	if err != nil {
+		t.Fatalf("failed to sign token: %v", err)
+	}
+	return tokenStr
 }
