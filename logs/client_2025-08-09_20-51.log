@@ -1,3 +1,0 @@
-{"level":"info","ts":"2025-08-09T20:51:24.210+0300","caller":"app/run.go:53","msg":"Конфигурация загружена","config":{"server_address":"localhost:50051","use_tls":true,"tls_skip_verify":false,"ca_cert_path":"certs/ca.crt","timeout":10000000000,"log_level":"debug"}}
-{"level":"info","ts":"2025-08-09T20:51:24.210+0300","caller":"app/run.go:54","msg":"Запуск TUI..."}
-{"level":"info","ts":"2025-08-09T20:51:48.799+0300","caller":"tui/runner.go:80","msg":"TUI завершился корректно"}
