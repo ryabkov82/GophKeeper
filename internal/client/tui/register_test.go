@@ -5,43 +5,23 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/app"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// Мок для auth.AuthManager
-type mockAuthManager struct {
-	registerErr error
-	loginErr    error
-}
-
-func (m *mockAuthManager) Register(ctx context.Context, login, password string) error {
-	return m.registerErr
-}
-
-func (m *mockAuthManager) Login(ctx context.Context, login, password string) error {
-	return m.loginErr
-}
-
-func (m *mockAuthManager) ContextWithToken(ctx context.Context) context.Context {
-	return ctx
-}
-
 // Помощник для создания модели с заполненными моками
-func makeTestModel(t *testing.T, authMgr *mockAuthManager) Model {
+func makeTestModel(t *testing.T, authMgr *mockAuthService) Model {
 	m := Model{
-		ctx:      context.Background(),
-		services: &app.AppServices{AuthManager: authMgr},
+		ctx:         context.Background(),
+		authService: authMgr,
 	}
 	m = initRegisterForm(m)
 	return m
 }
 
 func TestUpdateRegister_FocusSwitching(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestModel(t, authMgr)
 
 	tests := []struct {
@@ -66,7 +46,7 @@ func TestUpdateRegister_FocusSwitching(t *testing.T) {
 }
 
 func TestUpdateRegister_EnterPasswordsMismatch(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestModel(t, authMgr)
 
 	m.inputs[0].SetValue("user")
@@ -83,7 +63,7 @@ func TestUpdateRegister_EnterPasswordsMismatch(t *testing.T) {
 }
 
 func TestUpdateRegister_EnterPasswordsMatch(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestModel(t, authMgr)
 
 	tests := []struct {
@@ -103,7 +83,7 @@ func TestUpdateRegister_EnterPasswordsMatch(t *testing.T) {
 			m.inputs[2].SetValue("pass")
 			m.focusedInput = 2
 
-			m.services.AuthManager = authMgr
+			m.authService = authMgr
 			authMgr.registerErr = tc.registerErr
 
 			_, cmd := updateRegister(m, tea.KeyMsg{Type: tea.KeyEnter})
@@ -138,7 +118,7 @@ func TestUpdateRegister_EnterPasswordsMatch(t *testing.T) {
 }
 
 func TestRenderRegister_ShowsError(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestModel(t, authMgr)
 	m.registerErr = errors.New("error message")
 

@@ -6,8 +6,14 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/ryabkov82/gophkeeper/internal/client/app"
 )
+
+// Определяем структуру, которая содержит все нужные сервисы для модели
+type ModelServices struct {
+	Auth AuthService
+	//Credential tui.CredentialService
+	// Добавляй сюда другие интерфейсы по необходимости
+}
 
 // Model - основная модель приложения, реализующая tea.Model
 type Model struct {
@@ -23,7 +29,8 @@ type Model struct {
 	focusedInput int
 
 	// Данные приложения
-	services    *app.AppServices
+	//services    *app.AppServices
+	authService AuthService
 	ctx         context.Context
 	registerErr error // Добавляем поле для ошибок
 	loginErr    error
@@ -54,7 +61,7 @@ type Credential struct {
 }
 
 // NewModel создает новую модель приложения
-func NewModel(ctx context.Context, services *app.AppServices) *Model {
+func NewModel(ctx context.Context, svcs ModelServices) *Model {
 
 	return &Model{
 		currentState: "menu",
@@ -67,7 +74,7 @@ func NewModel(ctx context.Context, services *app.AppServices) *Model {
 		inputs:       make([]textinput.Model, 0),
 		focusedInput: 0,
 		ctx:          ctx,
-		services:     services,
+		authService:  svcs.Auth,
 	}
 }
 
@@ -118,11 +125,11 @@ func (m Model) View() string {
 
 // Стили интерфейса
 var (
-	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
-	errorStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	selectedStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	normalStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
+	titleStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
+	errorStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	selectedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
+	normalStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	//cursorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	hintStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
 	activeFieldStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	inactiveFieldStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))

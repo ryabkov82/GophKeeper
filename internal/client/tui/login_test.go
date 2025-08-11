@@ -6,22 +6,35 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/ryabkov82/gophkeeper/internal/client/app"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func makeTestLoginModel(t *testing.T, authMgr *mockAuthManager) Model {
+// mockAuthService реализует tui.AuthService для тестов
+type mockAuthService struct {
+	loginErr    error
+	registerErr error
+}
+
+func (m *mockAuthService) LoginUser(ctx context.Context, login, password string) error {
+	return m.loginErr
+}
+
+func (m *mockAuthService) RegisterUser(ctx context.Context, login, password string) error {
+	return m.registerErr
+}
+
+func makeTestLoginModel(t *testing.T, authMgr *mockAuthService) Model {
 	m := Model{
-		ctx:      context.Background(),
-		services: &app.AppServices{AuthManager: authMgr},
+		ctx:         context.Background(),
+		authService: authMgr,
 	}
 	m = initLoginForm(m)
 	return m
 }
 
 func TestUpdateLogin_FocusSwitching(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestLoginModel(t, authMgr)
 
 	tests := []struct {
@@ -45,7 +58,7 @@ func TestUpdateLogin_FocusSwitching(t *testing.T) {
 }
 
 func TestUpdateLogin_EnterEmptyFields(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestLoginModel(t, authMgr)
 
 	// Пустой логин и пароль
@@ -60,13 +73,12 @@ func TestUpdateLogin_EnterEmptyFields(t *testing.T) {
 }
 
 func TestUpdateLogin_EnterValidCredentials(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestLoginModel(t, authMgr)
 
 	m.inputs[0].SetValue("user")
 	m.inputs[1].SetValue("pass")
 	m.focusedInput = 1
-	m.services.AuthManager = authMgr
 
 	tests := []struct {
 		name         string
@@ -114,7 +126,7 @@ func TestUpdateLogin_EnterValidCredentials(t *testing.T) {
 }
 
 func TestRenderLogin_ShowsError(t *testing.T) {
-	authMgr := &mockAuthManager{}
+	authMgr := &mockAuthService{}
 	m := makeTestLoginModel(t, authMgr)
 	m.loginErr = errors.New("some error")
 

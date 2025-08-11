@@ -25,9 +25,13 @@ func (m *mockAuthService) Register(ctx context.Context, login, password string) 
 	return args.Error(0)
 }
 
-func (m *mockAuthService) Login(ctx context.Context, login, password string) (string, error) {
+func (m *mockAuthService) Login(ctx context.Context, login, password string) (string, []byte, error) {
 	args := m.Called(ctx, login, password)
-	return args.String(0), args.Error(1)
+	var salt []byte
+	if s, ok := args.Get(1).([]byte); ok {
+		salt = s
+	}
+	return args.String(0), salt, args.Error(2)
 }
 
 func TestAuthHandler_Register(t *testing.T) {
@@ -77,7 +81,7 @@ func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockSvc := new(mockAuthService)
 		mockSvc.On("Login", ctx, "testuser", "testpass").
-			Return("token123", nil)
+			Return("token123", []byte("mysalt"), nil)
 
 		handler := handlers.NewAuthHandler(mockSvc, zap.NewNop())
 		req := &api.LoginRequest{}
@@ -94,7 +98,7 @@ func TestAuthHandler_Login(t *testing.T) {
 	t.Run("unauthenticated", func(t *testing.T) {
 		mockSvc := new(mockAuthService)
 		mockSvc.On("Login", ctx, "baduser", "wrongpass").
-			Return("", errors.New("invalid credentials"))
+			Return("", nil, errors.New("invalid credentials"))
 
 		handler := handlers.NewAuthHandler(mockSvc, zap.NewNop())
 		req := &api.LoginRequest{}

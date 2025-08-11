@@ -4,12 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/connection"
-	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -20,47 +17,21 @@ type CredentialManagerIface interface {
 	GetCredentialsByUserID(ctx context.Context, userID string) ([]model.Credential, error)
 	UpdateCredential(ctx context.Context, cred *model.Credential) error
 	DeleteCredential(ctx context.Context, id string) error
+	SetClient(client pb.CredentialServiceClient)
 }
 
 // CredentialManager управляет CRUD операциями с учётными данными,
 // взаимодействует с сервером по gRPC и логирует операции.
 type CredentialManager struct {
-	connManager connection.ConnManager
-	logger      *zap.Logger
-	auth        auth.AuthManagerIface
-	client      pb.CredentialServiceClient // для инъекции моков в тестах
+	logger *zap.Logger
+	client pb.CredentialServiceClient // для инъекции моков в тестах
 }
 
 // NewCredentialManager создаёт новый CredentialManager.
-func NewCredentialManager(connManager connection.ConnManager, authManager auth.AuthManagerIface, logger *zap.Logger) *CredentialManager {
+func NewCredentialManager(logger *zap.Logger) *CredentialManager {
 	return &CredentialManager{
-		connManager: connManager,
-		auth:        authManager,
-		logger:      logger,
+		logger: logger,
 	}
-}
-
-// withClient упрощает работу с gRPC клиентом:
-// открывает соединение и вызывает переданную функцию с клиентом
-func (m *CredentialManager) withClient(ctx context.Context, fn func(client pb.CredentialServiceClient) error) error {
-	conn, err := m.connManager.Connect(ctx)
-	if err != nil {
-		m.logger.Error("Connection failed", zap.Error(err))
-		return fmt.Errorf("connection failed: %w", err)
-	}
-
-	client := m.getClient(conn)
-	return fn(client)
-}
-
-// getClient возвращает gRPC клиента.
-// Использует встроенный client для тестов, если он установлен,
-// иначе создаёт нового клиента на основе соединения.
-func (m *CredentialManager) getClient(conn grpc.ClientConnInterface) pb.CredentialServiceClient {
-	if m.client != nil {
-		return m.client
-	}
-	return pb.NewCredentialServiceClient(conn)
 }
 
 // SetClient позволяет установить кастомный (например, моковый) gRPC-клиент.
@@ -76,24 +47,20 @@ func (m *CredentialManager) CreateCredential(ctx context.Context, cred *model.Cr
 		zap.String("title", cred.Title),
 	)
 
-	ctx = m.auth.ContextWithToken(ctx)
+	req := &pb.CreateCredentialRequest{}
+	req.SetCredential(toProtoCredential(cred))
 
-	return m.withClient(ctx, func(client pb.CredentialServiceClient) error {
-		req := &pb.CreateCredentialRequest{}
-		req.SetCredential(toProtoCredential(cred))
+	_, err := m.client.CreateCredential(ctx, req)
+	if err != nil {
+		m.logger.Error("CreateCredential RPC failed", zap.Error(err))
+		return fmt.Errorf("CreateCredential RPC failed: %w", err)
+	}
 
-		_, err := client.CreateCredential(ctx, req)
-		if err != nil {
-			m.logger.Error("CreateCredential RPC failed", zap.Error(err))
-			return fmt.Errorf("CreateCredential RPC failed: %w", err)
-		}
-
-		m.logger.Info("CreateCredential succeeded",
-			zap.String("userID", cred.UserID),
-			zap.String("title", cred.Title),
-		)
-		return nil
-	})
+	m.logger.Info("CreateCredential succeeded",
+		zap.String("userID", cred.UserID),
+		zap.String("title", cred.Title),
+	)
+	return nil
 }
 
 // GetCredentialByID получает учётные данные по ID.
@@ -102,25 +69,17 @@ func (m *CredentialManager) GetCredentialByID(ctx context.Context, id string) (*
 		zap.String("credentialID", id),
 	)
 
-	ctx = m.auth.ContextWithToken(ctx)
 	var cred *model.Credential
-	err := m.withClient(ctx, func(client pb.CredentialServiceClient) error {
-		req := &pb.GetCredentialByIDRequest{}
-		req.SetId(id)
+	req := &pb.GetCredentialByIDRequest{}
+	req.SetId(id)
 
-		resp, err := client.GetCredentialByID(ctx, req)
-		if err != nil {
-			m.logger.Error("GetCredentialByID RPC failed", zap.Error(err))
-			return fmt.Errorf("GetCredentialByID RPC failed: %w", err)
-		}
-
-		cred = fromProtoCredential(resp.GetCredential())
-		return nil
-	})
-
+	resp, err := m.client.GetCredentialByID(ctx, req)
 	if err != nil {
-		return nil, err
+		m.logger.Error("GetCredentialByID RPC failed", zap.Error(err))
+		return nil, fmt.Errorf("GetCredentialByID RPC failed: %w", err)
 	}
+
+	cred = fromProtoCredential(resp.GetCredential())
 
 	m.logger.Info("GetCredentialByID succeeded",
 		zap.String("credentialID", id),
@@ -134,29 +93,20 @@ func (m *CredentialManager) GetCredentialsByUserID(ctx context.Context, userID s
 		zap.String("userID", userID),
 	)
 
-	ctx = m.auth.ContextWithToken(ctx)
 	var creds []model.Credential
-	err := m.withClient(ctx, func(client pb.CredentialServiceClient) error {
-		req := &pb.GetCredentialsByUserIDRequest{}
-		req.SetUserId(userID)
+	req := &pb.GetCredentialsByUserIDRequest{}
+	req.SetUserId(userID)
 
-		resp, err := client.GetCredentialsByUserID(ctx, req)
-		if err != nil {
-			m.logger.Error("GetCredentialsByUserID RPC failed", zap.Error(err))
-			return fmt.Errorf("GetCredentialsByUserID RPC failed: %w", err)
-		}
-
-		creds = make([]model.Credential, 0, len(resp.GetCredentials()))
-		for _, pbCred := range resp.GetCredentials() {
-			creds = append(creds, *fromProtoCredential(pbCred))
-		}
-		return nil
-	})
-
+	resp, err := m.client.GetCredentialsByUserID(ctx, req)
 	if err != nil {
-		return nil, err
+		m.logger.Error("GetCredentialsByUserID RPC failed", zap.Error(err))
+		return nil, fmt.Errorf("GetCredentialsByUserID RPC failed: %w", err)
 	}
 
+	creds = make([]model.Credential, 0, len(resp.GetCredentials()))
+	for _, pbCred := range resp.GetCredentials() {
+		creds = append(creds, *fromProtoCredential(pbCred))
+	}
 	m.logger.Info("GetCredentialsByUserID succeeded",
 		zap.String("userID", userID),
 		zap.Int("count", len(creds)),
@@ -170,22 +120,19 @@ func (m *CredentialManager) UpdateCredential(ctx context.Context, cred *model.Cr
 		zap.String("credentialID", cred.ID),
 	)
 
-	ctx = m.auth.ContextWithToken(ctx)
-	return m.withClient(ctx, func(client pb.CredentialServiceClient) error {
-		req := &pb.UpdateCredentialRequest{}
-		req.SetCredential(toProtoCredential(cred))
+	req := &pb.UpdateCredentialRequest{}
+	req.SetCredential(toProtoCredential(cred))
 
-		_, err := client.UpdateCredential(ctx, req)
-		if err != nil {
-			m.logger.Error("UpdateCredential RPC failed", zap.Error(err))
-			return fmt.Errorf("UpdateCredential RPC failed: %w", err)
-		}
+	_, err := m.client.UpdateCredential(ctx, req)
+	if err != nil {
+		m.logger.Error("UpdateCredential RPC failed", zap.Error(err))
+		return fmt.Errorf("UpdateCredential RPC failed: %w", err)
+	}
 
-		m.logger.Info("UpdateCredential succeeded",
-			zap.String("credentialID", cred.ID),
-		)
-		return nil
-	})
+	m.logger.Info("UpdateCredential succeeded",
+		zap.String("credentialID", cred.ID),
+	)
+	return nil
 }
 
 // DeleteCredential удаляет учётные данные по ID.
@@ -194,22 +141,19 @@ func (m *CredentialManager) DeleteCredential(ctx context.Context, id string) err
 		zap.String("credentialID", id),
 	)
 
-	ctx = m.auth.ContextWithToken(ctx)
-	return m.withClient(ctx, func(client pb.CredentialServiceClient) error {
-		req := &pb.DeleteCredentialRequest{}
-		req.SetId(id)
+	req := &pb.DeleteCredentialRequest{}
+	req.SetId(id)
 
-		_, err := client.DeleteCredential(ctx, req)
-		if err != nil {
-			m.logger.Error("DeleteCredential RPC failed", zap.Error(err))
-			return fmt.Errorf("DeleteCredential RPC failed: %w", err)
-		}
+	_, err := m.client.DeleteCredential(ctx, req)
+	if err != nil {
+		m.logger.Error("DeleteCredential RPC failed", zap.Error(err))
+		return fmt.Errorf("DeleteCredential RPC failed: %w", err)
+	}
 
-		m.logger.Info("DeleteCredential succeeded",
-			zap.String("credentialID", id),
-		)
-		return nil
-	})
+	m.logger.Info("DeleteCredential succeeded",
+		zap.String("credentialID", id),
+	)
+	return nil
 }
 
 // Преобразования между model.Credential и pb.Credential

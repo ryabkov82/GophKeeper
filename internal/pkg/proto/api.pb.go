@@ -327,13 +327,13 @@ func (b0 LoginRequest_builder) Build() *LoginRequest {
 
 // Ответ на вход
 type LoginResponse struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_AccessToken  *string                `protobuf:"bytes,1,opt,name=access_token,json=accessToken"`
-	xxx_hidden_RefreshToken *string                `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken"`
-	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
-	XXX_presence            [1]uint32
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AccessToken *string                `protobuf:"bytes,1,opt,name=access_token,json=accessToken"`
+	xxx_hidden_Salt        []byte                 `protobuf:"bytes,2,opt,name=salt"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *LoginResponse) Reset() {
@@ -371,14 +371,11 @@ func (x *LoginResponse) GetAccessToken() string {
 	return ""
 }
 
-func (x *LoginResponse) GetRefreshToken() string {
+func (x *LoginResponse) GetSalt() []byte {
 	if x != nil {
-		if x.xxx_hidden_RefreshToken != nil {
-			return *x.xxx_hidden_RefreshToken
-		}
-		return ""
+		return x.xxx_hidden_Salt
 	}
-	return ""
+	return nil
 }
 
 func (x *LoginResponse) SetAccessToken(v string) {
@@ -386,8 +383,11 @@ func (x *LoginResponse) SetAccessToken(v string) {
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
-func (x *LoginResponse) SetRefreshToken(v string) {
-	x.xxx_hidden_RefreshToken = &v
+func (x *LoginResponse) SetSalt(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Salt = v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
 }
 
@@ -398,7 +398,7 @@ func (x *LoginResponse) HasAccessToken() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *LoginResponse) HasRefreshToken() bool {
+func (x *LoginResponse) HasSalt() bool {
 	if x == nil {
 		return false
 	}
@@ -410,16 +410,16 @@ func (x *LoginResponse) ClearAccessToken() {
 	x.xxx_hidden_AccessToken = nil
 }
 
-func (x *LoginResponse) ClearRefreshToken() {
+func (x *LoginResponse) ClearSalt() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_RefreshToken = nil
+	x.xxx_hidden_Salt = nil
 }
 
 type LoginResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	AccessToken  *string
-	RefreshToken *string
+	AccessToken *string
+	Salt        []byte
 }
 
 func (b0 LoginResponse_builder) Build() *LoginResponse {
@@ -430,9 +430,9 @@ func (b0 LoginResponse_builder) Build() *LoginResponse {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
 		x.xxx_hidden_AccessToken = b.AccessToken
 	}
-	if b.RefreshToken != nil {
+	if b.Salt != nil {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
-		x.xxx_hidden_RefreshToken = b.RefreshToken
+		x.xxx_hidden_Salt = b.Salt
 	}
 	return m0
 }
@@ -1451,10 +1451,10 @@ const file_api_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"W\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"F\n" +
 	"\rLoginResponse\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
-	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"\x8f\x02\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12\x12\n" +
+	"\x04salt\x18\x02 \x01(\fR\x04salt\"\x8f\x02\n" +
 	"\n" +
 	"Credential\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +

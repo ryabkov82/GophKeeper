@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 )
 
 var loginFieldLabels = []string{
@@ -49,7 +48,7 @@ func updateLogin(m Model, msg tea.Msg) (Model, tea.Cmd) {
 
 				return m, tea.Batch(
 					tea.Printf("Авторизация..."),
-					loginUser(m.ctx, m.services.AuthManager, login, password),
+					loginUser(m.ctx, m.authService, login, password),
 				)
 			}
 
@@ -139,9 +138,9 @@ func renderLoginSuccess(m Model) string {
 }
 
 // Команда для авторизации
-func loginUser(ctx context.Context, authManager auth.AuthManagerIface, login, password string) tea.Cmd {
+func loginUser(ctx context.Context, authService AuthService, login, password string) tea.Cmd {
 	return func() tea.Msg {
-		err := authManager.Login(ctx, login, password)
+		err := authService.LoginUser(ctx, login, password)
 		if err != nil {
 			return LoginFailedMsg{Err: err}
 		}

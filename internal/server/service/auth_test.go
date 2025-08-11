@@ -75,14 +75,14 @@ func TestAuthService_Login(t *testing.T) {
 
 	t.Run("user not found", func(t *testing.T) {
 		mockRepo.On("GetUserByLogin", mock.Anything, login).Return(nil, errors.New("not found")).Once()
-		_, err := svc.Login(ctx, login, password)
+		_, _, err := svc.Login(ctx, login, password)
 		require.Error(t, err)
 		mockRepo.AssertExpectations(t)
 	})
 
 	t.Run("invalid password", func(t *testing.T) {
 		mockRepo.On("GetUserByLogin", mock.Anything, login).Return(user, nil).Once()
-		_, err := svc.Login(ctx, login, "wrongpass")
+		_, _, err := svc.Login(ctx, login, "wrongpass")
 		require.Error(t, err)
 		require.EqualError(t, err, "invalid credentials")
 		mockRepo.AssertExpectations(t)
@@ -90,7 +90,7 @@ func TestAuthService_Login(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockRepo.On("GetUserByLogin", mock.Anything, login).Return(user, nil).Once()
-		token, err := svc.Login(ctx, login, password)
+		token, _, err := svc.Login(ctx, login, password)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 		mockRepo.AssertExpectations(t)

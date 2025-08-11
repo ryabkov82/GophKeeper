@@ -28,7 +28,7 @@ message LoginRequest {
 // Ответ на вход
 message LoginResponse {
   string access_token = 1;
-  string refresh_token = 2; // если используется
+  bytes salt = 2; // соль для генерации ключа шифрования
 }
 
 // gRPC-сервис аутентификации

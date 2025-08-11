@@ -67,7 +67,8 @@ func TestConnect_Success(t *testing.T) {
 		ConnectTimeout: time.Second,
 	}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	// Мокаем dialFunc
 	mgr.dialFunc = func(target string, opts ...grpc.DialOption) (GrpcConn, error) {
@@ -88,7 +89,8 @@ func TestConnect_DialError(t *testing.T) {
 		ConnectTimeout: time.Second,
 	}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	// Мокаем dialFunc с ошибкой
 	mgr.dialFunc = func(target string, opts ...grpc.DialOption) (GrpcConn, error) {
@@ -145,7 +147,8 @@ func TestClose_WithOpenConnection(t *testing.T) {
 		ServerAddress: "localhost:1234",
 	}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	closed := false
 	mgr.conn = &fakeConn{
@@ -169,7 +172,8 @@ func TestClose_NoConnection(t *testing.T) {
 		ServerAddress: "localhost:1234",
 	}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	err := mgr.Close()
 	require.NoError(t, err) // ничего не должно происходить, ошибки нет
@@ -181,7 +185,8 @@ func TestIsReady_TrueAndFalse(t *testing.T) {
 		ServerAddress: "localhost:1234",
 	}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	// Случай, когда conn == nil
 	require.False(t, mgr.IsReady())
@@ -209,7 +214,8 @@ func TestConn(t *testing.T) {
 		ServerAddress: "localhost:1234",
 	}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 	require.Nil(t, mgr.Conn())
 
 	dummyConn := &grpc.ClientConn{}
@@ -221,7 +227,8 @@ func TestManager_Close(t *testing.T) {
 	logger := zap.NewNop()
 	cfg := &Config{ServerAddress: "localhost:1234"}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	closed := false
 	mgr.conn = &fakeConn{
@@ -240,7 +247,8 @@ func TestManager_Close_Error(t *testing.T) {
 	logger := zap.NewNop()
 	cfg := &Config{ServerAddress: "localhost:1234"}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	mgr.conn = &fakeConn{
 		closeFunc: func() error {
@@ -257,7 +265,8 @@ func TestManager_Close_NilConn(t *testing.T) {
 	logger := zap.NewNop()
 	cfg := &Config{ServerAddress: "localhost:1234"}
 
-	mgr := New(cfg, logger)
+	mockAuth := &mockAuthManager{}
+	mgr := New(cfg, logger, mockAuth)
 
 	// conn == nil, Close должен вернуть nil и ничего не делать
 	err := mgr.Close()

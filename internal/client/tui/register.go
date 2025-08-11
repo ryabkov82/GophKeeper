@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 )
 
 var fieldLabels = []string{
@@ -58,7 +57,7 @@ func updateRegister(m Model, msg tea.Msg) (Model, tea.Cmd) {
 
 				return m, tea.Batch(
 					tea.Printf("Регистрируем пользователя..."),
-					registerUser(m.ctx, m.services.AuthManager, m.inputs[0].Value(), m.inputs[1].Value()),
+					registerUser(m.ctx, m.authService, m.inputs[0].Value(), m.inputs[1].Value()),
 				)
 			}
 
@@ -132,9 +131,9 @@ func renderRegister(m Model) string {
 }
 
 // Команда для регистрации
-func registerUser(ctx context.Context, authManager auth.AuthManagerIface, login, password string) tea.Cmd {
+func registerUser(ctx context.Context, authService AuthService, login, password string) tea.Cmd {
 	return func() tea.Msg {
-		err := authManager.Register(ctx, login, password)
+		err := authService.RegisterUser(ctx, login, password)
 		if err != nil {
 			return RegisterFailedMsg{Err: err}
 		}
