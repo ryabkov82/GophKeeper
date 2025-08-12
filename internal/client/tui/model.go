@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 	"github.com/ryabkov82/gophkeeper/internal/client/tui/adapters"
 	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
 )
@@ -45,8 +46,11 @@ type Model struct {
 
 	// для редактирования — generic формы
 	editEntity interface{} // храним сущность (например *model.Credential)
+	editFields []forms.FormField
+	editErr    error
 
 	lastError error // Добавляем поле для ошибок
+
 }
 
 // Добавляем сообщения для системы

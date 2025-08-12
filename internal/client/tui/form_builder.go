@@ -4,18 +4,20 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 )
 
-// initFormInputs создает слайс textinput.Model на основе полей FormEntity.
-func initFormInputs(entity forms.FormEntity) []textinput.Model {
+// initFormInputsFromFields создает слайс textinput.Model на основе полей FormEntity.
+func initFormInputsFromFields(entity forms.FormEntity) []textinput.Model {
 	fields := entity.FormFields()
 	inputs := make([]textinput.Model, len(fields))
 
 	for i, field := range fields {
 		ti := textinput.New()
-		ti.Placeholder = field.Placeholder
-		ti.Prompt = field.Label + ": "
+		ti.Placeholder = ""
+		ti.Prompt = " "
+		ti.Cursor.Style = lipgloss.NewStyle().Background(lipgloss.Color("15"))
 		ti.SetValue(field.Value)
 		ti.CharLimit = 256 // можно настроить лимит символов
 
@@ -48,7 +50,12 @@ func initFormInputs(entity forms.FormEntity) []textinput.Model {
 // и возвращает слайс FormField с актуальными значениями.
 // Порядок должен совпадать с исходным (FormFields).
 func extractFieldsFromInputs(fields []forms.FormField, inputs []textinput.Model) []forms.FormField {
-	for i := range fields {
+	// берём min длину, если размеры не совпадают — обновляем по минимуму
+	n := len(fields)
+	if len(inputs) < n {
+		n = len(inputs)
+	}
+	for i := 0; i < n; i++ {
 		fields[i].Value = inputs[i].Value()
 	}
 	return fields

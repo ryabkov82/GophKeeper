@@ -114,7 +114,7 @@ func (h *CredentialHandler) GetCredentialByID(ctx context.Context, req *pb.GetCr
 
 // GetCredentialsByUserID возвращает все учётные данные пользователя.
 // Получает userID из контекста, логирует количество возвращаемых записей.
-func (h *CredentialHandler) GetCredentialsByUserID(ctx context.Context, _ *emptypb.Empty) (*pb.GetCredentialsResponse, error) {
+func (h *CredentialHandler) GetCredentials(ctx context.Context, _ *emptypb.Empty) (*pb.GetCredentialsResponse, error) {
 	userID, err := jwtauth.FromContext(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "userID not found in context")

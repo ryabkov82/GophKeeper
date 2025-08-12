@@ -11,3 +11,9 @@ type FormEntity interface {
 	FormFields() []FormField
 	UpdateFromFields(fields []FormField) error
 }
+
+// Identifiable — чтобы получать/устанавливать ID сущности.
+type Identifiable interface {
+	GetID() string
+	SetID(id string)
+}

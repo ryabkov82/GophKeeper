@@ -151,7 +151,7 @@ func TestGetCredentialsByUserID_Success(t *testing.T) {
 
 	mockService.On("GetByUserID", ctx, userID).Return(creds, nil)
 
-	resp, err := h.GetCredentialsByUserID(ctx, &emptypb.Empty{})
+	resp, err := h.GetCredentials(ctx, &emptypb.Empty{})
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.Len(t, resp.GetCredentials(), 2)
