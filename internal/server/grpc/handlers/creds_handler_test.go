@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type CredentialServiceMock struct {
@@ -146,13 +147,11 @@ func TestGetCredentialsByUserID_Success(t *testing.T) {
 		{ID: "2", UserID: userID, Title: "Site2", Login: "login2"},
 	}
 
-	req := &pb.GetCredentialsByUserIDRequest{}
-
 	ctx := contextWithUserID(userID)
 
 	mockService.On("GetByUserID", ctx, userID).Return(creds, nil)
 
-	resp, err := h.GetCredentialsByUserID(ctx, req)
+	resp, err := h.GetCredentialsByUserID(ctx, &emptypb.Empty{})
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.Len(t, resp.GetCredentials(), 2)

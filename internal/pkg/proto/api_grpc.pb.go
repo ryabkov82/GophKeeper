@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -163,11 +164,11 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	CredentialService_CreateCredential_FullMethodName       = "/gophkeeper.proto.CredentialService/CreateCredential"
-	CredentialService_GetCredentialByID_FullMethodName      = "/gophkeeper.proto.CredentialService/GetCredentialByID"
-	CredentialService_GetCredentialsByUserID_FullMethodName = "/gophkeeper.proto.CredentialService/GetCredentialsByUserID"
-	CredentialService_UpdateCredential_FullMethodName       = "/gophkeeper.proto.CredentialService/UpdateCredential"
-	CredentialService_DeleteCredential_FullMethodName       = "/gophkeeper.proto.CredentialService/DeleteCredential"
+	CredentialService_CreateCredential_FullMethodName  = "/gophkeeper.proto.CredentialService/CreateCredential"
+	CredentialService_GetCredentialByID_FullMethodName = "/gophkeeper.proto.CredentialService/GetCredentialByID"
+	CredentialService_GetCredentials_FullMethodName    = "/gophkeeper.proto.CredentialService/GetCredentials"
+	CredentialService_UpdateCredential_FullMethodName  = "/gophkeeper.proto.CredentialService/UpdateCredential"
+	CredentialService_DeleteCredential_FullMethodName  = "/gophkeeper.proto.CredentialService/DeleteCredential"
 )
 
 // CredentialServiceClient is the client API for CredentialService service.
@@ -178,7 +179,7 @@ const (
 type CredentialServiceClient interface {
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*CreateCredentialResponse, error)
 	GetCredentialByID(ctx context.Context, in *GetCredentialByIDRequest, opts ...grpc.CallOption) (*GetCredentialByIDResponse, error)
-	GetCredentialsByUserID(ctx context.Context, in *GetCredentialsByUserIDRequest, opts ...grpc.CallOption) (*GetCredentialsByUserIDResponse, error)
+	GetCredentials(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCredentialsResponse, error)
 	UpdateCredential(ctx context.Context, in *UpdateCredentialRequest, opts ...grpc.CallOption) (*UpdateCredentialResponse, error)
 	DeleteCredential(ctx context.Context, in *DeleteCredentialRequest, opts ...grpc.CallOption) (*DeleteCredentialResponse, error)
 }
@@ -211,10 +212,10 @@ func (c *credentialServiceClient) GetCredentialByID(ctx context.Context, in *Get
 	return out, nil
 }
 
-func (c *credentialServiceClient) GetCredentialsByUserID(ctx context.Context, in *GetCredentialsByUserIDRequest, opts ...grpc.CallOption) (*GetCredentialsByUserIDResponse, error) {
+func (c *credentialServiceClient) GetCredentials(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCredentialsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetCredentialsByUserIDResponse)
-	err := c.cc.Invoke(ctx, CredentialService_GetCredentialsByUserID_FullMethodName, in, out, cOpts...)
+	out := new(GetCredentialsResponse)
+	err := c.cc.Invoke(ctx, CredentialService_GetCredentials_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +250,7 @@ func (c *credentialServiceClient) DeleteCredential(ctx context.Context, in *Dele
 type CredentialServiceServer interface {
 	CreateCredential(context.Context, *CreateCredentialRequest) (*CreateCredentialResponse, error)
 	GetCredentialByID(context.Context, *GetCredentialByIDRequest) (*GetCredentialByIDResponse, error)
-	GetCredentialsByUserID(context.Context, *GetCredentialsByUserIDRequest) (*GetCredentialsByUserIDResponse, error)
+	GetCredentials(context.Context, *emptypb.Empty) (*GetCredentialsResponse, error)
 	UpdateCredential(context.Context, *UpdateCredentialRequest) (*UpdateCredentialResponse, error)
 	DeleteCredential(context.Context, *DeleteCredentialRequest) (*DeleteCredentialResponse, error)
 	mustEmbedUnimplementedCredentialServiceServer()
@@ -268,8 +269,8 @@ func (UnimplementedCredentialServiceServer) CreateCredential(context.Context, *C
 func (UnimplementedCredentialServiceServer) GetCredentialByID(context.Context, *GetCredentialByIDRequest) (*GetCredentialByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCredentialByID not implemented")
 }
-func (UnimplementedCredentialServiceServer) GetCredentialsByUserID(context.Context, *GetCredentialsByUserIDRequest) (*GetCredentialsByUserIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCredentialsByUserID not implemented")
+func (UnimplementedCredentialServiceServer) GetCredentials(context.Context, *emptypb.Empty) (*GetCredentialsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCredentials not implemented")
 }
 func (UnimplementedCredentialServiceServer) UpdateCredential(context.Context, *UpdateCredentialRequest) (*UpdateCredentialResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCredential not implemented")
@@ -334,20 +335,20 @@ func _CredentialService_GetCredentialByID_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CredentialService_GetCredentialsByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCredentialsByUserIDRequest)
+func _CredentialService_GetCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CredentialServiceServer).GetCredentialsByUserID(ctx, in)
+		return srv.(CredentialServiceServer).GetCredentials(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CredentialService_GetCredentialsByUserID_FullMethodName,
+		FullMethod: CredentialService_GetCredentials_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CredentialServiceServer).GetCredentialsByUserID(ctx, req.(*GetCredentialsByUserIDRequest))
+		return srv.(CredentialServiceServer).GetCredentials(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -404,8 +405,8 @@ var CredentialService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CredentialService_GetCredentialByID_Handler,
 		},
 		{
-			MethodName: "GetCredentialsByUserID",
-			Handler:    _CredentialService_GetCredentialsByUserID_Handler,
+			MethodName: "GetCredentials",
+			Handler:    _CredentialService_GetCredentials_Handler,
 		},
 		{
 			MethodName: "UpdateCredential",

@@ -14,7 +14,7 @@ func makeTestMenuModel() Model {
 		menuItems: []menuItem{
 			{title: "Login", description: "Вход в систему"},
 			{title: "Register", description: "Регистрация"},
-			{title: "View Data", description: "Просмотр данных"},
+			{title: "View Credentials", description: "Просмотреть учётные данные"},
 			{title: "Exit", description: "Выход из программы"},
 		},
 		menuCursor:   0,

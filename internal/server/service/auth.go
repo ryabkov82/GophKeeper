@@ -72,6 +72,9 @@ func (s *authService) Login(ctx context.Context, login, password string) (string
 		return "", nil, err
 	}
 
+	if user == nil {
+		return "", nil, errors.New("invalid credentials")
+	}
 	if !crypto.VerifyPassword(password, user.PasswordHash, user.Salt) {
 		return "", nil, errors.New("invalid credentials")
 	}

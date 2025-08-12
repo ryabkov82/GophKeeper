@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS credentials (
     title TEXT CHECK (char_length(title) <= 255),
 
     -- Логин пользователя
-    login TEXT NOT NULL CHECK (char_length(login) <= 255),
+    login TEXT NOT NULL CHECK (char_length(login) <= 512),
 
     -- Пароль (в зашифрованном виде, например base64)
     password TEXT NOT NULL CHECK (char_length(password) <= 1024),

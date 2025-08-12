@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -113,7 +114,7 @@ func (h *CredentialHandler) GetCredentialByID(ctx context.Context, req *pb.GetCr
 
 // GetCredentialsByUserID возвращает все учётные данные пользователя.
 // Получает userID из контекста, логирует количество возвращаемых записей.
-func (h *CredentialHandler) GetCredentialsByUserID(ctx context.Context, req *pb.GetCredentialsByUserIDRequest) (*pb.GetCredentialsByUserIDResponse, error) {
+func (h *CredentialHandler) GetCredentialsByUserID(ctx context.Context, _ *emptypb.Empty) (*pb.GetCredentialsResponse, error) {
 	userID, err := jwtauth.FromContext(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "userID not found in context")
@@ -137,7 +138,7 @@ func (h *CredentialHandler) GetCredentialsByUserID(ctx context.Context, req *pb.
 		zap.Int("count", len(creds)),
 	)
 
-	resp := &pb.GetCredentialsByUserIDResponse{}
+	resp := &pb.GetCredentialsResponse{}
 	for i := range creds {
 		resp.SetCredentials(append(resp.GetCredentials(), toProtoCredential(&creds[i])))
 	}

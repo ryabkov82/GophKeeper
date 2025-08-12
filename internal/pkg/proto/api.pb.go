@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	_ "google.golang.org/protobuf/types/gofeaturespb"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	unsafe "unsafe"
@@ -1013,106 +1014,28 @@ func (b0 GetCredentialByIDResponse_builder) Build() *GetCredentialByIDResponse {
 	return m0
 }
 
-type GetCredentialsByUserIDRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_UserId      *string                `protobuf:"bytes,1,opt,name=user_id,json=userId"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *GetCredentialsByUserIDRequest) Reset() {
-	*x = GetCredentialsByUserIDRequest{}
-	mi := &file_api_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCredentialsByUserIDRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCredentialsByUserIDRequest) ProtoMessage() {}
-
-func (x *GetCredentialsByUserIDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *GetCredentialsByUserIDRequest) GetUserId() string {
-	if x != nil {
-		if x.xxx_hidden_UserId != nil {
-			return *x.xxx_hidden_UserId
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *GetCredentialsByUserIDRequest) SetUserId(v string) {
-	x.xxx_hidden_UserId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
-}
-
-func (x *GetCredentialsByUserIDRequest) HasUserId() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
-}
-
-func (x *GetCredentialsByUserIDRequest) ClearUserId() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_UserId = nil
-}
-
-type GetCredentialsByUserIDRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	UserId *string
-}
-
-func (b0 GetCredentialsByUserIDRequest_builder) Build() *GetCredentialsByUserIDRequest {
-	m0 := &GetCredentialsByUserIDRequest{}
-	b, x := &b0, m0
-	_, _ = b, x
-	if b.UserId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
-		x.xxx_hidden_UserId = b.UserId
-	}
-	return m0
-}
-
-type GetCredentialsByUserIDResponse struct {
+type GetCredentialsResponse struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Credentials *[]*Credential         `protobuf:"bytes,1,rep,name=credentials"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
 
-func (x *GetCredentialsByUserIDResponse) Reset() {
-	*x = GetCredentialsByUserIDResponse{}
-	mi := &file_api_proto_msgTypes[10]
+func (x *GetCredentialsResponse) Reset() {
+	*x = GetCredentialsResponse{}
+	mi := &file_api_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetCredentialsByUserIDResponse) String() string {
+func (x *GetCredentialsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetCredentialsByUserIDResponse) ProtoMessage() {}
+func (*GetCredentialsResponse) ProtoMessage() {}
 
-func (x *GetCredentialsByUserIDResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_msgTypes[10]
+func (x *GetCredentialsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1123,7 +1046,7 @@ func (x *GetCredentialsByUserIDResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *GetCredentialsByUserIDResponse) GetCredentials() []*Credential {
+func (x *GetCredentialsResponse) GetCredentials() []*Credential {
 	if x != nil {
 		if x.xxx_hidden_Credentials != nil {
 			return *x.xxx_hidden_Credentials
@@ -1132,18 +1055,18 @@ func (x *GetCredentialsByUserIDResponse) GetCredentials() []*Credential {
 	return nil
 }
 
-func (x *GetCredentialsByUserIDResponse) SetCredentials(v []*Credential) {
+func (x *GetCredentialsResponse) SetCredentials(v []*Credential) {
 	x.xxx_hidden_Credentials = &v
 }
 
-type GetCredentialsByUserIDResponse_builder struct {
+type GetCredentialsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Credentials []*Credential
 }
 
-func (b0 GetCredentialsByUserIDResponse_builder) Build() *GetCredentialsByUserIDResponse {
-	m0 := &GetCredentialsByUserIDResponse{}
+func (b0 GetCredentialsResponse_builder) Build() *GetCredentialsResponse {
+	m0 := &GetCredentialsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Credentials = &b.Credentials
@@ -1159,7 +1082,7 @@ type UpdateCredentialRequest struct {
 
 func (x *UpdateCredentialRequest) Reset() {
 	*x = UpdateCredentialRequest{}
-	mi := &file_api_proto_msgTypes[11]
+	mi := &file_api_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1171,7 +1094,7 @@ func (x *UpdateCredentialRequest) String() string {
 func (*UpdateCredentialRequest) ProtoMessage() {}
 
 func (x *UpdateCredentialRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_msgTypes[11]
+	mi := &file_api_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1227,7 +1150,7 @@ type UpdateCredentialResponse struct {
 
 func (x *UpdateCredentialResponse) Reset() {
 	*x = UpdateCredentialResponse{}
-	mi := &file_api_proto_msgTypes[12]
+	mi := &file_api_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1239,7 +1162,7 @@ func (x *UpdateCredentialResponse) String() string {
 func (*UpdateCredentialResponse) ProtoMessage() {}
 
 func (x *UpdateCredentialResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_msgTypes[12]
+	mi := &file_api_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1297,7 +1220,7 @@ type DeleteCredentialRequest struct {
 
 func (x *DeleteCredentialRequest) Reset() {
 	*x = DeleteCredentialRequest{}
-	mi := &file_api_proto_msgTypes[13]
+	mi := &file_api_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1309,7 +1232,7 @@ func (x *DeleteCredentialRequest) String() string {
 func (*DeleteCredentialRequest) ProtoMessage() {}
 
 func (x *DeleteCredentialRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_msgTypes[13]
+	mi := &file_api_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1375,7 +1298,7 @@ type DeleteCredentialResponse struct {
 
 func (x *DeleteCredentialResponse) Reset() {
 	*x = DeleteCredentialResponse{}
-	mi := &file_api_proto_msgTypes[14]
+	mi := &file_api_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1387,7 +1310,7 @@ func (x *DeleteCredentialResponse) String() string {
 func (*DeleteCredentialResponse) ProtoMessage() {}
 
 func (x *DeleteCredentialResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_msgTypes[14]
+	mi := &file_api_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1443,7 +1366,7 @@ var File_api_proto protoreflect.FileDescriptor
 
 const file_api_proto_rawDesc = "" +
 	"\n" +
-	"\tapi.proto\x12\x10gophkeeper.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!google/protobuf/go_features.proto\"C\n" +
+	"\tapi.proto\x12\x10gophkeeper.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!google/protobuf/go_features.proto\x1a\x1bgoogle/protobuf/empty.proto\"C\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\",\n" +
@@ -1480,10 +1403,8 @@ const file_api_proto_rawDesc = "" +
 	"\x19GetCredentialByIDResponse\x12<\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1c.gophkeeper.proto.CredentialR\n" +
-	"credential\"8\n" +
-	"\x1dGetCredentialsByUserIDRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"`\n" +
-	"\x1eGetCredentialsByUserIDResponse\x12>\n" +
+	"credential\"X\n" +
+	"\x16GetCredentialsResponse\x12>\n" +
 	"\vcredentials\x18\x01 \x03(\v2\x1c.gophkeeper.proto.CredentialR\vcredentials\"W\n" +
 	"\x17UpdateCredentialRequest\x12<\n" +
 	"\n" +
@@ -1499,56 +1420,56 @@ const file_api_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess2\xaa\x01\n" +
 	"\vAuthService\x12Q\n" +
 	"\bRegister\x12!.gophkeeper.proto.RegisterRequest\x1a\".gophkeeper.proto.RegisterResponse\x12H\n" +
-	"\x05Login\x12\x1e.gophkeeper.proto.LoginRequest\x1a\x1f.gophkeeper.proto.LoginResponse2\xbf\x04\n" +
+	"\x05Login\x12\x1e.gophkeeper.proto.LoginRequest\x1a\x1f.gophkeeper.proto.LoginResponse2\x96\x04\n" +
 	"\x11CredentialService\x12i\n" +
 	"\x10CreateCredential\x12).gophkeeper.proto.CreateCredentialRequest\x1a*.gophkeeper.proto.CreateCredentialResponse\x12l\n" +
-	"\x11GetCredentialByID\x12*.gophkeeper.proto.GetCredentialByIDRequest\x1a+.gophkeeper.proto.GetCredentialByIDResponse\x12{\n" +
-	"\x16GetCredentialsByUserID\x12/.gophkeeper.proto.GetCredentialsByUserIDRequest\x1a0.gophkeeper.proto.GetCredentialsByUserIDResponse\x12i\n" +
+	"\x11GetCredentialByID\x12*.gophkeeper.proto.GetCredentialByIDRequest\x1a+.gophkeeper.proto.GetCredentialByIDResponse\x12R\n" +
+	"\x0eGetCredentials\x12\x16.google.protobuf.Empty\x1a(.gophkeeper.proto.GetCredentialsResponse\x12i\n" +
 	"\x10UpdateCredential\x12).gophkeeper.proto.UpdateCredentialRequest\x1a*.gophkeeper.proto.UpdateCredentialResponse\x12i\n" +
 	"\x10DeleteCredential\x12).gophkeeper.proto.DeleteCredentialRequest\x1a*.gophkeeper.proto.DeleteCredentialResponseB<Z2github.com/ryabkov82/gophkeeper/internal/pkg/proto\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
 
-var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_api_proto_goTypes = []any{
-	(*RegisterRequest)(nil),                // 0: gophkeeper.proto.RegisterRequest
-	(*RegisterResponse)(nil),               // 1: gophkeeper.proto.RegisterResponse
-	(*LoginRequest)(nil),                   // 2: gophkeeper.proto.LoginRequest
-	(*LoginResponse)(nil),                  // 3: gophkeeper.proto.LoginResponse
-	(*Credential)(nil),                     // 4: gophkeeper.proto.Credential
-	(*CreateCredentialRequest)(nil),        // 5: gophkeeper.proto.CreateCredentialRequest
-	(*CreateCredentialResponse)(nil),       // 6: gophkeeper.proto.CreateCredentialResponse
-	(*GetCredentialByIDRequest)(nil),       // 7: gophkeeper.proto.GetCredentialByIDRequest
-	(*GetCredentialByIDResponse)(nil),      // 8: gophkeeper.proto.GetCredentialByIDResponse
-	(*GetCredentialsByUserIDRequest)(nil),  // 9: gophkeeper.proto.GetCredentialsByUserIDRequest
-	(*GetCredentialsByUserIDResponse)(nil), // 10: gophkeeper.proto.GetCredentialsByUserIDResponse
-	(*UpdateCredentialRequest)(nil),        // 11: gophkeeper.proto.UpdateCredentialRequest
-	(*UpdateCredentialResponse)(nil),       // 12: gophkeeper.proto.UpdateCredentialResponse
-	(*DeleteCredentialRequest)(nil),        // 13: gophkeeper.proto.DeleteCredentialRequest
-	(*DeleteCredentialResponse)(nil),       // 14: gophkeeper.proto.DeleteCredentialResponse
-	(*timestamppb.Timestamp)(nil),          // 15: google.protobuf.Timestamp
+	(*RegisterRequest)(nil),           // 0: gophkeeper.proto.RegisterRequest
+	(*RegisterResponse)(nil),          // 1: gophkeeper.proto.RegisterResponse
+	(*LoginRequest)(nil),              // 2: gophkeeper.proto.LoginRequest
+	(*LoginResponse)(nil),             // 3: gophkeeper.proto.LoginResponse
+	(*Credential)(nil),                // 4: gophkeeper.proto.Credential
+	(*CreateCredentialRequest)(nil),   // 5: gophkeeper.proto.CreateCredentialRequest
+	(*CreateCredentialResponse)(nil),  // 6: gophkeeper.proto.CreateCredentialResponse
+	(*GetCredentialByIDRequest)(nil),  // 7: gophkeeper.proto.GetCredentialByIDRequest
+	(*GetCredentialByIDResponse)(nil), // 8: gophkeeper.proto.GetCredentialByIDResponse
+	(*GetCredentialsResponse)(nil),    // 9: gophkeeper.proto.GetCredentialsResponse
+	(*UpdateCredentialRequest)(nil),   // 10: gophkeeper.proto.UpdateCredentialRequest
+	(*UpdateCredentialResponse)(nil),  // 11: gophkeeper.proto.UpdateCredentialResponse
+	(*DeleteCredentialRequest)(nil),   // 12: gophkeeper.proto.DeleteCredentialRequest
+	(*DeleteCredentialResponse)(nil),  // 13: gophkeeper.proto.DeleteCredentialResponse
+	(*timestamppb.Timestamp)(nil),     // 14: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),             // 15: google.protobuf.Empty
 }
 var file_api_proto_depIdxs = []int32{
-	15, // 0: gophkeeper.proto.Credential.created_at:type_name -> google.protobuf.Timestamp
-	15, // 1: gophkeeper.proto.Credential.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: gophkeeper.proto.Credential.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: gophkeeper.proto.Credential.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: gophkeeper.proto.CreateCredentialRequest.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 3: gophkeeper.proto.CreateCredentialResponse.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 4: gophkeeper.proto.GetCredentialByIDResponse.credential:type_name -> gophkeeper.proto.Credential
-	4,  // 5: gophkeeper.proto.GetCredentialsByUserIDResponse.credentials:type_name -> gophkeeper.proto.Credential
+	4,  // 5: gophkeeper.proto.GetCredentialsResponse.credentials:type_name -> gophkeeper.proto.Credential
 	4,  // 6: gophkeeper.proto.UpdateCredentialRequest.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 7: gophkeeper.proto.UpdateCredentialResponse.credential:type_name -> gophkeeper.proto.Credential
 	0,  // 8: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
 	2,  // 9: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
 	5,  // 10: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
 	7,  // 11: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
-	9,  // 12: gophkeeper.proto.CredentialService.GetCredentialsByUserID:input_type -> gophkeeper.proto.GetCredentialsByUserIDRequest
-	11, // 13: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
-	13, // 14: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
+	15, // 12: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
+	10, // 13: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
+	12, // 14: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
 	1,  // 15: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
 	3,  // 16: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
 	6,  // 17: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
 	8,  // 18: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
-	10, // 19: gophkeeper.proto.CredentialService.GetCredentialsByUserID:output_type -> gophkeeper.proto.GetCredentialsByUserIDResponse
-	12, // 20: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
-	14, // 21: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
+	9,  // 19: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
+	11, // 20: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
+	13, // 21: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
 	15, // [15:22] is the sub-list for method output_type
 	8,  // [8:15] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
@@ -1567,7 +1488,7 @@ func file_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_rawDesc), len(file_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

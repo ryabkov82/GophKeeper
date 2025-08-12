@@ -11,6 +11,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	proto "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	grpc "google.golang.org/grpc"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // MockAuthServiceClient is a mock of AuthServiceClient interface.
@@ -259,24 +260,24 @@ func (mr *MockCredentialServiceClientMockRecorder) GetCredentialByID(ctx, in int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentialByID", reflect.TypeOf((*MockCredentialServiceClient)(nil).GetCredentialByID), varargs...)
 }
 
-// GetCredentialsByUserID mocks base method.
-func (m *MockCredentialServiceClient) GetCredentialsByUserID(ctx context.Context, in *proto.GetCredentialsByUserIDRequest, opts ...grpc.CallOption) (*proto.GetCredentialsByUserIDResponse, error) {
+// GetCredentials mocks base method.
+func (m *MockCredentialServiceClient) GetCredentials(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*proto.GetCredentialsResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GetCredentialsByUserID", varargs...)
-	ret0, _ := ret[0].(*proto.GetCredentialsByUserIDResponse)
+	ret := m.ctrl.Call(m, "GetCredentials", varargs...)
+	ret0, _ := ret[0].(*proto.GetCredentialsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetCredentialsByUserID indicates an expected call of GetCredentialsByUserID.
-func (mr *MockCredentialServiceClientMockRecorder) GetCredentialsByUserID(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// GetCredentials indicates an expected call of GetCredentials.
+func (mr *MockCredentialServiceClientMockRecorder) GetCredentials(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentialsByUserID", reflect.TypeOf((*MockCredentialServiceClient)(nil).GetCredentialsByUserID), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentials", reflect.TypeOf((*MockCredentialServiceClient)(nil).GetCredentials), varargs...)
 }
 
 // UpdateCredential mocks base method.
@@ -367,19 +368,19 @@ func (mr *MockCredentialServiceServerMockRecorder) GetCredentialByID(arg0, arg1 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentialByID", reflect.TypeOf((*MockCredentialServiceServer)(nil).GetCredentialByID), arg0, arg1)
 }
 
-// GetCredentialsByUserID mocks base method.
-func (m *MockCredentialServiceServer) GetCredentialsByUserID(arg0 context.Context, arg1 *proto.GetCredentialsByUserIDRequest) (*proto.GetCredentialsByUserIDResponse, error) {
+// GetCredentials mocks base method.
+func (m *MockCredentialServiceServer) GetCredentials(arg0 context.Context, arg1 *emptypb.Empty) (*proto.GetCredentialsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCredentialsByUserID", arg0, arg1)
-	ret0, _ := ret[0].(*proto.GetCredentialsByUserIDResponse)
+	ret := m.ctrl.Call(m, "GetCredentials", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GetCredentialsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetCredentialsByUserID indicates an expected call of GetCredentialsByUserID.
-func (mr *MockCredentialServiceServerMockRecorder) GetCredentialsByUserID(arg0, arg1 interface{}) *gomock.Call {
+// GetCredentials indicates an expected call of GetCredentials.
+func (mr *MockCredentialServiceServerMockRecorder) GetCredentials(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentialsByUserID", reflect.TypeOf((*MockCredentialServiceServer)(nil).GetCredentialsByUserID), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentials", reflect.TypeOf((*MockCredentialServiceServer)(nil).GetCredentials), arg0, arg1)
 }
 
 // UpdateCredential mocks base method.

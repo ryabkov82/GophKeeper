@@ -6,19 +6,21 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/adapters"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
 )
 
 // Определяем структуру, которая содержит все нужные сервисы для модели
 type ModelServices struct {
-	Auth AuthService
-	//Credential tui.CredentialService
+	Auth       contracts.AuthService
+	Credential contracts.CredentialService
 	// Добавляй сюда другие интерфейсы по необходимости
 }
 
 // Model - основная модель приложения, реализующая tea.Model
 type Model struct {
 	// Состояния интерфейса
-	currentState string // "menu", "login", "register", "view_data"
+	currentState string // "menu", "login", "register", "list", "view", "edit"
 
 	// Главное меню
 	menuItems  []menuItem
@@ -29,35 +31,34 @@ type Model struct {
 	focusedInput int
 
 	// Данные приложения
-	//services    *app.AppServices
-	authService AuthService
+	authService contracts.AuthService
 	ctx         context.Context
 	registerErr error // Добавляем поле для ошибок
 	loginErr    error
+
+	currentType contracts.DataType   // какой тип данных сейчас выбран
+	listItems   []contracts.ListItem // универсальный список
+	listCursor  int
+
+	// map: DataType -> DataService
+	services map[contracts.DataType]contracts.DataService
+
+	// для редактирования — generic формы
+	editEntity interface{} // храним сущность (например *model.Credential)
+
+	lastError error // Добавляем поле для ошибок
 }
 
 // Добавляем сообщения для системы
 type RegisterSuccessMsg struct{}
 type RegisterFailedMsg struct{ Err error }
+type listLoadedMsg struct{ items []contracts.ListItem }
+type errMsg struct{ err error }
 
 // menuItem - элемент меню
 type menuItem struct {
 	title       string
 	description string
-}
-
-// User - данные пользователя
-type User struct {
-	Username string
-	Token    string
-}
-
-// Credential - хранимые учетные данные
-type Credential struct {
-	Type     string
-	Username string
-	Password string
-	Metadata string
 }
 
 // NewModel создает новую модель приложения
@@ -68,13 +69,19 @@ func NewModel(ctx context.Context, svcs ModelServices) *Model {
 		menuItems: []menuItem{
 			{"Login", "Войти в систему"},
 			{"Register", "Зарегистрироваться"},
-			{"View Data", "Просмотреть сохраненные данные"},
+			{"Credentials", "Учётные данные"},
+			{"Notes", "Текстовые заметки"},
+			{"Files", "Бинарные файлы"},
+			{"Cards", "Банковские карты"},
 			{"Exit", "Выйти из приложения"},
 		},
 		inputs:       make([]textinput.Model, 0),
 		focusedInput: 0,
 		ctx:          ctx,
 		authService:  svcs.Auth,
+		services: map[contracts.DataType]contracts.DataService{
+			contracts.TypeCredentials: adapters.NewCredentialAdapter(svcs.Credential),
+		},
 	}
 }
 
@@ -96,8 +103,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return updateRegister(m, msg)
 	case "registerSuccess":
 		return updateRegisterSuccess(m, msg)
-	case "view_data":
-		return updateViewData(m, msg)
+	case "list":
+		// Обрабатываем сообщения listLoadedMsg и errMsg
+		switch msg := msg.(type) {
+		case listLoadedMsg:
+			m.listItems = msg.items
+			m.listCursor = 0
+			return m, nil
+
+		case errMsg:
+			// Сохраняем ошибку в модель, чтобы показать пользователю
+			m.lastError = msg.err
+			return m, nil
+
+		default:
+			return updateViewData(m, msg)
+		}
+	case "edit_new": // <- здесь обрабатываем редактирование новой записи
+		return updateEdit(m, msg)
 	default:
 		return m, nil
 	}
@@ -116,10 +139,22 @@ func (m Model) View() string {
 		return renderRegister(m)
 	case "registerSuccess":
 		return renderRegisterSuccess(m)
-	case "view_data":
-		return renderViewData(m)
+	case "list":
+		return renderList(m)
+	case "edit", "edit_new":
+		return renderEditForm(m)
 	default:
 		return ""
+	}
+}
+
+func (m *Model) loadList() tea.Cmd {
+	return func() tea.Msg {
+		items, err := m.services[m.currentType].List(m.ctx)
+		if err != nil {
+			return errMsg{err}
+		}
+		return listLoadedMsg{items}
 	}
 }
 

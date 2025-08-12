@@ -4,6 +4,7 @@ package gophkeeper.proto;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/go_features.proto";
+import "google/protobuf/empty.proto";
 option features.(pb.go).api_level = API_OPAQUE;
 
 option go_package = "github.com/ryabkov82/gophkeeper/internal/pkg/proto";
@@ -65,11 +66,7 @@ message GetCredentialByIDResponse {
     Credential credential = 1;
 }
 
-message GetCredentialsByUserIDRequest {
-    string user_id = 1;
-}
-
-message GetCredentialsByUserIDResponse {
+message GetCredentialsResponse {
     repeated Credential credentials = 1;
 }
 
@@ -93,7 +90,7 @@ message DeleteCredentialResponse {
 service CredentialService {
     rpc CreateCredential(CreateCredentialRequest) returns (CreateCredentialResponse);
     rpc GetCredentialByID(GetCredentialByIDRequest) returns (GetCredentialByIDResponse);
-    rpc GetCredentialsByUserID(GetCredentialsByUserIDRequest) returns (GetCredentialsByUserIDResponse);
+    rpc GetCredentials(google.protobuf.Empty) returns (GetCredentialsResponse);
     rpc UpdateCredential(UpdateCredentialRequest) returns (UpdateCredentialResponse);
     rpc DeleteCredential(DeleteCredentialRequest) returns (DeleteCredentialResponse);
 }

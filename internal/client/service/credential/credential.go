@@ -7,6 +7,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -14,7 +15,7 @@ import (
 type CredentialManagerIface interface {
 	CreateCredential(ctx context.Context, cred *model.Credential) error
 	GetCredentialByID(ctx context.Context, id string) (*model.Credential, error)
-	GetCredentialsByUserID(ctx context.Context, userID string) ([]model.Credential, error)
+	GetCredentials(ctx context.Context) ([]model.Credential, error)
 	UpdateCredential(ctx context.Context, cred *model.Credential) error
 	DeleteCredential(ctx context.Context, id string) error
 	SetClient(client pb.CredentialServiceClient)
@@ -88,16 +89,13 @@ func (m *CredentialManager) GetCredentialByID(ctx context.Context, id string) (*
 }
 
 // GetCredentialsByUserID получает список учётных данных по ID пользователя.
-func (m *CredentialManager) GetCredentialsByUserID(ctx context.Context, userID string) ([]model.Credential, error) {
-	m.logger.Debug("GetCredentialsByUserID request started",
-		zap.String("userID", userID),
-	)
+func (m *CredentialManager) GetCredentials(ctx context.Context) ([]model.Credential, error) {
+
+	m.logger.Debug("GetCredentialsB request started")
 
 	var creds []model.Credential
-	req := &pb.GetCredentialsByUserIDRequest{}
-	req.SetUserId(userID)
 
-	resp, err := m.client.GetCredentialsByUserID(ctx, req)
+	resp, err := m.client.GetCredentials(ctx, &emptypb.Empty{})
 	if err != nil {
 		m.logger.Error("GetCredentialsByUserID RPC failed", zap.Error(err))
 		return nil, fmt.Errorf("GetCredentialsByUserID RPC failed: %w", err)
@@ -108,7 +106,6 @@ func (m *CredentialManager) GetCredentialsByUserID(ctx context.Context, userID s
 		creds = append(creds, *fromProtoCredential(pbCred))
 	}
 	m.logger.Info("GetCredentialsByUserID succeeded",
-		zap.String("userID", userID),
 		zap.Int("count", len(creds)),
 	)
 	return creds, nil

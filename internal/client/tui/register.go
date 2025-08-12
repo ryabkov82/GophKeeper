@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
 )
 
 var fieldLabels = []string{
@@ -131,7 +132,7 @@ func renderRegister(m Model) string {
 }
 
 // Команда для регистрации
-func registerUser(ctx context.Context, authService AuthService, login, password string) tea.Cmd {
+func registerUser(ctx context.Context, authService contracts.AuthService, login, password string) tea.Cmd {
 	return func() tea.Msg {
 		err := authService.RegisterUser(ctx, login, password)
 		if err != nil {

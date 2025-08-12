@@ -51,7 +51,8 @@ func Run(
 	newProgram tuiiface.ProgramFactory,
 ) error {
 	model := NewModel(ctx, ModelServices{
-		Auth: services,
+		Auth:       services,
+		Credential: services,
 	})
 	p := newProgram(model)
 

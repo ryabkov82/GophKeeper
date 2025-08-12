@@ -83,7 +83,7 @@ func TestGetCredentialByID_Success(t *testing.T) {
 	}
 }
 
-func TestGetCredentialsByUserID_Success(t *testing.T) {
+func TestGetCredentials_Success(t *testing.T) {
 	manager, ctrl, mockClient := setup(t)
 	defer ctrl.Finish()
 
@@ -97,14 +97,14 @@ func TestGetCredentialsByUserID_Success(t *testing.T) {
 	credProto.SetCreatedAt(timestamppb.New(testCredential.CreatedAt))
 	credProto.SetUpdatedAt(timestamppb.New(testCredential.UpdatedAt))
 
-	resp := &pb.GetCredentialsByUserIDResponse{}
+	resp := &pb.GetCredentialsResponse{}
 	resp.SetCredentials([]*pb.Credential{credProto})
 
 	mockClient.EXPECT().
-		GetCredentialsByUserID(gomock.Any(), gomock.Any()).
+		GetCredentials(gomock.Any(), gomock.Any()).
 		Return(resp, nil)
 
-	creds, err := manager.GetCredentialsByUserID(context.Background(), testCredential.UserID)
+	creds, err := manager.GetCredentials(context.Background())
 	if err != nil {
 		t.Fatalf("GetCredentialsByUserID failed: %v", err)
 	}
