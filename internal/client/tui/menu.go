@@ -29,8 +29,7 @@ func updateMenu(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			case "Register":
 				m = initRegisterForm(m)
 			case "Credentials":
-				m.currentType = contracts.TypeCredentials
-				m.currentState = "list"
+				m = initListForm(m, contracts.TypeCredentials)
 				return m, m.loadList()
 			case "Exit":
 				return m, tea.Quit

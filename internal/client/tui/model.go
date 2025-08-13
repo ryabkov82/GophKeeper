@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -13,9 +14,34 @@ import (
 
 // Определяем структуру, которая содержит все нужные сервисы для модели
 type ModelServices struct {
-	Auth       contracts.AuthService
-	Credential contracts.CredentialService
+	Auth       contracts.AuthService       // Сервис аутентификации
+	Credential contracts.CredentialService // Сервис управления учетными данными
 	// Добавляй сюда другие интерфейсы по необходимости
+}
+
+// formWidget представляет отдельное поле формы, может быть обычным input или textarea.
+type formWidget struct {
+	isTextarea bool
+	input      textinput.Model
+	textarea   textarea.Model
+	field      forms.FormField
+}
+
+// setFocus устанавливает фокус на виджет или снимает его.
+func (w *formWidget) setFocus(focused bool) {
+	if w.isTextarea {
+		if focused {
+			w.textarea.Focus()
+		} else {
+			w.textarea.Blur()
+		}
+	} else {
+		if focused {
+			w.input.Focus()
+		} else {
+			w.input.Blur()
+		}
+	}
 }
 
 // Model - основная модель приложения, реализующая tea.Model
@@ -24,33 +50,31 @@ type Model struct {
 	currentState string // "menu", "login", "register", "list", "view", "edit"
 
 	// Главное меню
-	menuItems  []menuItem
-	menuCursor int
+	menuItems  []menuItem // элементы главного меню
+	menuCursor int        // текущая позиция в меню
 
 	// Формы ввода
-	inputs       []textinput.Model
-	focusedInput int
+	inputs       []textinput.Model // срез обычных полей ввода
+	focusedInput int               // индекс текущего фокусного поля
 
 	// Данные приложения
-	authService contracts.AuthService
-	ctx         context.Context
-	registerErr error // Добавляем поле для ошибок
-	loginErr    error
+	authService contracts.AuthService // сервис аутентификации
+	ctx         context.Context       // контекст приложения
+	registerErr error                 // ошибка регистрации
+	loginErr    error                 // ошибка логина
 
 	currentType contracts.DataType   // какой тип данных сейчас выбран
-	listItems   []contracts.ListItem // универсальный список
-	listCursor  int
+	listItems   []contracts.ListItem // универсальный список элементов
+	listCursor  int                  // индекс выбранного элемента списка
+	listErr     error                // ошибка загрузки списка
 
 	// map: DataType -> DataService
-	services map[contracts.DataType]contracts.DataService
+	services map[contracts.DataType]contracts.DataService // карта сервисов для каждого типа данных
 
 	// для редактирования — generic формы
-	editEntity interface{} // храним сущность (например *model.Credential)
-	editFields []forms.FormField
-	editErr    error
-
-	lastError error // Добавляем поле для ошибок
-
+	editEntity interface{}  // храним сущность (например *model.Credential)
+	widgets    []formWidget // виджеты формы редактирования
+	editErr    error        // ошибка редактирования
 }
 
 // Добавляем сообщения для системы
@@ -59,13 +83,13 @@ type RegisterFailedMsg struct{ Err error }
 type listLoadedMsg struct{ items []contracts.ListItem }
 type errMsg struct{ err error }
 
-// menuItem - элемент меню
+// menuItem описывает элемент главного меню.
 type menuItem struct {
-	title       string
-	description string
+	title       string // заголовок пункта
+	description string // описание/подсказка
 }
 
-// NewModel создает новую модель приложения
+// NewModel создаёт новую модель приложения с заданными сервисами и контекстом.
 func NewModel(ctx context.Context, svcs ModelServices) *Model {
 
 	return &Model{
@@ -94,7 +118,7 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-// Update обработка сообщений и обновление состояния
+// Update обрабатывает входящие сообщения и обновляет состояние модели.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.currentState {
 	case "menu":
@@ -117,20 +141,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case errMsg:
 			// Сохраняем ошибку в модель, чтобы показать пользователю
-			m.lastError = msg.err
+			m.listErr = msg.err
 			return m, nil
 
 		default:
 			return updateViewData(m, msg)
 		}
-	case "edit_new": // <- здесь обрабатываем редактирование новой записи
+	case "edit", "edit_new":
 		return updateEdit(m, msg)
 	default:
 		return m, nil
 	}
 }
 
-// View рендеринг интерфейса
+// View рендерит текущее состояние интерфейса в строку для вывода в терминал.
 func (m Model) View() string {
 	switch m.currentState {
 	case "menu":
@@ -152,6 +176,7 @@ func (m Model) View() string {
 	}
 }
 
+// loadList возвращает команду для загрузки списка элементов текущего типа.
 func (m *Model) loadList() tea.Cmd {
 	return func() tea.Msg {
 		items, err := m.services[m.currentType].List(m.ctx)
@@ -162,13 +187,30 @@ func (m *Model) loadList() tea.Cmd {
 	}
 }
 
-// Стили интерфейса
+// ExtractFields извлекает значения из всех виджетов формы (inputs и textarea) в срез FormField.
+func (m Model) ExtractFields() []forms.FormField {
+	result := make([]forms.FormField, 0, len(m.widgets))
+
+	for _, w := range m.widgets {
+		f := w.field
+		if w.isTextarea {
+			f.Value = w.textarea.Value()
+		} else {
+			f.Value = w.input.Value()
+		}
+		result = append(result, f)
+	}
+
+	return result
+}
+
+// Стили интерфейса (для заголовков, ошибок, активных/неактивных полей и подсказок).
 var (
-	titleStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
-	errorStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	selectedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	normalStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	//cursorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
+	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
+	errorStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	selectedStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
+	normalStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	cursorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	hintStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
 	activeFieldStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	inactiveFieldStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))

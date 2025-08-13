@@ -3,60 +3,52 @@ package tui
 import (
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 )
 
-// initFormInputsFromFields создает слайс textinput.Model на основе полей FormEntity.
-func initFormInputsFromFields(entity forms.FormEntity) []textinput.Model {
-	fields := entity.FormFields()
-	inputs := make([]textinput.Model, len(fields))
+// initFormInputsFromFields создает слайс formWidget на основе полей FormEntity.
+func initFormInputsFromFields(fields []forms.FormField) []formWidget {
+
+	widgets := make([]formWidget, len(fields))
 
 	for i, field := range fields {
-		ti := textinput.New()
-		ti.Placeholder = ""
-		ti.Prompt = " "
-		ti.Cursor.Style = lipgloss.NewStyle().Background(lipgloss.Color("15"))
-		ti.SetValue(field.Value)
-		ti.CharLimit = 256 // можно настроить лимит символов
+		w := formWidget{field: field}
+		switch strings.ToLower(field.InputType) {
+		case "multiline":
+			ta := textarea.New()
+			ta.Placeholder = ""
+			ta.Cursor.Style = cursorStyle
+			ta.SetValue(field.Value)
+			ta.ShowLineNumbers = false
+			ta.CharLimit = 0 // без лимита
+			ta.Prompt = " "
 
-		// По умолчанию текст виден
-		ti.EchoMode = textinput.EchoNormal
+			w.isTextarea = true
+			w.textarea = ta
 
-		// Если поле - пароль, скрываем ввод
-		if strings.ToLower(field.InputType) == "password" {
-			ti.EchoMode = textinput.EchoPassword
-			ti.EchoCharacter = '•'
+		default:
+			ti := textinput.New()
+			ti.Placeholder = ""
+			ti.Prompt = " "
+			ti.Cursor.Style = cursorStyle
+			ti.SetValue(field.Value)
+			ti.CharLimit = 256
+			ti.EchoMode = textinput.EchoNormal
+			if strings.ToLower(field.InputType) == "password" {
+				ti.EchoMode = textinput.EchoPassword
+				ti.EchoCharacter = '•'
+			}
+
+			w.isTextarea = false
+			w.input = ti
 		}
 
-		// Можно расширить для multiline или других типов, например:
-		// if field.InputType == "multiline" { ... }
+		w.setFocus(i == 0)
 
-		// Фокусируем первый элемент, остальные нет
-		if i == 0 {
-			ti.Focus()
-		} else {
-			ti.Blur()
-		}
-
-		inputs[i] = ti
+		widgets[i] = w
 	}
 
-	return inputs
-}
-
-// extractFieldsFromInputs получает заполненные значения из textinput.Model
-// и возвращает слайс FormField с актуальными значениями.
-// Порядок должен совпадать с исходным (FormFields).
-func extractFieldsFromInputs(fields []forms.FormField, inputs []textinput.Model) []forms.FormField {
-	// берём min длину, если размеры не совпадают — обновляем по минимуму
-	n := len(fields)
-	if len(inputs) < n {
-		n = len(inputs)
-	}
-	for i := 0; i < n; i++ {
-		fields[i].Value = inputs[i].Value()
-	}
-	return fields
+	return widgets
 }

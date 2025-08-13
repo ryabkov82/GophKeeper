@@ -7,10 +7,34 @@ type DataType int
 
 const (
 	TypeCredentials DataType = iota
-	TypeNote
-	TypeBinary
-	TypeCard
+	TypeNotes
+	TypeFiles
+	TypeCards
 )
+
+// String возвращает читаемое название типа данных DataType.
+// Используется для отображения в интерфейсе и логах.
+//
+// Примеры возврата:
+//   TypeCredentials -> "Credentials"
+//   TypeNotes       -> "Notes"
+//   TypeFiles       -> "Files"
+//   TypeCards       -> "Cards"
+//   любое другое значение -> "Unknown"
+func (dt DataType) String() string {
+	switch dt {
+	case TypeCredentials:
+		return "Credentials"
+	case TypeNotes:
+		return "Notes"
+	case TypeFiles:
+		return "Files"
+	case TypeCards:
+		return "Cards"
+	default:
+		return "Unknown"
+	}
+}
 
 // ListItem — единица для универсального списка
 type ListItem struct {

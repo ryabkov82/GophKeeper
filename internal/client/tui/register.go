@@ -39,7 +39,8 @@ func newInputField(placeholder string) textinput.Model {
 	ti := textinput.New()
 	ti.Placeholder = placeholder
 	ti.Prompt = " " // Один пробел вместо ">"
-	ti.Cursor.Style = lipgloss.NewStyle().Background(lipgloss.Color("15"))
+	//ti.Cursor.Style = lipgloss.NewStyle().Background(lipgloss.Color("15"))
+	ti.Cursor.Style = cursorStyle
 	ti.Width = 30
 	return ti
 }

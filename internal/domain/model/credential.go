@@ -56,7 +56,7 @@ func (c *Credential) FormFields() []forms.FormField {
 		{
 			Label:       "Metadata",
 			Value:       c.Metadata,
-			InputType:   "text",
+			InputType:   "multiline",
 			Placeholder: "Дополнительные заметки",
 		},
 	}
