@@ -10,7 +10,7 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-//go:embed migrations/*.sql
+//go:embed sql/*.sql
 var embedMigrations embed.FS
 
 // RunMigrations применяет миграции к базе данных с использованием библиотеки Goose.
@@ -34,7 +34,7 @@ func RunMigrations(db *sql.DB) error {
 		return fmt.Errorf("set dialect: %w", err)
 	}
 
-	err := goose.Up(db, "migrations")
+	err := goose.Up(db, "sql")
 	if err != nil {
 		return fmt.Errorf("goose up: %w", err)
 	}

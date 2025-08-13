@@ -13,13 +13,15 @@ import (
 )
 
 func TestRunWithServices(t *testing.T) {
+
+	tempLogDir := t.TempDir()
 	cfg := &config.ClientConfig{
 		ServerAddress: "localhost:50051",
 		UseTLS:        false,
 		LogLevel:      "debug",
 		Timeout:       2 * time.Second,
+		LogDirPath:    tempLogDir,
 	}
-	tempLogDir := t.TempDir()
 
 	var runTUICalled bool
 
@@ -32,37 +34,40 @@ func TestRunWithServices(t *testing.T) {
 		return nil
 	}
 
-	err := app.RunWithServices(cfg, tempLogDir, mockRunTUI)
+	err := app.RunWithServices(cfg, mockRunTUI)
 	assert.NoError(t, err)
 	assert.True(t, runTUICalled)
 }
 
 func TestRunWithServices_MkdirFail(t *testing.T) {
-	cfg := &config.ClientConfig{}
+
 	badDir := string([]byte{0})
+	cfg := &config.ClientConfig{LogDirPath: badDir}
 
 	mockRunTUI := func(ctx context.Context, services *app.AppServices, progFactory tuiiface.ProgramFactory) error {
 		return nil
 	}
 
-	err := app.RunWithServices(cfg, badDir, mockRunTUI)
+	err := app.RunWithServices(cfg, mockRunTUI)
 	assert.Error(t, err)
 }
 
 func TestRunWithServices_RunTUIFail(t *testing.T) {
+
+	tempLogDir := t.TempDir()
 	cfg := &config.ClientConfig{
 		ServerAddress: "localhost:50051",
 		UseTLS:        false,
 		LogLevel:      "debug",
 		Timeout:       2 * time.Second,
+		LogDirPath:    tempLogDir,
 	}
-	tempLogDir := t.TempDir()
 
 	mockRunTUI := func(ctx context.Context, services *app.AppServices, progFactory tuiiface.ProgramFactory) error {
 		return errors.New("TUI error")
 	}
 
-	err := app.RunWithServices(cfg, tempLogDir, mockRunTUI)
+	err := app.RunWithServices(cfg, mockRunTUI)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "TUI error")
 }

@@ -3,43 +3,48 @@ package app
 import (
 	"context"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/auth"
 	"github.com/ryabkov82/gophkeeper/internal/client/config"
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/credential"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/cryptokey"
+	"github.com/ryabkov82/gophkeeper/internal/client/storage"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/logger"
 	"go.uber.org/zap"
 )
 
-// AppServices представляет контейнер всех зависимостей, необходимых для работы клиента.
-// Это упрощает передачу сервисов в TUI и другие слои приложения, делает код более модульным
-// и облегчает тестирование.
+// AppServices представляет контейнер всех основных сервисов и зависимостей,
+// необходимых для работы клиента.
 //
-// Поля:
-//   - AuthManager: отвечает за регистрацию, вход и управление токеном доступа пользователя.
-//   - ConnManager: управляет подключением к gRPC-серверу.
-//   - Logger: структурированный логгер для записи отладочной и диагностической информации.
+// Такая структура облегчает передачу зависимостей между слоями приложения (например, в TUI),
+// повышает модульность кода и упрощает тестирование.
+//
+// Основные поля:
+//   - AuthManager: управление регистрацией, аутентификацией и токенами доступа пользователей.
+//   - CredentialManager: управление учётными данными (создание, получение, обновление, удаление).
+//   - CryptoKeyManager: генерация, хранение и загрузка криптографических ключей для шифрования.
+//   - ConnManager: управление gRPC подключениями к серверу.
+//   - Logger: структурированный логгер для записи отладочной, диагностической и системной информации.
+//
+// Для корректного закрытия ресурсов (например, gRPC соединений) используется sync.Once.
 type AppServices struct {
-	AuthManager auth.AuthManagerIface
-	ConnManager connection.ConnManager
-	Logger      *zap.Logger
-	// Будущие зависимости:
-	// DataService *data.Service
+	AuthManager       auth.AuthManagerIface
+	CredentialManager credential.CredentialManagerIface
+	CryptoKeyManager  cryptokey.CryptoKeyManagerIface
+	ConnManager       connection.ConnManager
+	Logger            *zap.Logger
 
 	closeOnce sync.Once
 }
 
 // NewAppServices создаёт контейнер зависимостей клиента.
-// logDir — директория для логов, cfg — конфигурация клиента.
-func NewAppServices(cfg *config.ClientConfig, logDir string) (*AppServices, error) {
-	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-		return nil, fmt.Errorf("failed to create log directory: %w", err)
-	}
+// cfg — конфигурация клиента.
+func NewAppServices(cfg *config.ClientConfig) (*AppServices, error) {
 
-	if err := logger.InitializeWithTimestamp(cfg.LogLevel, logDir); err != nil {
+	if err := logger.InitializeWithTimestamp(cfg.LogLevel, cfg.LogDirPath); err != nil {
 		return nil, fmt.Errorf("logger initialize failed: %w", err)
 	}
 
@@ -53,18 +58,43 @@ func NewAppServices(cfg *config.ClientConfig, logDir string) (*AppServices, erro
 		ConnectTimeout: cfg.Timeout,
 	}
 
-	connManager := connection.New(connConfig, log)
-	tokenStore := auth.NewFileTokenStorage(".token")
-	authManager := auth.NewAuthManager(connManager, tokenStore, log)
+	tokenStore := storage.NewFileTokenStorage(cfg.TokenFilePath)
+
+	cryptoStore := storage.NewFileCryptoKeyStorage(cfg.KeyFilePath)
+	cryptoKeyManager := cryptokey.NewCryptoKeyManager(cryptoStore, log)
+	authManager := auth.NewAuthManager(tokenStore, log)
+
+	// Создаем CredentialManager, передав logger
+	credentialManager := credential.NewCredentialManager(log)
+
+	connManager := connection.New(connConfig, log, authManager)
 
 	return &AppServices{
-		AuthManager: authManager,
-		ConnManager: connManager,
-		Logger:      log,
+		AuthManager:       authManager,
+		CredentialManager: credentialManager,
+		CryptoKeyManager:  cryptoKeyManager,
+		ConnManager:       connManager,
+		Logger:            log,
 	}, nil
 }
 
-// Close освобождает ресурсы
+// getGRPCConn возвращает активное gRPC соединение, обеспечивая его создание и восстановление при необходимости.
+//
+// ctx — контекст запроса, используется для контроля таймаута и отмены операции.
+//
+// Возвращает готовое соединение GrpcConn или ошибку при неудаче подключения.
+func (s *AppServices) getGRPCConn(ctx context.Context) (connection.GrpcConn, error) {
+	conn, err := s.ConnManager.Connect(ctx)
+	if err != nil {
+		s.Logger.Error("Failed to connect gRPC", zap.Error(err))
+		return nil, err
+	}
+	return conn, nil
+}
+
+// Close корректно освобождает ресурсы, в частности закрывает gRPC соединение.
+//
+// Возвращает ошибку, если закрытие прошло с проблемами.
 func (s *AppServices) Close() error {
 	var err error
 	s.closeOnce.Do(func() {

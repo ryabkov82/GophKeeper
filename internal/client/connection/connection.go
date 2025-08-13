@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -54,7 +55,8 @@ type Manager struct {
 	mu     sync.RWMutex
 	logger *zap.Logger
 
-	dialFunc func(target string, opts ...grpc.DialOption) (GrpcConn, error)
+	dialFunc    func(target string, opts ...grpc.DialOption) (GrpcConn, error)
+	authManager auth.AuthManagerIface // интерфейс для доступа к токену
 }
 
 type connectionResult struct {
@@ -63,11 +65,12 @@ type connectionResult struct {
 }
 
 // New создаёт новый экземпляр Manager с заданной конфигурацией и логгером.
-func New(cfg *Config, logger *zap.Logger) *Manager {
+func New(cfg *Config, logger *zap.Logger, authManager auth.AuthManagerIface) *Manager {
 	return &Manager{
-		config:   cfg,
-		logger:   logger,
-		dialFunc: defaultDialFunc,
+		config:      cfg,
+		logger:      logger,
+		dialFunc:    defaultDialFunc,
+		authManager: authManager,
 	}
 }
 
@@ -166,6 +169,10 @@ func (m *Manager) createConnection(ctx context.Context) (GrpcConn, error) {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		m.logger.Debug("Using insecure gRPC connection")
 	}
+
+	dialOpts = append(dialOpts, grpc.WithUnaryInterceptor(
+		AuthUnaryInterceptor(m.authManager, m.logger),
+	))
 
 	m.logger.Debug("Dialing gRPC server", zap.String("address", m.config.ServerAddress))
 	conn, err := m.dialFunc(m.config.ServerAddress, dialOpts...)

@@ -36,10 +36,9 @@ import (
 //   - ошибку, возникшую при инициализации сервисов или при выполнении runTUI.
 func RunWithServices(
 	cfg *config.ClientConfig,
-	logDir string,
 	runTUI func(ctx context.Context, services *AppServices, progFactory tuiiface.ProgramFactory) error,
 ) error {
-	services, err := NewAppServices(cfg, logDir)
+	services, err := NewAppServices(cfg)
 	if err != nil {
 		return err
 	}

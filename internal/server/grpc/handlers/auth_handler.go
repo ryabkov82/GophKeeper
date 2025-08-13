@@ -69,7 +69,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *api.LoginRequest) (*api.Lo
 		zap.String("login", login),
 	)
 
-	token, err := h.service.Login(ctx, login, password)
+	token, salt, err := h.service.Login(ctx, login, password)
 	if err != nil {
 		h.Logger.Warn("Login failed",
 			zap.String("login", login),
@@ -84,5 +84,6 @@ func (h *AuthHandler) Login(ctx context.Context, req *api.LoginRequest) (*api.Lo
 
 	resp := api.LoginResponse{}
 	resp.SetAccessToken(token)
+	resp.SetSalt(salt)
 	return &resp, nil
 }

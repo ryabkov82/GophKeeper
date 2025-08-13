@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ryabkov82/gophkeeper/internal/client/paths"
 )
 
 // ClientConfig содержит параметры конфигурации клиента
@@ -21,6 +23,10 @@ type ClientConfig struct {
 	Timeout       time.Duration `json:"timeout" env:"TIMEOUT"`
 	ConfigPath    string        `json:"-" env:"CONFIG"` // Путь к конфиг-файлу
 	LogLevel      string        `json:"log_level" env:"LOG_LEVEL"`
+
+	KeyFilePath   string `json:"key_file_path" env:"KEY_FILE_PATH"`     // путь к ключу шифрования
+	TokenFilePath string `json:"token_file_path" env:"TOKEN_FILE_PATH"` // путь к файлу с токеном
+	LogDirPath    string `json:"log_dir_path" env:"LOG_DIR_PATH"`       // путь к директории с логами
 }
 
 const (
@@ -29,7 +35,23 @@ const (
 )
 
 // DefaultConfig возвращает конфигурацию по умолчанию
-func DefaultConfig() *ClientConfig {
+func DefaultConfig() (*ClientConfig, error) {
+
+	keyPath, err := paths.DefaultKeyFilePath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get default key file path: %w", err)
+	}
+
+	tokenPath, err := paths.DefaultTokenFilePath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get default token file path: %w", err)
+	}
+
+	logDirPath, err := paths.DefaultLogDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get default log dir path: %w", err)
+	}
+
 	return &ClientConfig{
 		ServerAddress: "localhost:50051",
 		UseTLS:        false,
@@ -37,7 +59,10 @@ func DefaultConfig() *ClientConfig {
 		CACertPath:    "certs/ca.crt",
 		Timeout:       10 * time.Second,
 		LogLevel:      "info",
-	}
+		KeyFilePath:   keyPath,
+		TokenFilePath: tokenPath,
+		LogDirPath:    logDirPath,
+	}, nil
 }
 
 // Load загружает конфигурацию в порядке:
@@ -46,7 +71,11 @@ func DefaultConfig() *ClientConfig {
 // 3) флаги командной строки
 // 4) переменные окружения
 func Load() (*ClientConfig, error) {
-	cfg := DefaultConfig()
+
+	cfg, err := DefaultConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create default config: %w", err)
+	}
 
 	// 1. Загрузка из JSON-файла
 	if configFile := getConfigFilePath(); configFile != "" {

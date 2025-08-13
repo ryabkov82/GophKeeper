@@ -4,20 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/connection"
+	"github.com/ryabkov82/gophkeeper/internal/client/storage"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 // AuthManager управляет авторизацией пользователя, включая хранение токена,
 // взаимодействие с сервером через gRPC и логирование.
 type AuthManager struct {
-	token       string       // Текущий токен (в памяти)
-	tokenStore  TokenStorage // Постоянное хранилище (файл, keychain и т.д.)
-	connManager connection.ConnManager
-	Logger      *zap.Logger
-	Client      proto.AuthServiceClient // добавлено для инъекции моков
+	token      string               // Текущий токен (в памяти)
+	tokenStore storage.TokenStorage // Постоянное хранилище (файл, keychain и т.д.)
+	Logger     *zap.Logger
+	Client     proto.AuthServiceClient // добавлено для инъекции моков
 }
 
 // AuthManagerIface описывает интерфейс для управления аутентификацией и регистрацией пользователей.
@@ -30,27 +28,28 @@ type AuthManagerIface interface {
 	Register(ctx context.Context, login, password string) error
 
 	// Login выполняет аутентификацию пользователя с заданным логином и паролем.
+	// Возвращает соль для последующей генерации ключа шифрования
 	// Возвращает ошибку, если вход не удался.
-	Login(ctx context.Context, login, password string) error
-}
+	Login(ctx context.Context, login, password string) ([]byte, error)
 
-// TokenStorage описывает интерфейс для сохранения, загрузки и очистки токена.
-type TokenStorage interface {
-	Save(token string) error
-	Load() (string, error)
-	Clear() error
+	// SetClient задаёт gRPC клиента для AuthManager.
+	SetClient(client proto.AuthServiceClient)
+
+	// GetToken возвращает текущий токен.
+	GetToken() string
 }
 
 // NewAuthManager создаёт новый экземпляр AuthManager.
 //
-// connManager — менеджер подключения к gRPC-серверу,
 // store — реализация хранения токена,
 // logger — логгер.
-func NewAuthManager(connManager connection.ConnManager, store TokenStorage, logger *zap.Logger) *AuthManager {
+func NewAuthManager(
+	store storage.TokenStorage,
+	logger *zap.Logger,
+) *AuthManager {
 	return &AuthManager{
-		tokenStore:  store,
-		connManager: connManager,
-		Logger:      logger,
+		tokenStore: store,
+		Logger:     logger,
 	}
 }
 
@@ -91,65 +90,64 @@ func (a *AuthManager) Clear() error {
 	return nil
 }
 
-func (a *AuthManager) getClient(conn grpc.ClientConnInterface) proto.AuthServiceClient {
-	if a.Client != nil {
-		return a.Client
-	}
-	return proto.NewAuthServiceClient(conn)
+// SetClient задаёт gRPC клиента для AuthManager.
+//
+// Этот метод используется для установки экземпляра
+// proto.AuthServiceClient, который будет использоваться
+// для выполнения вызовов RPC внутри AuthManager.
+//
+// Обычно вызывается после установления gRPC соединения,
+// чтобы внедрить готовый клиент в AuthManager.
+//
+// client — клиент, реализующий интерфейс proto.AuthServiceClient.
+func (a *AuthManager) SetClient(client proto.AuthServiceClient) {
+	a.Client = client
 }
 
 // Login выполняет аутентификацию пользователя через gRPC,
 // получает access token и сохраняет его в хранилище.
-func (a *AuthManager) Login(ctx context.Context, login, password string) error {
-	a.Logger.Info("Attempting login", zap.String("login", login))
+func (a *AuthManager) Login(ctx context.Context, login, password string) ([]byte, error) {
 
-	conn, err := a.connManager.Connect(ctx)
-	if err != nil {
-		a.Logger.Error("Connection failed", zap.Error(err))
-		return fmt.Errorf("connection failed: %w", err)
-	}
+	a.Logger.Info("Attempting login", zap.String("login", login))
 
 	req := &proto.LoginRequest{}
 	req.SetLogin(login)
 	req.SetPassword(password)
 
-	client := a.getClient(conn) // используем инжектированный клиент, если есть
-	resp, err := client.Login(ctx, req)
+	resp, err := a.Client.Login(ctx, req)
 	if err != nil {
 		a.Logger.Error("Login RPC failed", zap.Error(err))
-		return fmt.Errorf("login RPC failed: %w", err)
+		return nil, fmt.Errorf("login RPC failed: %w", err)
 	}
 
 	if err := a.SetToken(resp.GetAccessToken()); err != nil {
-		return fmt.Errorf("failed to save token: %w", err)
+		return nil, fmt.Errorf("failed to save token: %w", err)
 	}
 
-	a.Logger.Info("Login successful", zap.String("login", login))
-	return nil
+	salt := resp.GetSalt()
+
+	a.Logger.Info("Login successful",
+		zap.String("login", login),
+	)
+
+	return salt, nil
+
 }
 
 // Register выполняет регистрацию пользователя через gRPC.
-// После успешной регистрации автоматически выполняет вход.
 func (a *AuthManager) Register(ctx context.Context, login, password string) error {
 	a.Logger.Info("Attempting registration", zap.String("login", login))
-
-	conn, err := a.connManager.Connect(ctx)
-	if err != nil {
-		a.Logger.Error("Connection failed", zap.Error(err))
-		return fmt.Errorf("connection failed: %w", err)
-	}
 
 	req := &proto.RegisterRequest{}
 	req.SetLogin(login)
 	req.SetPassword(password)
 
-	client := a.getClient(conn)
-	_, err = client.Register(ctx, req)
+	_, err := a.Client.Register(ctx, req)
 	if err != nil {
 		a.Logger.Error("Register RPC failed", zap.Error(err))
 		return fmt.Errorf("register RPC failed: %w", err)
 	}
 
 	a.Logger.Info("Registration successful, proceeding to login", zap.String("login", login))
-	return a.Login(ctx, login, password)
+	return nil
 }

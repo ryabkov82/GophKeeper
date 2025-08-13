@@ -18,7 +18,7 @@ func main() {
 
 	progFactory := tui.DefaultProgramFactory
 
-	err = app.RunWithServices(cfg, "logs",
+	err = app.RunWithServices(cfg,
 		func(ctx context.Context, services *app.AppServices, _ tuiiface.ProgramFactory) error {
 			// Передаём progFactory и сигналы в tui.Run
 			return tui.Run(ctx, services, progFactory)

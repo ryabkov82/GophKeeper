@@ -63,17 +63,26 @@ func (s *authService) Register(ctx context.Context, login, password string) erro
 //
 // Возвращает:
 //   - строку с JWT-токеном в случае успеха;
+//   - срез байт с солью пользователя ([]byte);
 //   - ошибку, если пользователь не найден, пароль не совпадает,
 //     либо возникли проблемы при генерации токена.
-func (s *authService) Login(ctx context.Context, login, password string) (string, error) {
+func (s *authService) Login(ctx context.Context, login, password string) (string, []byte, error) {
 	user, err := s.userRepo.GetUserByLogin(ctx, login)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
+	if user == nil {
+		return "", nil, errors.New("invalid credentials")
+	}
 	if !crypto.VerifyPassword(password, user.PasswordHash, user.Salt) {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
-	return s.tokenManager.GenerateToken(user.ID, login)
+	token, err := s.tokenManager.GenerateToken(user.ID, login)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return token, []byte(user.Salt), nil
 }

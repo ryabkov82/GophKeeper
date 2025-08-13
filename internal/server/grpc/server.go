@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtutils"
 	api "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"github.com/ryabkov82/gophkeeper/internal/server/config"
 	"github.com/ryabkov82/gophkeeper/internal/server/grpc/handlers"
@@ -23,10 +24,12 @@ import (
 func NewGRPCServer(cfg *config.Config, logger *zap.Logger, services *service.Services) (*grpc.Server, error) {
 	var opts []grpc.ServerOption
 
+	jwtManager := jwtutils.New(cfg.JwtKey, 24*60*60)
 	// Добавляем интерцепторы
 	opts = append(opts,
 		grpc.ChainUnaryInterceptor(
 			interceptors.LoggingInterceptor(logger),
+			interceptors.UnaryAuthInterceptor(jwtManager, logger),
 			// можно добавить другие: AuthInterceptor, RecoveryInterceptor и т.п.
 		),
 	)
@@ -48,7 +51,9 @@ func NewGRPCServer(cfg *config.Config, logger *zap.Logger, services *service.Ser
 	authHandler := handlers.NewAuthHandler(services.Auth, logger)
 	api.RegisterAuthServiceServer(s, authHandler)
 
-	// TODO: Register other services (e.g., Data)
+	// Регистрируем Credential хендлер
+	credHandler := handlers.NewCredentialHandler(services.Credential, logger)
+	api.RegisterCredentialServiceServer(s, credHandler)
 
 	return s, nil
 }

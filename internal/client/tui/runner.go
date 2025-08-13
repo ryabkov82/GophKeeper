@@ -50,7 +50,10 @@ func Run(
 	services *app.AppServices,
 	newProgram tuiiface.ProgramFactory,
 ) error {
-	model := NewModel(ctx, services)
+	model := NewModel(ctx, ModelServices{
+		Auth:       services,
+		Credential: services,
+	})
 	p := newProgram(model)
 
 	done := make(chan error, 1)

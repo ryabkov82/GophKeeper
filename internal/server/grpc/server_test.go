@@ -27,9 +27,15 @@ func (m *mockAuthService) Register(ctx context.Context, login, password string) 
 	return args.Error(0)
 }
 
-func (m *mockAuthService) Login(ctx context.Context, login, password string) (string, error) {
+func (m *mockAuthService) Login(ctx context.Context, login, password string) (string, []byte, error) {
 	args := m.Called(ctx, login, password)
-	return args.String(0), args.Error(1)
+
+	var salt []byte
+	if s, ok := args.Get(1).([]byte); ok {
+		salt = s
+	}
+
+	return args.String(0), salt, args.Error(2)
 }
 
 func getFreePort(t *testing.T) string {

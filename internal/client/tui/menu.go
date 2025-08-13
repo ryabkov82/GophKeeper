@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
 )
 
 // updateMenu обрабатывает сообщения в состоянии меню
@@ -27,8 +28,9 @@ func updateMenu(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				m = initLoginForm(m)
 			case "Register":
 				m = initRegisterForm(m)
-			case "View Data":
-				m.currentState = "view_data"
+			case "Credentials":
+				m = initListForm(m, contracts.TypeCredentials)
+				return m, m.loadList()
 			case "Exit":
 				return m, tea.Quit
 			}

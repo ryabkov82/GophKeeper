@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/ryabkov82/gophkeeper/internal/client/auth"
-	"github.com/ryabkov82/gophkeeper/internal/client/connection"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto/mocks"
 	"github.com/stretchr/testify/require"
@@ -30,16 +29,6 @@ func (m *mockTokenStorage) Clear() error {
 	return nil
 }
 
-// Заглушка для connManager
-type mockConnManager struct{}
-
-func (m *mockConnManager) Connect(ctx context.Context) (connection.GrpcConn, error) {
-	return nil, nil // не используется, тк клиент мокируется напрямую
-}
-func (m *mockConnManager) Close() error {
-	return nil
-}
-
 func TestAuthManager_Login(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -48,6 +37,7 @@ func TestAuthManager_Login(t *testing.T) {
 
 	resp := &proto.LoginResponse{}
 	resp.SetAccessToken("testtoken")
+	resp.SetSalt([]byte("salt"))
 
 	mockClient.EXPECT().
 		Login(gomock.Any(), gomock.Any(), gomock.Any()).
@@ -55,20 +45,20 @@ func TestAuthManager_Login(t *testing.T) {
 		Times(1)
 
 	store := &mockTokenStorage{}
-	connManager := &mockConnManager{}
 
-	authMgr := auth.NewAuthManager(connManager, store, zap.NewNop())
+	authMgr := auth.NewAuthManager(store, zap.NewNop())
 	authMgr.Client = mockClient // инжектим мок клиента
 
-	err := authMgr.Login(context.Background(), "user", "pass")
+	salt, err := authMgr.Login(context.Background(), "user", "pass")
 	require.NoError(t, err)
 
 	require.Equal(t, "testtoken", authMgr.GetToken())
+	require.Equal(t, "salt", string(salt))
 }
 
 func TestAuthManager_SetToken(t *testing.T) {
 	store := &mockTokenStorage{}
-	authMgr := auth.NewAuthManager(nil, store, zap.NewNop())
+	authMgr := auth.NewAuthManager(store, zap.NewNop())
 
 	err := authMgr.SetToken("mytoken")
 	require.NoError(t, err)
@@ -78,7 +68,7 @@ func TestAuthManager_SetToken(t *testing.T) {
 
 func TestAuthManager_GetToken_LoadsFromStorage(t *testing.T) {
 	store := &mockTokenStorage{token: "storedtoken"}
-	authMgr := auth.NewAuthManager(nil, store, zap.NewNop())
+	authMgr := auth.NewAuthManager(store, zap.NewNop())
 
 	token := authMgr.GetToken()
 	require.Equal(t, "storedtoken", token)
@@ -86,7 +76,7 @@ func TestAuthManager_GetToken_LoadsFromStorage(t *testing.T) {
 
 func TestAuthManager_Clear(t *testing.T) {
 	store := &mockTokenStorage{token: "someToken"}
-	authMgr := auth.NewAuthManager(nil, store, zap.NewNop())
+	authMgr := auth.NewAuthManager(store, zap.NewNop())
 	authMgr.SetToken("someToken")
 
 	err := authMgr.Clear()
@@ -105,15 +95,9 @@ func TestAuthManager_Register(t *testing.T) {
 		Return(&proto.RegisterResponse{}, nil).
 		Times(1)
 
-	mockClient.EXPECT().
-		Login(gomock.Any(), gomock.Any(), gomock.Any()).
-		Return(&proto.LoginResponse{}, nil).
-		Times(1)
-
 	store := &mockTokenStorage{}
-	connManager := &mockConnManager{}
 
-	authMgr := auth.NewAuthManager(connManager, store, zap.NewNop())
+	authMgr := auth.NewAuthManager(store, zap.NewNop())
 	authMgr.Client = mockClient
 
 	err := authMgr.Register(context.Background(), "user", "pass")

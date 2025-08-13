@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtutils"
 	"github.com/ryabkov82/gophkeeper/internal/server/config"
 	"github.com/ryabkov82/gophkeeper/internal/server/grpc"
@@ -35,7 +37,7 @@ func StartServer(log *zap.Logger, cfg *config.Config) {
 
 	// 2. Слои: repository -> services
 	repos := storage.NewRepositories(db)
-	jwtManager := jwtutils.New(cfg.JwtKey, 24*60*60)
+	jwtManager := jwtutils.New(cfg.JwtKey, 24*time.Hour)
 	services := service.NewServices(repos, jwtManager)
 
 	// 3. Запуск gRPC сервера с набором сервисов

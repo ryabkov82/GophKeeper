@@ -3,71 +3,113 @@ package tui
 import (
 	"context"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/ryabkov82/gophkeeper/internal/client/app"
+	"github.com/ryabkov82/gophkeeper/internal/client/forms"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/adapters"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
 )
+
+// Определяем структуру, которая содержит все нужные сервисы для модели
+type ModelServices struct {
+	Auth       contracts.AuthService       // Сервис аутентификации
+	Credential contracts.CredentialService // Сервис управления учетными данными
+	// Добавляй сюда другие интерфейсы по необходимости
+}
+
+// formWidget представляет отдельное поле формы, может быть обычным input или textarea.
+type formWidget struct {
+	isTextarea bool
+	input      textinput.Model
+	textarea   textarea.Model
+	field      forms.FormField
+}
+
+// setFocus устанавливает фокус на виджет или снимает его.
+func (w *formWidget) setFocus(focused bool) {
+	if w.isTextarea {
+		if focused {
+			w.textarea.Focus()
+		} else {
+			w.textarea.Blur()
+		}
+	} else {
+		if focused {
+			w.input.Focus()
+		} else {
+			w.input.Blur()
+		}
+	}
+}
 
 // Model - основная модель приложения, реализующая tea.Model
 type Model struct {
 	// Состояния интерфейса
-	currentState string // "menu", "login", "register", "view_data"
+	currentState string // "menu", "login", "register", "list", "view", "edit"
 
 	// Главное меню
-	menuItems  []menuItem
-	menuCursor int
+	menuItems  []menuItem // элементы главного меню
+	menuCursor int        // текущая позиция в меню
 
 	// Формы ввода
-	inputs       []textinput.Model
-	focusedInput int
+	inputs       []textinput.Model // срез обычных полей ввода
+	focusedInput int               // индекс текущего фокусного поля
 
 	// Данные приложения
-	services    *app.AppServices
-	ctx         context.Context
-	registerErr error // Добавляем поле для ошибок
-	loginErr    error
+	authService contracts.AuthService // сервис аутентификации
+	ctx         context.Context       // контекст приложения
+	registerErr error                 // ошибка регистрации
+	loginErr    error                 // ошибка логина
+
+	currentType contracts.DataType   // какой тип данных сейчас выбран
+	listItems   []contracts.ListItem // универсальный список элементов
+	listCursor  int                  // индекс выбранного элемента списка
+	listErr     error                // ошибка загрузки списка
+
+	// map: DataType -> DataService
+	services map[contracts.DataType]contracts.DataService // карта сервисов для каждого типа данных
+
+	// для редактирования — generic формы
+	editEntity interface{}  // храним сущность (например *model.Credential)
+	widgets    []formWidget // виджеты формы редактирования
+	editErr    error        // ошибка редактирования
 }
 
 // Добавляем сообщения для системы
 type RegisterSuccessMsg struct{}
 type RegisterFailedMsg struct{ Err error }
+type listLoadedMsg struct{ items []contracts.ListItem }
+type errMsg struct{ err error }
 
-// menuItem - элемент меню
+// menuItem описывает элемент главного меню.
 type menuItem struct {
-	title       string
-	description string
+	title       string // заголовок пункта
+	description string // описание/подсказка
 }
 
-// User - данные пользователя
-type User struct {
-	Username string
-	Token    string
-}
-
-// Credential - хранимые учетные данные
-type Credential struct {
-	Type     string
-	Username string
-	Password string
-	Metadata string
-}
-
-// NewModel создает новую модель приложения
-func NewModel(ctx context.Context, services *app.AppServices) *Model {
+// NewModel создаёт новую модель приложения с заданными сервисами и контекстом.
+func NewModel(ctx context.Context, svcs ModelServices) *Model {
 
 	return &Model{
 		currentState: "menu",
 		menuItems: []menuItem{
 			{"Login", "Войти в систему"},
 			{"Register", "Зарегистрироваться"},
-			{"View Data", "Просмотреть сохраненные данные"},
+			{"Credentials", "Учётные данные"},
+			{"Notes", "Текстовые заметки"},
+			{"Files", "Бинарные файлы"},
+			{"Cards", "Банковские карты"},
 			{"Exit", "Выйти из приложения"},
 		},
 		inputs:       make([]textinput.Model, 0),
 		focusedInput: 0,
 		ctx:          ctx,
-		services:     services,
+		authService:  svcs.Auth,
+		services: map[contracts.DataType]contracts.DataService{
+			contracts.TypeCredentials: adapters.NewCredentialAdapter(svcs.Credential),
+		},
 	}
 }
 
@@ -76,7 +118,7 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-// Update обработка сообщений и обновление состояния
+// Update обрабатывает входящие сообщения и обновляет состояние модели.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.currentState {
 	case "menu":
@@ -89,14 +131,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return updateRegister(m, msg)
 	case "registerSuccess":
 		return updateRegisterSuccess(m, msg)
-	case "view_data":
-		return updateViewData(m, msg)
+	case "list":
+		// Обрабатываем сообщения listLoadedMsg и errMsg
+		switch msg := msg.(type) {
+		case listLoadedMsg:
+			m.listItems = msg.items
+			m.listCursor = 0
+			return m, nil
+
+		case errMsg:
+			// Сохраняем ошибку в модель, чтобы показать пользователю
+			m.listErr = msg.err
+			return m, nil
+
+		default:
+			return updateViewData(m, msg)
+		}
+	case "edit", "edit_new":
+		return updateEdit(m, msg)
 	default:
 		return m, nil
 	}
 }
 
-// View рендеринг интерфейса
+// View рендерит текущее состояние интерфейса в строку для вывода в терминал.
 func (m Model) View() string {
 	switch m.currentState {
 	case "menu":
@@ -109,14 +167,44 @@ func (m Model) View() string {
 		return renderRegister(m)
 	case "registerSuccess":
 		return renderRegisterSuccess(m)
-	case "view_data":
-		return renderViewData(m)
+	case "list":
+		return renderList(m)
+	case "edit", "edit_new":
+		return renderEditForm(m)
 	default:
 		return ""
 	}
 }
 
-// Стили интерфейса
+// loadList возвращает команду для загрузки списка элементов текущего типа.
+func (m *Model) loadList() tea.Cmd {
+	return func() tea.Msg {
+		items, err := m.services[m.currentType].List(m.ctx)
+		if err != nil {
+			return errMsg{err}
+		}
+		return listLoadedMsg{items}
+	}
+}
+
+// ExtractFields извлекает значения из всех виджетов формы (inputs и textarea) в срез FormField.
+func (m Model) ExtractFields() []forms.FormField {
+	result := make([]forms.FormField, 0, len(m.widgets))
+
+	for _, w := range m.widgets {
+		f := w.field
+		if w.isTextarea {
+			f.Value = w.textarea.Value()
+		} else {
+			f.Value = w.input.Value()
+		}
+		result = append(result, f)
+	}
+
+	return result
+}
+
+// Стили интерфейса (для заголовков, ошибок, активных/неактивных полей и подсказок).
 var (
 	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
 	errorStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
