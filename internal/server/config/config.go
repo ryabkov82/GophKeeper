@@ -1,3 +1,6 @@
+// Package config предоставляет функционал загрузки и хранения конфигурации сервера GophKeeper.
+// Конфигурация может быть загружена из JSON-файла, переменных окружения или флагов командной строки.
+// Основное назначение — централизованное хранение всех параметров, необходимых для запуска сервера.
 package config
 
 import (
@@ -12,6 +15,17 @@ import (
 )
 
 // Config содержит параметры конфигурации сервера.
+// Все поля имеют JSON-теги для удобства сериализации/десериализации.
+//
+// Поля:
+//
+//	GRPCServerAddr — адрес gRPC-сервера в формате host:port, на котором будет запущено приложение.
+//	DBConnect      — строка подключения (DSN) к базе данных PostgreSQL.
+//	JwtKey         — секретный ключ, используемый для подписи и проверки JWT-токенов.
+//	SSLCertFile    — путь к TLS-сертификату, используемому сервером при включённом TLS.
+//	SSLKeyFile     — путь к приватному ключу TLS, соответствующему сертификату из SSLCertFile.
+//	EnableTLS      — флаг включения TLS (true — использовать HTTPS/gRPC-TLS, false — без шифрования).
+//	LogLevel       — уровень логирования. Возможные значения: debug, info, warn, error.
 type Config struct {
 	GRPCServerAddr string `json:"grpc_server_address"` // host:port
 	DBConnect      string `json:"database_dsn"`        // PostgreSQL DSN

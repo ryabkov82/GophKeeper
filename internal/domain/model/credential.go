@@ -38,18 +38,21 @@ func (c *Credential) FormFields() []forms.FormField {
 		{
 			Label:       "Title",
 			Value:       c.Title,
+			MaxLength:   150,
 			InputType:   "text",
 			Placeholder: "Название (например, Gmail)",
 		},
 		{
 			Label:       "Login",
 			Value:       c.Login,
+			MaxLength:   50,
 			InputType:   "text",
 			Placeholder: "Логин/Email",
 		},
 		{
 			Label:       "Password",
 			Value:       c.Password,
+			MaxLength:   50,
 			InputType:   "password",
 			Placeholder: "Пароль",
 		},

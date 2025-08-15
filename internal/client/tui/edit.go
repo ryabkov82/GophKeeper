@@ -27,61 +27,54 @@ func initEditForm(m Model) Model {
 }
 
 func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
-
-	if len(m.widgets) == 0 {
-		return m, nil
-	}
-
-	w := m.widgets[m.focusedInput]
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		key := msg.String()
+
+		// Обработка глобальных горячих клавиш
 		switch key {
 		case "tab", "shift+tab":
 			m = moveFocus(m, key == "tab")
 			return focusField(m), nil
 
 		case "up", "down":
-			if w.isTextarea {
-				// Если в textarea несколько строк — передаём стрелки внутрь
-				if strings.Contains(w.textarea.Value(), "\n") {
-					var cmd tea.Cmd
-					w.textarea, cmd = w.textarea.Update(msg)
-					m.widgets[m.focusedInput] = w
-					return m, cmd
-				}
+			if len(m.widgets) == 0 {
+				return m, nil
 			}
-			// Иначе — переключение между полями
+			w := m.widgets[m.focusedInput]
+			if w.isTextarea && strings.Contains(w.textarea.Value(), "\n") {
+				var cmd tea.Cmd
+				w.textarea, cmd = w.textarea.Update(msg)
+				m.widgets[m.focusedInput] = w
+				return m, cmd
+			}
 			m = moveFocus(m, key == "down")
 			return focusField(m), nil
 
 		case "esc":
-			// Отмена редактирования/создания, возвращаемся в список
 			m.currentState = "list"
 			m.editEntity = nil
 			m.inputs = nil
 			return m, nil
 
 		case "ctrl+s":
-			// Сохраняем данные из формы
 			return saveEdit(m)
+
 		case "enter":
-			// Если последнее поле — сохраняем, иначе переходим дальше
+			if len(m.widgets) == 0 {
+				return m, nil
+			}
+			w := m.widgets[m.focusedInput]
 			if w.isTextarea {
-				// Передаем Enter внутрь textarea
 				var cmd tea.Cmd
 				w.textarea, cmd = w.textarea.Update(msg)
 				m.widgets[m.focusedInput] = w
 				return m, cmd
 			}
-
-			m.focusedInput++
-			if m.focusedInput >= len(m.widgets) {
-				m.focusedInput = 0
-			}
+			m.focusedInput = (m.focusedInput + 1) % len(m.widgets)
 			return focusField(m), nil
 
-		case "ctrl+v": // переключить видимость пароля
+		case "ctrl+b":
 			for i, w := range m.widgets {
 				if !w.isTextarea && strings.ToLower(w.field.InputType) == "password" {
 					if w.input.EchoMode == textinput.EchoPassword {
@@ -95,19 +88,31 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 			return m, nil
 		}
-	}
 
-	var cmd tea.Cmd
+		if len(m.widgets) == 0 {
+			return m, nil
+		}
 
-	w = m.widgets[m.focusedInput]
-	if w.isTextarea {
-		w.textarea, cmd = w.textarea.Update(msg)
-	} else {
+		w := &m.widgets[m.focusedInput]
+
+		// --- Обработка maskedInput ---
+		if w.maskedInput != nil && w.maskedInput.Mask != "" {
+			HandleMaskedInput(w, key, msg)
+			return m, nil
+		}
+
+		if w.isTextarea {
+			var cmd tea.Cmd
+			w.textarea, cmd = w.textarea.Update(msg)
+			return m, cmd
+		}
+
+		var cmd tea.Cmd
 		w.input, cmd = w.input.Update(msg)
+		return m, cmd
 	}
-	m.widgets[m.focusedInput] = w
 
-	return m, cmd
+	return m, nil
 }
 
 func renderEditForm(m Model) string {
@@ -145,7 +150,7 @@ func renderEditForm(m Model) string {
 	}
 
 	b.WriteString("\n" + hintStyle.Render(
-		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+V — переключить видимость пароля\n",
+		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+B — переключить видимость пароля\n",
 	))
 
 	return b.String()

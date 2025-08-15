@@ -15,6 +15,8 @@ type FormField struct {
 	Value       string
 	InputType   string // "text", "password" и т.д.
 	Placeholder string
+	Mask        string
+	MaxLength   int // для ограничения длины ввода
 }
 
 // FormEntity интерфейс, который должна реализовывать любая сущность,

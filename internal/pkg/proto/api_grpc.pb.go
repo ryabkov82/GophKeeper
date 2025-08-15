@@ -420,3 +420,261 @@ var CredentialService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "api.proto",
 }
+
+const (
+	BankCardService_CreateBankCard_FullMethodName  = "/gophkeeper.proto.BankCardService/CreateBankCard"
+	BankCardService_GetBankCardByID_FullMethodName = "/gophkeeper.proto.BankCardService/GetBankCardByID"
+	BankCardService_GetBankCards_FullMethodName    = "/gophkeeper.proto.BankCardService/GetBankCards"
+	BankCardService_UpdateBankCard_FullMethodName  = "/gophkeeper.proto.BankCardService/UpdateBankCard"
+	BankCardService_DeleteBankCard_FullMethodName  = "/gophkeeper.proto.BankCardService/DeleteBankCard"
+)
+
+// BankCardServiceClient is the client API for BankCardService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Сервис для работы с BankCard
+type BankCardServiceClient interface {
+	CreateBankCard(ctx context.Context, in *CreateBankCardRequest, opts ...grpc.CallOption) (*CreateBankCardResponse, error)
+	GetBankCardByID(ctx context.Context, in *GetBankCardByIDRequest, opts ...grpc.CallOption) (*GetBankCardByIDResponse, error)
+	GetBankCards(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBankCardsResponse, error)
+	UpdateBankCard(ctx context.Context, in *UpdateBankCardRequest, opts ...grpc.CallOption) (*UpdateBankCardResponse, error)
+	DeleteBankCard(ctx context.Context, in *DeleteBankCardRequest, opts ...grpc.CallOption) (*DeleteBankCardResponse, error)
+}
+
+type bankCardServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewBankCardServiceClient(cc grpc.ClientConnInterface) BankCardServiceClient {
+	return &bankCardServiceClient{cc}
+}
+
+func (c *bankCardServiceClient) CreateBankCard(ctx context.Context, in *CreateBankCardRequest, opts ...grpc.CallOption) (*CreateBankCardResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateBankCardResponse)
+	err := c.cc.Invoke(ctx, BankCardService_CreateBankCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankCardServiceClient) GetBankCardByID(ctx context.Context, in *GetBankCardByIDRequest, opts ...grpc.CallOption) (*GetBankCardByIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBankCardByIDResponse)
+	err := c.cc.Invoke(ctx, BankCardService_GetBankCardByID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankCardServiceClient) GetBankCards(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBankCardsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBankCardsResponse)
+	err := c.cc.Invoke(ctx, BankCardService_GetBankCards_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankCardServiceClient) UpdateBankCard(ctx context.Context, in *UpdateBankCardRequest, opts ...grpc.CallOption) (*UpdateBankCardResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateBankCardResponse)
+	err := c.cc.Invoke(ctx, BankCardService_UpdateBankCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankCardServiceClient) DeleteBankCard(ctx context.Context, in *DeleteBankCardRequest, opts ...grpc.CallOption) (*DeleteBankCardResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBankCardResponse)
+	err := c.cc.Invoke(ctx, BankCardService_DeleteBankCard_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// BankCardServiceServer is the server API for BankCardService service.
+// All implementations must embed UnimplementedBankCardServiceServer
+// for forward compatibility.
+//
+// Сервис для работы с BankCard
+type BankCardServiceServer interface {
+	CreateBankCard(context.Context, *CreateBankCardRequest) (*CreateBankCardResponse, error)
+	GetBankCardByID(context.Context, *GetBankCardByIDRequest) (*GetBankCardByIDResponse, error)
+	GetBankCards(context.Context, *emptypb.Empty) (*GetBankCardsResponse, error)
+	UpdateBankCard(context.Context, *UpdateBankCardRequest) (*UpdateBankCardResponse, error)
+	DeleteBankCard(context.Context, *DeleteBankCardRequest) (*DeleteBankCardResponse, error)
+	mustEmbedUnimplementedBankCardServiceServer()
+}
+
+// UnimplementedBankCardServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedBankCardServiceServer struct{}
+
+func (UnimplementedBankCardServiceServer) CreateBankCard(context.Context, *CreateBankCardRequest) (*CreateBankCardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBankCard not implemented")
+}
+func (UnimplementedBankCardServiceServer) GetBankCardByID(context.Context, *GetBankCardByIDRequest) (*GetBankCardByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBankCardByID not implemented")
+}
+func (UnimplementedBankCardServiceServer) GetBankCards(context.Context, *emptypb.Empty) (*GetBankCardsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBankCards not implemented")
+}
+func (UnimplementedBankCardServiceServer) UpdateBankCard(context.Context, *UpdateBankCardRequest) (*UpdateBankCardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBankCard not implemented")
+}
+func (UnimplementedBankCardServiceServer) DeleteBankCard(context.Context, *DeleteBankCardRequest) (*DeleteBankCardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBankCard not implemented")
+}
+func (UnimplementedBankCardServiceServer) mustEmbedUnimplementedBankCardServiceServer() {}
+func (UnimplementedBankCardServiceServer) testEmbeddedByValue()                         {}
+
+// UnsafeBankCardServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to BankCardServiceServer will
+// result in compilation errors.
+type UnsafeBankCardServiceServer interface {
+	mustEmbedUnimplementedBankCardServiceServer()
+}
+
+func RegisterBankCardServiceServer(s grpc.ServiceRegistrar, srv BankCardServiceServer) {
+	// If the following call pancis, it indicates UnimplementedBankCardServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&BankCardService_ServiceDesc, srv)
+}
+
+func _BankCardService_CreateBankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBankCardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankCardServiceServer).CreateBankCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankCardService_CreateBankCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankCardServiceServer).CreateBankCard(ctx, req.(*CreateBankCardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankCardService_GetBankCardByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBankCardByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankCardServiceServer).GetBankCardByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankCardService_GetBankCardByID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankCardServiceServer).GetBankCardByID(ctx, req.(*GetBankCardByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankCardService_GetBankCards_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankCardServiceServer).GetBankCards(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankCardService_GetBankCards_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankCardServiceServer).GetBankCards(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankCardService_UpdateBankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateBankCardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankCardServiceServer).UpdateBankCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankCardService_UpdateBankCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankCardServiceServer).UpdateBankCard(ctx, req.(*UpdateBankCardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankCardService_DeleteBankCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBankCardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankCardServiceServer).DeleteBankCard(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankCardService_DeleteBankCard_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankCardServiceServer).DeleteBankCard(ctx, req.(*DeleteBankCardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// BankCardService_ServiceDesc is the grpc.ServiceDesc for BankCardService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var BankCardService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "gophkeeper.proto.BankCardService",
+	HandlerType: (*BankCardServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateBankCard",
+			Handler:    _BankCardService_CreateBankCard_Handler,
+		},
+		{
+			MethodName: "GetBankCardByID",
+			Handler:    _BankCardService_GetBankCardByID_Handler,
+		},
+		{
+			MethodName: "GetBankCards",
+			Handler:    _BankCardService_GetBankCards_Handler,
+		},
+		{
+			MethodName: "UpdateBankCard",
+			Handler:    _BankCardService_UpdateBankCard_Handler,
+		},
+		{
+			MethodName: "DeleteBankCard",
+			Handler:    _BankCardService_DeleteBankCard_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api.proto",
+}

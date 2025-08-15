@@ -3,10 +3,8 @@ package tui
 import (
 	"context"
 
-	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 	"github.com/ryabkov82/gophkeeper/internal/client/tui/adapters"
 	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
@@ -16,32 +14,8 @@ import (
 type ModelServices struct {
 	Auth       contracts.AuthService       // Сервис аутентификации
 	Credential contracts.CredentialService // Сервис управления учетными данными
+	Bankcard   contracts.BankCardService   // Сервис управления банковскими картами
 	// Добавляй сюда другие интерфейсы по необходимости
-}
-
-// formWidget представляет отдельное поле формы, может быть обычным input или textarea.
-type formWidget struct {
-	isTextarea bool
-	input      textinput.Model
-	textarea   textarea.Model
-	field      forms.FormField
-}
-
-// setFocus устанавливает фокус на виджет или снимает его.
-func (w *formWidget) setFocus(focused bool) {
-	if w.isTextarea {
-		if focused {
-			w.textarea.Focus()
-		} else {
-			w.textarea.Blur()
-		}
-	} else {
-		if focused {
-			w.input.Focus()
-		} else {
-			w.input.Blur()
-		}
-	}
 }
 
 // Model - основная модель приложения, реализующая tea.Model
@@ -109,6 +83,7 @@ func NewModel(ctx context.Context, svcs ModelServices) *Model {
 		authService:  svcs.Auth,
 		services: map[contracts.DataType]contracts.DataService{
 			contracts.TypeCredentials: adapters.NewCredentialAdapter(svcs.Credential),
+			contracts.TypeCards:       adapters.NewBankCardAdapter(svcs.Bankcard),
 		},
 	}
 }
@@ -203,15 +178,3 @@ func (m Model) ExtractFields() []forms.FormField {
 
 	return result
 }
-
-// Стили интерфейса (для заголовков, ошибок, активных/неактивных полей и подсказок).
-var (
-	titleStyle         = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("63"))
-	errorStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	selectedStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	normalStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	hintStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
-	activeFieldStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	inactiveFieldStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-)

@@ -45,6 +45,18 @@ func getFreePort(t *testing.T) string {
 	return l.Addr().String()
 }
 
+type mockServiceFactory struct{}
+
+func (m *mockServiceFactory) Auth() service.AuthService {
+	return &mockAuthService{}
+}
+func (m *mockServiceFactory) Credential() service.CredentialService {
+	return nil
+}
+func (m *mockServiceFactory) BankCard() service.BankCardService {
+	return nil
+}
+
 func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {
 	addr := getFreePort(t)
 
@@ -59,11 +71,9 @@ func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {
 	}
 
 	logger := zap.NewNop()
-	services := &service.Services{
-		Auth: &mockAuthService{},
-	}
+	serviceFactory := &mockServiceFactory{}
 
-	srv, err := grpc.NewGRPCServer(cfg, logger, services)
+	srv, err := grpc.NewGRPCServer(cfg, logger, serviceFactory)
 	require.NoError(t, err)
 
 	sigChan := make(chan os.Signal, 1)
@@ -83,11 +93,9 @@ func TestNewGRPCServer_NoTLS(t *testing.T) {
 	}
 
 	logger := zap.NewNop()
-	services := &service.Services{
-		Auth: &mockAuthService{},
-	}
+	serviceFactory := &mockServiceFactory{}
 
-	srv, err := grpc.NewGRPCServer(cfg, logger, services)
+	srv, err := grpc.NewGRPCServer(cfg, logger, serviceFactory)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 }
@@ -100,10 +108,8 @@ func TestNewGRPCServer_WithInvalidTLSFiles(t *testing.T) {
 	}
 
 	logger := zap.NewNop()
-	services := &service.Services{
-		Auth: &mockAuthService{},
-	}
+	serviceFactory := &mockServiceFactory{}
 
-	_, err := grpc.NewGRPCServer(cfg, logger, services)
+	_, err := grpc.NewGRPCServer(cfg, logger, serviceFactory)
 	require.Error(t, err)
 }

@@ -36,12 +36,16 @@ func StartServer(log *zap.Logger, cfg *config.Config) {
 	}
 
 	// 2. Слои: repository -> services
-	repos := storage.NewRepositories(db)
+	storageFactory, err := storage.NewStorageFactory("postgres", db)
+	if err != nil {
+		log.Fatal("Failed to initialize storage", zap.Error(err))
+	}
+
 	jwtManager := jwtutils.New(cfg.JwtKey, 24*time.Hour)
-	services := service.NewServices(repos, jwtManager)
+	serviceFactory := service.NewServiceFactory(storageFactory, jwtManager)
 
 	// 3. Запуск gRPC сервера с набором сервисов
-	if err := grpc.StartGRPCServer(log, cfg, services); err != nil {
+	if err := grpc.StartGRPCServer(log, cfg, serviceFactory); err != nil {
 		log.Fatal("gRPC server failed", zap.Error(err))
 	}
 }

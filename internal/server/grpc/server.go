@@ -21,7 +21,7 @@ import (
 )
 
 // NewGRPCServer создаёт и настраивает gRPC-сервер с зарегистрированными хендлерами
-func NewGRPCServer(cfg *config.Config, logger *zap.Logger, services *service.Services) (*grpc.Server, error) {
+func NewGRPCServer(cfg *config.Config, logger *zap.Logger, serviceFactory service.ServiceFactory) (*grpc.Server, error) {
 	var opts []grpc.ServerOption
 
 	jwtManager := jwtutils.New(cfg.JwtKey, 24*60*60)
@@ -48,12 +48,16 @@ func NewGRPCServer(cfg *config.Config, logger *zap.Logger, services *service.Ser
 	s := grpc.NewServer(opts...)
 
 	// Регистрируем Auth хендлер
-	authHandler := handlers.NewAuthHandler(services.Auth, logger)
+	authHandler := handlers.NewAuthHandler(serviceFactory.Auth(), logger)
 	api.RegisterAuthServiceServer(s, authHandler)
 
 	// Регистрируем Credential хендлер
-	credHandler := handlers.NewCredentialHandler(services.Credential, logger)
+	credHandler := handlers.NewCredentialHandler(serviceFactory.Credential(), logger)
 	api.RegisterCredentialServiceServer(s, credHandler)
+
+	// Регистрируем Credential хендлер
+	bankcardHandler := handlers.NewBankCardHandler(serviceFactory.BankCard(), logger)
+	api.RegisterBankCardServiceServer(s, bankcardHandler)
 
 	return s, nil
 }
@@ -107,14 +111,14 @@ func ServeGRPC(s *grpc.Server, lis net.Listener, signals <-chan os.Signal, logge
 //   - services: контейнер зарегистрированных бизнес-сервисов.
 //
 // Возвращает ошибку при невозможности запуска или в процессе graceful shutdown.
-func StartGRPCServer(log *zap.Logger, cfg *config.Config, services *service.Services) error {
+func StartGRPCServer(log *zap.Logger, cfg *config.Config, serviceFactory service.ServiceFactory) error {
 	lis, err := net.Listen("tcp", cfg.GRPCServerAddr)
 	if err != nil {
 		log.Error("failed to listen", zap.Error(err))
 		return err
 	}
 
-	srv, err := NewGRPCServer(cfg, log, services)
+	srv, err := NewGRPCServer(cfg, log, serviceFactory)
 	if err != nil {
 		log.Error("failed to create gRPC server", zap.Error(err))
 		return err
