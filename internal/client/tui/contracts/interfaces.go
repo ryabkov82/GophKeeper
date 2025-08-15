@@ -26,3 +26,25 @@ type CredentialService interface {
 	UpdateCredential(ctx context.Context, cred *model.Credential) error
 	DeleteCredential(ctx context.Context, id string) error
 }
+
+// BankCardService описывает интерфейс управления данными банковских карт.
+type BankCardService interface {
+	// CreateBankCard создает новую запись банковской карты.
+	// Перед сохранением все чувствительные данные должны быть зашифрованы.
+	CreateBankCard(ctx context.Context, card *model.BankCard) error
+
+	// GetBankCardByID возвращает банковскую карту по её идентификатору.
+	// При необходимости выполняет дешифровку данных карты.
+	GetBankCardByID(ctx context.Context, id string) (*model.BankCard, error)
+
+	// GetBankCards возвращает все банковские карты пользователя.
+	// При необходимости выполняет дешифровку данных карт.
+	GetBankCards(ctx context.Context) ([]model.BankCard, error)
+
+	// UpdateBankCard обновляет существующую запись банковской карты.
+	// Перед сохранением все чувствительные данные должны быть зашифрованы.
+	UpdateBankCard(ctx context.Context, card *model.BankCard) error
+
+	// DeleteBankCard удаляет запись банковской карты по идентификатору.
+	DeleteBankCard(ctx context.Context, id string) error
+}

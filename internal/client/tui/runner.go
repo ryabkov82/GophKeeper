@@ -53,6 +53,7 @@ func Run(
 	model := NewModel(ctx, ModelServices{
 		Auth:       services,
 		Credential: services,
+		Bankcard:   services,
 	})
 	p := newProgram(model)
 

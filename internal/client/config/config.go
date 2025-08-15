@@ -1,3 +1,26 @@
+// Package config предоставляет функционал загрузки и валидации конфигурации клиента.
+//
+// Конфигурация может быть определена в нескольких источниках:
+//  1. Значения по умолчанию (DefaultConfig)
+//  2. JSON-конфигурационный файл
+//  3. Флаги командной строки
+//  4. Переменные окружения
+//
+// При загрузке (Load) применяется следующий приоритет (от меньшего к большему):
+//   - Сначала берутся значения по умолчанию.
+//   - Затем данные из JSON-файла (если указан явно или через переменные окружения).
+//   - После этого применяются флаги командной строки.
+//   - И в последнюю очередь — переменные окружения.
+//
+// Пакет включает в себя:
+//   - Структуру ClientConfig — описание всех параметров клиента
+//   - Логику слияния конфигураций из разных источников (mergeConfigs)
+//   - Проверку корректности адреса сервера и других параметров (validateServerAddress)
+//   - Обработку флагов и переменных окружения
+//   - Поддержку пользовательских путей к ключам, токенам и логам через пакет internal/client/paths
+//
+// Данный подход упрощает конфигурирование клиента в разных средах (локально, тестово, в продакшене)
+// и обеспечивает строгую валидацию важных параметров (адрес, порт, таймаут, сертификаты).
 package config
 
 import (
@@ -16,17 +39,38 @@ import (
 
 // ClientConfig содержит параметры конфигурации клиента
 type ClientConfig struct {
-	ServerAddress string        `json:"server_address" env:"SERVER_ADDRESS"`
-	UseTLS        bool          `json:"use_tls" env:"USE_TLS"`
-	TLSSkipVerify bool          `json:"tls_skip_verify" env:"TLS_SKIP_VERIFY"`
-	CACertPath    string        `json:"ca_cert_path" env:"CA_CERT_PATH"`
-	Timeout       time.Duration `json:"timeout" env:"TIMEOUT"`
-	ConfigPath    string        `json:"-" env:"CONFIG"` // Путь к конфиг-файлу
-	LogLevel      string        `json:"log_level" env:"LOG_LEVEL"`
+	// ServerAddress — адрес сервера (например, "localhost:8080" или "example.com:443").
+	ServerAddress string `json:"server_address" env:"SERVER_ADDRESS"`
 
-	KeyFilePath   string `json:"key_file_path" env:"KEY_FILE_PATH"`     // путь к ключу шифрования
-	TokenFilePath string `json:"token_file_path" env:"TOKEN_FILE_PATH"` // путь к файлу с токеном
-	LogDirPath    string `json:"log_dir_path" env:"LOG_DIR_PATH"`       // путь к директории с логами
+	// UseTLS — флаг, указывающий на использование TLS при подключении.
+	UseTLS bool `json:"use_tls" env:"USE_TLS"`
+
+	// TLSSkipVerify — флаг, при true отключает проверку сертификата сервера.
+	// Использовать только в тестовой среде, так как это снижает безопасность.
+	TLSSkipVerify bool `json:"tls_skip_verify" env:"TLS_SKIP_VERIFY"`
+
+	// CACertPath — путь к файлу сертификата доверенного центра сертификации (CA),
+	// который используется для проверки TLS-сертификата сервера.
+	CACertPath string `json:"ca_cert_path" env:"CA_CERT_PATH"`
+
+	// Timeout — таймаут подключения
+	Timeout time.Duration `json:"timeout" env:"TIMEOUT"`
+
+	// ConfigPath — путь к конфигурационному файлу клиента.
+	// может задаваться через переменные окружения.
+	ConfigPath string `json:"-" env:"CONFIG"` // Путь к конфиг-файлу
+
+	// LogLevel — уровень логирования ("debug", "info", "warn", "error").
+	LogLevel string `json:"log_level" env:"LOG_LEVEL"`
+
+	// KeyFilePath — путь к файлу с ключом шифрования данных клиента.
+	KeyFilePath string `json:"key_file_path" env:"KEY_FILE_PATH"`
+
+	// TokenFilePath — путь к файлу, в котором хранится токен аутентификации.
+	TokenFilePath string `json:"token_file_path" env:"TOKEN_FILE_PATH"`
+
+	// LogDirPath — путь к директории для хранения логов клиента.
+	LogDirPath string `json:"log_dir_path" env:"LOG_DIR_PATH"`
 }
 
 const (

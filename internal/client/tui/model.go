@@ -16,15 +16,172 @@ import (
 type ModelServices struct {
 	Auth       contracts.AuthService       // Сервис аутентификации
 	Credential contracts.CredentialService // Сервис управления учетными данными
+	Bankcard   contracts.BankCardService   // Сервис управления банковскими картами
 	// Добавляй сюда другие интерфейсы по необходимости
 }
 
 // formWidget представляет отдельное поле формы, может быть обычным input или textarea.
 type formWidget struct {
-	isTextarea bool
-	input      textinput.Model
-	textarea   textarea.Model
-	field      forms.FormField
+	isTextarea  bool
+	input       textinput.Model
+	textarea    textarea.Model
+	field       forms.FormField
+	maskedInput MaskedInput // ← новое поле для работы с маской
+}
+
+type MaskedInput struct {
+	Mask      string
+	Raw       []rune
+	CursorPos int
+}
+
+func NewMaskedInput(mask string, value string) MaskedInput {
+	raw := make([]rune, len(mask))
+	for i := range raw {
+		raw[i] = ' ' // пустой placeholder
+	}
+
+	valRunes := []rune(value)
+	valPos := 0
+
+	for i, r := range mask {
+		if isPlaceholder(r) {
+			// вставляем символ из value, если он есть
+			if valPos < len(valRunes) {
+				// если текущий символ value подходит для этого placeholder
+				if isRuneAllowedForMaskChar(r, valRunes[valPos]) {
+					raw[i] = valRunes[valPos]
+					valPos++
+				} else {
+					// если символ не подходит, пропускаем его
+					valPos++
+					i-- // остаёмся на этом placeholder
+				}
+			} else {
+				raw[i] = ' ' // пустой
+			}
+		} else {
+			// фиксированный символ маски
+			raw[i] = r
+			// если value совпадает с фиксированным символом, пропускаем его
+			if valPos < len(valRunes) && valRunes[valPos] == r {
+				valPos++
+			}
+		}
+	}
+
+	return MaskedInput{
+		Mask:      mask,
+		Raw:       raw,
+		CursorPos: 0,
+	}
+}
+
+func isPlaceholder(r rune) bool {
+	return r == '#'
+}
+
+// Проверка вводимого символа по маске
+func isRuneAllowedForMaskChar(maskChar, input rune) bool {
+	switch maskChar {
+	case '#':
+		return input >= '0' && input <= '9'
+	default:
+		return false
+	}
+}
+
+func (m *MaskedInput) InsertRune(r rune) {
+	for i := m.CursorPos; i < len(m.Mask); i++ {
+		if isPlaceholder(rune(m.Mask[i])) {
+			if isRuneAllowedForMaskChar(rune(m.Mask[i]), r) {
+				m.Raw[i] = r
+				m.CursorPos = i + 1
+			}
+			break
+		}
+	}
+}
+
+func (m *MaskedInput) InsertString(s string) {
+	for _, r := range s {
+		m.InsertRune(r)
+	}
+}
+
+func (m *MaskedInput) Backspace() {
+	for i := m.CursorPos - 1; i >= 0; i-- {
+		if isPlaceholder(rune(m.Mask[i])) && m.Raw[i] != ' ' {
+			m.Raw[i] = ' '
+			m.CursorPos = i
+			break
+		}
+	}
+}
+
+func (m *MaskedInput) Delete() {
+	for i := m.CursorPos; i < len(m.Mask) && i < len(m.Raw); i++ {
+		if isPlaceholder(rune(m.Mask[i])) {
+			// Если символ под курсором не пустой — очищаем
+			if m.Raw[i] != ' ' {
+				m.Raw[i] = ' '
+			}
+			break
+		}
+	}
+}
+
+func (m *MaskedInput) Home() {
+	for i, r := range m.Mask {
+		if isPlaceholder(r) {
+			m.CursorPos = i
+			break
+		}
+	}
+}
+
+func (m *MaskedInput) End() {
+	last := 0
+	for i, r := range m.Mask {
+		if isPlaceholder(r) && m.Raw[i] != ' ' {
+			last = i
+		}
+	}
+	m.CursorPos = last
+}
+
+func (m *MaskedInput) Display() string {
+	out := make([]rune, len(m.Mask))
+	for i, r := range m.Mask {
+		if isPlaceholder(r) {
+			if m.Raw[i] == ' ' {
+				out[i] = '_' // отображаем пустой символ как подчеркивание
+			} else {
+				out[i] = m.Raw[i]
+			}
+		} else {
+			out[i] = r
+		}
+	}
+	return string(out)
+}
+
+func (m *MaskedInput) MoveLeft() {
+	for i := m.CursorPos - 1; i >= 0; i-- {
+		if isPlaceholder(rune(m.Mask[i])) {
+			m.CursorPos = i
+			break
+		}
+	}
+}
+
+func (m *MaskedInput) MoveRight() {
+	for i := m.CursorPos + 1; i < len(m.Mask); i++ {
+		if isPlaceholder(rune(m.Mask[i])) {
+			m.CursorPos = i
+			break
+		}
+	}
 }
 
 // setFocus устанавливает фокус на виджет или снимает его.
@@ -109,6 +266,7 @@ func NewModel(ctx context.Context, svcs ModelServices) *Model {
 		authService:  svcs.Auth,
 		services: map[contracts.DataType]contracts.DataService{
 			contracts.TypeCredentials: adapters.NewCredentialAdapter(svcs.Credential),
+			contracts.TypeCards:       adapters.NewBankCardAdapter(svcs.Bankcard),
 		},
 	}
 }

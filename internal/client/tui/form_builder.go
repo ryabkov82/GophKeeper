@@ -10,11 +10,11 @@ import (
 
 // initFormInputsFromFields создает слайс formWidget на основе полей FormEntity.
 func initFormInputsFromFields(fields []forms.FormField) []formWidget {
-
 	widgets := make([]formWidget, len(fields))
 
 	for i, field := range fields {
 		w := formWidget{field: field}
+
 		switch strings.ToLower(field.InputType) {
 		case "multiline":
 			ta := textarea.New()
@@ -22,7 +22,7 @@ func initFormInputsFromFields(fields []forms.FormField) []formWidget {
 			ta.Cursor.Style = cursorStyle
 			ta.SetValue(field.Value)
 			ta.ShowLineNumbers = false
-			ta.CharLimit = 0 // без лимита
+			ta.CharLimit = 0
 			ta.Prompt = " "
 
 			w.isTextarea = true
@@ -33,7 +33,6 @@ func initFormInputsFromFields(fields []forms.FormField) []formWidget {
 			ti.Placeholder = ""
 			ti.Prompt = " "
 			ti.Cursor.Style = cursorStyle
-			ti.SetValue(field.Value)
 			ti.CharLimit = 256
 			ti.EchoMode = textinput.EchoNormal
 			if strings.ToLower(field.InputType) == "password" {
@@ -43,10 +42,20 @@ func initFormInputsFromFields(fields []forms.FormField) []formWidget {
 
 			w.isTextarea = false
 			w.input = ti
+
+			// --- Работа с маской ---
+			if field.Mask != "" {
+				w.maskedInput = NewMaskedInput(field.Mask, field.Value)
+				// сразу отображаем маску с подчеркиваниями
+				w.input.SetValue(w.maskedInput.Display())
+				w.input.SetCursor(w.maskedInput.CursorPos)
+			} else {
+				// обычное значение без маски
+				w.input.SetValue(field.Value)
+			}
 		}
 
 		w.setFocus(i == 0)
-
 		widgets[i] = w
 	}
 

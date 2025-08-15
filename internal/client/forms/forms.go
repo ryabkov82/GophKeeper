@@ -15,6 +15,7 @@ type FormField struct {
 	Value       string
 	InputType   string // "text", "password" и т.д.
 	Placeholder string
+	Mask        string
 }
 
 // FormEntity интерфейс, который должна реализовывать любая сущность,

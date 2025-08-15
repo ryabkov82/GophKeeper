@@ -444,3 +444,271 @@ func (mr *MockUnsafeCredentialServiceServerMockRecorder) mustEmbedUnimplementedC
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedCredentialServiceServer", reflect.TypeOf((*MockUnsafeCredentialServiceServer)(nil).mustEmbedUnimplementedCredentialServiceServer))
 }
+
+// MockBankCardServiceClient is a mock of BankCardServiceClient interface.
+type MockBankCardServiceClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockBankCardServiceClientMockRecorder
+}
+
+// MockBankCardServiceClientMockRecorder is the mock recorder for MockBankCardServiceClient.
+type MockBankCardServiceClientMockRecorder struct {
+	mock *MockBankCardServiceClient
+}
+
+// NewMockBankCardServiceClient creates a new mock instance.
+func NewMockBankCardServiceClient(ctrl *gomock.Controller) *MockBankCardServiceClient {
+	mock := &MockBankCardServiceClient{ctrl: ctrl}
+	mock.recorder = &MockBankCardServiceClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBankCardServiceClient) EXPECT() *MockBankCardServiceClientMockRecorder {
+	return m.recorder
+}
+
+// CreateBankCard mocks base method.
+func (m *MockBankCardServiceClient) CreateBankCard(ctx context.Context, in *proto.CreateBankCardRequest, opts ...grpc.CallOption) (*proto.CreateBankCardResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateBankCard", varargs...)
+	ret0, _ := ret[0].(*proto.CreateBankCardResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBankCard indicates an expected call of CreateBankCard.
+func (mr *MockBankCardServiceClientMockRecorder) CreateBankCard(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBankCard", reflect.TypeOf((*MockBankCardServiceClient)(nil).CreateBankCard), varargs...)
+}
+
+// DeleteBankCard mocks base method.
+func (m *MockBankCardServiceClient) DeleteBankCard(ctx context.Context, in *proto.DeleteBankCardRequest, opts ...grpc.CallOption) (*proto.DeleteBankCardResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteBankCard", varargs...)
+	ret0, _ := ret[0].(*proto.DeleteBankCardResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteBankCard indicates an expected call of DeleteBankCard.
+func (mr *MockBankCardServiceClientMockRecorder) DeleteBankCard(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBankCard", reflect.TypeOf((*MockBankCardServiceClient)(nil).DeleteBankCard), varargs...)
+}
+
+// GetBankCardByID mocks base method.
+func (m *MockBankCardServiceClient) GetBankCardByID(ctx context.Context, in *proto.GetBankCardByIDRequest, opts ...grpc.CallOption) (*proto.GetBankCardByIDResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetBankCardByID", varargs...)
+	ret0, _ := ret[0].(*proto.GetBankCardByIDResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBankCardByID indicates an expected call of GetBankCardByID.
+func (mr *MockBankCardServiceClientMockRecorder) GetBankCardByID(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBankCardByID", reflect.TypeOf((*MockBankCardServiceClient)(nil).GetBankCardByID), varargs...)
+}
+
+// GetBankCards mocks base method.
+func (m *MockBankCardServiceClient) GetBankCards(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*proto.GetBankCardsResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetBankCards", varargs...)
+	ret0, _ := ret[0].(*proto.GetBankCardsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBankCards indicates an expected call of GetBankCards.
+func (mr *MockBankCardServiceClientMockRecorder) GetBankCards(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBankCards", reflect.TypeOf((*MockBankCardServiceClient)(nil).GetBankCards), varargs...)
+}
+
+// UpdateBankCard mocks base method.
+func (m *MockBankCardServiceClient) UpdateBankCard(ctx context.Context, in *proto.UpdateBankCardRequest, opts ...grpc.CallOption) (*proto.UpdateBankCardResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateBankCard", varargs...)
+	ret0, _ := ret[0].(*proto.UpdateBankCardResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateBankCard indicates an expected call of UpdateBankCard.
+func (mr *MockBankCardServiceClientMockRecorder) UpdateBankCard(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBankCard", reflect.TypeOf((*MockBankCardServiceClient)(nil).UpdateBankCard), varargs...)
+}
+
+// MockBankCardServiceServer is a mock of BankCardServiceServer interface.
+type MockBankCardServiceServer struct {
+	ctrl     *gomock.Controller
+	recorder *MockBankCardServiceServerMockRecorder
+}
+
+// MockBankCardServiceServerMockRecorder is the mock recorder for MockBankCardServiceServer.
+type MockBankCardServiceServerMockRecorder struct {
+	mock *MockBankCardServiceServer
+}
+
+// NewMockBankCardServiceServer creates a new mock instance.
+func NewMockBankCardServiceServer(ctrl *gomock.Controller) *MockBankCardServiceServer {
+	mock := &MockBankCardServiceServer{ctrl: ctrl}
+	mock.recorder = &MockBankCardServiceServerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBankCardServiceServer) EXPECT() *MockBankCardServiceServerMockRecorder {
+	return m.recorder
+}
+
+// CreateBankCard mocks base method.
+func (m *MockBankCardServiceServer) CreateBankCard(arg0 context.Context, arg1 *proto.CreateBankCardRequest) (*proto.CreateBankCardResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBankCard", arg0, arg1)
+	ret0, _ := ret[0].(*proto.CreateBankCardResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBankCard indicates an expected call of CreateBankCard.
+func (mr *MockBankCardServiceServerMockRecorder) CreateBankCard(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBankCard", reflect.TypeOf((*MockBankCardServiceServer)(nil).CreateBankCard), arg0, arg1)
+}
+
+// DeleteBankCard mocks base method.
+func (m *MockBankCardServiceServer) DeleteBankCard(arg0 context.Context, arg1 *proto.DeleteBankCardRequest) (*proto.DeleteBankCardResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBankCard", arg0, arg1)
+	ret0, _ := ret[0].(*proto.DeleteBankCardResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteBankCard indicates an expected call of DeleteBankCard.
+func (mr *MockBankCardServiceServerMockRecorder) DeleteBankCard(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBankCard", reflect.TypeOf((*MockBankCardServiceServer)(nil).DeleteBankCard), arg0, arg1)
+}
+
+// GetBankCardByID mocks base method.
+func (m *MockBankCardServiceServer) GetBankCardByID(arg0 context.Context, arg1 *proto.GetBankCardByIDRequest) (*proto.GetBankCardByIDResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBankCardByID", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GetBankCardByIDResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBankCardByID indicates an expected call of GetBankCardByID.
+func (mr *MockBankCardServiceServerMockRecorder) GetBankCardByID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBankCardByID", reflect.TypeOf((*MockBankCardServiceServer)(nil).GetBankCardByID), arg0, arg1)
+}
+
+// GetBankCards mocks base method.
+func (m *MockBankCardServiceServer) GetBankCards(arg0 context.Context, arg1 *emptypb.Empty) (*proto.GetBankCardsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBankCards", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GetBankCardsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBankCards indicates an expected call of GetBankCards.
+func (mr *MockBankCardServiceServerMockRecorder) GetBankCards(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBankCards", reflect.TypeOf((*MockBankCardServiceServer)(nil).GetBankCards), arg0, arg1)
+}
+
+// UpdateBankCard mocks base method.
+func (m *MockBankCardServiceServer) UpdateBankCard(arg0 context.Context, arg1 *proto.UpdateBankCardRequest) (*proto.UpdateBankCardResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateBankCard", arg0, arg1)
+	ret0, _ := ret[0].(*proto.UpdateBankCardResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateBankCard indicates an expected call of UpdateBankCard.
+func (mr *MockBankCardServiceServerMockRecorder) UpdateBankCard(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBankCard", reflect.TypeOf((*MockBankCardServiceServer)(nil).UpdateBankCard), arg0, arg1)
+}
+
+// mustEmbedUnimplementedBankCardServiceServer mocks base method.
+func (m *MockBankCardServiceServer) mustEmbedUnimplementedBankCardServiceServer() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "mustEmbedUnimplementedBankCardServiceServer")
+}
+
+// mustEmbedUnimplementedBankCardServiceServer indicates an expected call of mustEmbedUnimplementedBankCardServiceServer.
+func (mr *MockBankCardServiceServerMockRecorder) mustEmbedUnimplementedBankCardServiceServer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedBankCardServiceServer", reflect.TypeOf((*MockBankCardServiceServer)(nil).mustEmbedUnimplementedBankCardServiceServer))
+}
+
+// MockUnsafeBankCardServiceServer is a mock of UnsafeBankCardServiceServer interface.
+type MockUnsafeBankCardServiceServer struct {
+	ctrl     *gomock.Controller
+	recorder *MockUnsafeBankCardServiceServerMockRecorder
+}
+
+// MockUnsafeBankCardServiceServerMockRecorder is the mock recorder for MockUnsafeBankCardServiceServer.
+type MockUnsafeBankCardServiceServerMockRecorder struct {
+	mock *MockUnsafeBankCardServiceServer
+}
+
+// NewMockUnsafeBankCardServiceServer creates a new mock instance.
+func NewMockUnsafeBankCardServiceServer(ctrl *gomock.Controller) *MockUnsafeBankCardServiceServer {
+	mock := &MockUnsafeBankCardServiceServer{ctrl: ctrl}
+	mock.recorder = &MockUnsafeBankCardServiceServerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUnsafeBankCardServiceServer) EXPECT() *MockUnsafeBankCardServiceServerMockRecorder {
+	return m.recorder
+}
+
+// mustEmbedUnimplementedBankCardServiceServer mocks base method.
+func (m *MockUnsafeBankCardServiceServer) mustEmbedUnimplementedBankCardServiceServer() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "mustEmbedUnimplementedBankCardServiceServer")
+}
+
+// mustEmbedUnimplementedBankCardServiceServer indicates an expected call of mustEmbedUnimplementedBankCardServiceServer.
+func (mr *MockUnsafeBankCardServiceServerMockRecorder) mustEmbedUnimplementedBankCardServiceServer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedBankCardServiceServer", reflect.TypeOf((*MockUnsafeBankCardServiceServer)(nil).mustEmbedUnimplementedBankCardServiceServer))
+}

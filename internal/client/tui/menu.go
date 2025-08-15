@@ -29,8 +29,9 @@ func updateMenu(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			case "Register":
 				m = initRegisterForm(m)
 			case "Credentials":
-				m = initListForm(m, contracts.TypeCredentials)
-				return m, m.loadList()
+				return handleListSelection(m, contracts.TypeCredentials)
+			case "Cards":
+				return handleListSelection(m, contracts.TypeCards)
 			case "Exit":
 				return m, tea.Quit
 			}
@@ -82,4 +83,9 @@ func renderMenu(m Model) string {
 	b.WriteString(hint)
 
 	return b.String()
+}
+
+func handleListSelection(m Model, itemType contracts.DataType) (Model, tea.Cmd) {
+	newModel := initListForm(m, itemType)
+	return newModel, newModel.loadList()
 }

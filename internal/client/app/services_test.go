@@ -151,6 +151,45 @@ func (m *mockCredentialManager) SetClient(client proto.CredentialServiceClient) 
 	m.setClientCalled = true
 }
 
+// mockBankCardManager - мок BankcardManagerIface
+type mockBankCardManager struct {
+	setClientCalled bool
+	client          proto.BankCardServiceClient
+
+	createErr     error
+	getByIDResult *model.BankCard
+	getByIDErr    error
+	getAllResult  []model.BankCard
+	getAllErr     error
+	updateErr     error
+	deleteErr     error
+}
+
+func (m *mockBankCardManager) SetClient(client proto.BankCardServiceClient) {
+	m.setClientCalled = true
+	m.client = client
+}
+
+func (m *mockBankCardManager) CreateBankCard(ctx context.Context, card *model.BankCard) error {
+	return m.createErr
+}
+
+func (m *mockBankCardManager) GetBankCardByID(ctx context.Context, id string) (*model.BankCard, error) {
+	return m.getByIDResult, m.getByIDErr
+}
+
+func (m *mockBankCardManager) GetBankCards(ctx context.Context) ([]model.BankCard, error) {
+	return m.getAllResult, m.getAllErr
+}
+
+func (m *mockBankCardManager) UpdateBankCard(ctx context.Context, card *model.BankCard) error {
+	return m.updateErr
+}
+
+func (m *mockBankCardManager) DeleteBankCard(ctx context.Context, id string) error {
+	return m.deleteErr
+}
+
 func TestNewAppServices_Success(t *testing.T) {
 	tempLogDir := t.TempDir()
 

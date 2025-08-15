@@ -9,6 +9,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/client/config"
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/bankcard"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/credential"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/cryptokey"
 	"github.com/ryabkov82/gophkeeper/internal/client/storage"
@@ -25,6 +26,7 @@ import (
 // Основные поля:
 //   - AuthManager: управление регистрацией, аутентификацией и токенами доступа пользователей.
 //   - CredentialManager: управление учётными данными (создание, получение, обновление, удаление).
+//   - BankCardManager: управление банковскими картами (создание, получение, обновление, удаление).
 //   - CryptoKeyManager: генерация, хранение и загрузка криптографических ключей для шифрования.
 //   - ConnManager: управление gRPC подключениями к серверу.
 //   - Logger: структурированный логгер для записи отладочной, диагностической и системной информации.
@@ -33,6 +35,7 @@ import (
 type AppServices struct {
 	AuthManager       auth.AuthManagerIface
 	CredentialManager credential.CredentialManagerIface
+	BankCardManager   bankcard.BankCardManagerIface
 	CryptoKeyManager  cryptokey.CryptoKeyManagerIface
 	ConnManager       connection.ConnManager
 	Logger            *zap.Logger
@@ -67,11 +70,15 @@ func NewAppServices(cfg *config.ClientConfig) (*AppServices, error) {
 	// Создаем CredentialManager, передав logger
 	credentialManager := credential.NewCredentialManager(log)
 
+	// Создаем CredentialManager, передав logger
+	bankcardManager := bankcard.NewBankCardManager(log)
+
 	connManager := connection.New(connConfig, log, authManager)
 
 	return &AppServices{
 		AuthManager:       authManager,
 		CredentialManager: credentialManager,
+		BankCardManager:   bankcardManager,
 		CryptoKeyManager:  cryptoKeyManager,
 		ConnManager:       connManager,
 		Logger:            log,

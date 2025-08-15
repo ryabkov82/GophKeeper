@@ -100,14 +100,14 @@ func newEmptyEntity(dataType contracts.DataType) interface{} {
 	switch dataType {
 	case contracts.TypeCredentials:
 		return &model.Credential{}
-	/*
-		case contracts.TypeNotes:
-			return &model.Note{} // если у тебя есть такой тип
-		case contracts.TypeFiles:
-			return &model.File{} // и т.д.
-		case contracts.TypeCards:
-			return &model.Card{}
-	*/
+	case contracts.TypeCards:
+		return &model.BankCard{}
+		/*
+			case contracts.TypeNotes:
+				return &model.Note{} // если у тебя есть такой тип
+			case contracts.TypeFiles:
+				return &model.File{} // и т.д.
+		*/
 	default:
 		return nil
 	}

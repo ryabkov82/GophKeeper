@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -28,11 +29,6 @@ func initEditForm(m Model) Model {
 
 func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 
-	if len(m.widgets) == 0 {
-		return m, nil
-	}
-
-	w := m.widgets[m.focusedInput]
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		key := msg.String()
@@ -42,6 +38,10 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			return focusField(m), nil
 
 		case "up", "down":
+			if len(m.widgets) == 0 {
+				return m, nil
+			}
+			w := m.widgets[m.focusedInput]
 			if w.isTextarea {
 				// Если в textarea несколько строк — передаём стрелки внутрь
 				if strings.Contains(w.textarea.Value(), "\n") {
@@ -66,6 +66,10 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			// Сохраняем данные из формы
 			return saveEdit(m)
 		case "enter":
+			if len(m.widgets) == 0 {
+				return m, nil
+			}
+			w := m.widgets[m.focusedInput]
 			// Если последнее поле — сохраняем, иначе переходим дальше
 			if w.isTextarea {
 				// Передаем Enter внутрь textarea
@@ -81,7 +85,7 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 			return focusField(m), nil
 
-		case "ctrl+v": // переключить видимость пароля
+		case "ctrl+b": // переключить видимость пароля
 			for i, w := range m.widgets {
 				if !w.isTextarea && strings.ToLower(w.field.InputType) == "password" {
 					if w.input.EchoMode == textinput.EchoPassword {
@@ -95,19 +99,85 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+		if len(m.widgets) == 0 {
+			return m, nil
+		}
+
+		// --- Обработка специальных клавиш для maskedInput ---
+		// Обновляем maskedInput напрямую в срезе
+		if m.widgets[m.focusedInput].maskedInput.Mask != "" {
+			switch key {
+			case "backspace":
+				tmp := m.widgets[m.focusedInput]
+				tmp.maskedInput.Backspace()
+				tmp.input.SetValue(tmp.maskedInput.Display())
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+			case "delete":
+				tmp := m.widgets[m.focusedInput]
+				tmp.maskedInput.Delete()
+				tmp.input.SetValue(tmp.maskedInput.Display())
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+			case "home":
+				tmp := m.widgets[m.focusedInput]
+				tmp.maskedInput.Home()
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+			case "end":
+				tmp := m.widgets[m.focusedInput]
+				tmp.maskedInput.End()
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+			case "ctrl+v":
+				tmp := m.widgets[m.focusedInput]
+				clip := clipboardRead()
+				tmp.maskedInput.InsertString(clip)
+				tmp.input.SetValue(tmp.maskedInput.Display())
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+			case "left":
+				tmp := m.widgets[m.focusedInput]
+				tmp.maskedInput.MoveLeft()
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+				return m, nil
+			case "right":
+				tmp := m.widgets[m.focusedInput]
+				tmp.maskedInput.MoveRight()
+				tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+				m.widgets[m.focusedInput] = tmp
+				return m, nil
+			default:
+				if len(msg.Runes) > 0 {
+					tmp := m.widgets[m.focusedInput]
+					tmp.maskedInput.InsertRune(msg.Runes[0])
+					tmp.input.SetValue(tmp.maskedInput.Display())
+					tmp.input.SetCursor(tmp.maskedInput.CursorPos)
+					m.widgets[m.focusedInput] = tmp
+				}
+			}
+			return m, nil
+		}
+
+		w := m.widgets[m.focusedInput]
+
+		// --- Обычные поля textinput ---
+		if w.isTextarea {
+			var cmd tea.Cmd
+			w.textarea, cmd = w.textarea.Update(msg)
+			m.widgets[m.focusedInput] = w
+			return m, cmd
+		} else {
+			var cmd tea.Cmd
+			w.input, cmd = w.input.Update(msg)
+			m.widgets[m.focusedInput] = w
+			return m, cmd
+		}
 	}
 
-	var cmd tea.Cmd
+	return m, nil
 
-	w = m.widgets[m.focusedInput]
-	if w.isTextarea {
-		w.textarea, cmd = w.textarea.Update(msg)
-	} else {
-		w.input, cmd = w.input.Update(msg)
-	}
-	m.widgets[m.focusedInput] = w
-
-	return m, cmd
 }
 
 func renderEditForm(m Model) string {
@@ -145,7 +215,7 @@ func renderEditForm(m Model) string {
 	}
 
 	b.WriteString("\n" + hintStyle.Render(
-		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+V — переключить видимость пароля\n",
+		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+B — переключить видимость пароля\n",
 	))
 
 	return b.String()
@@ -229,4 +299,12 @@ func updateEditEntityFromInputs(m Model) Model {
 	m.editEntity = fe // для чёткости присвоим
 	m.editErr = nil
 	return m
+}
+
+func clipboardRead() string {
+	text, err := clipboard.ReadAll()
+	if err != nil {
+		return ""
+	}
+	return text
 }

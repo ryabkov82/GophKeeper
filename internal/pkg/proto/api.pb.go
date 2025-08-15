@@ -1362,6 +1362,996 @@ func (b0 DeleteCredentialResponse_builder) Build() *DeleteCredentialResponse {
 	return m0
 }
 
+// Сообщения для BankCard
+type BankCard struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id             *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_UserId         *string                `protobuf:"bytes,2,opt,name=user_id,json=userId"`
+	xxx_hidden_Title          *string                `protobuf:"bytes,3,opt,name=title"`
+	xxx_hidden_CardholderName *string                `protobuf:"bytes,4,opt,name=cardholder_name,json=cardholderName"`
+	xxx_hidden_CardNumber     *string                `protobuf:"bytes,5,opt,name=card_number,json=cardNumber"`
+	xxx_hidden_ExpiryDate     *string                `protobuf:"bytes,6,opt,name=expiry_date,json=expiryDate"`
+	xxx_hidden_Cvv            *string                `protobuf:"bytes,7,opt,name=cvv"`
+	xxx_hidden_Metadata       *string                `protobuf:"bytes,8,opt,name=metadata"`
+	xxx_hidden_CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt"`
+	xxx_hidden_UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *BankCard) Reset() {
+	*x = BankCard{}
+	mi := &file_api_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BankCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BankCard) ProtoMessage() {}
+
+func (x *BankCard) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *BankCard) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetTitle() string {
+	if x != nil {
+		if x.xxx_hidden_Title != nil {
+			return *x.xxx_hidden_Title
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetCardholderName() string {
+	if x != nil {
+		if x.xxx_hidden_CardholderName != nil {
+			return *x.xxx_hidden_CardholderName
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetCardNumber() string {
+	if x != nil {
+		if x.xxx_hidden_CardNumber != nil {
+			return *x.xxx_hidden_CardNumber
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetExpiryDate() string {
+	if x != nil {
+		if x.xxx_hidden_ExpiryDate != nil {
+			return *x.xxx_hidden_ExpiryDate
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetCvv() string {
+	if x != nil {
+		if x.xxx_hidden_Cvv != nil {
+			return *x.xxx_hidden_Cvv
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetMetadata() string {
+	if x != nil {
+		if x.xxx_hidden_Metadata != nil {
+			return *x.xxx_hidden_Metadata
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *BankCard) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_CreatedAt
+	}
+	return nil
+}
+
+func (x *BankCard) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdatedAt
+	}
+	return nil
+}
+
+func (x *BankCard) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+}
+
+func (x *BankCard) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+}
+
+func (x *BankCard) SetTitle(v string) {
+	x.xxx_hidden_Title = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+}
+
+func (x *BankCard) SetCardholderName(v string) {
+	x.xxx_hidden_CardholderName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+}
+
+func (x *BankCard) SetCardNumber(v string) {
+	x.xxx_hidden_CardNumber = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+}
+
+func (x *BankCard) SetExpiryDate(v string) {
+	x.xxx_hidden_ExpiryDate = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+}
+
+func (x *BankCard) SetCvv(v string) {
+	x.xxx_hidden_Cvv = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+}
+
+func (x *BankCard) SetMetadata(v string) {
+	x.xxx_hidden_Metadata = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+}
+
+func (x *BankCard) SetCreatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_CreatedAt = v
+}
+
+func (x *BankCard) SetUpdatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdatedAt = v
+}
+
+func (x *BankCard) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *BankCard) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *BankCard) HasTitle() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *BankCard) HasCardholderName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *BankCard) HasCardNumber() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *BankCard) HasExpiryDate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *BankCard) HasCvv() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *BankCard) HasMetadata() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *BankCard) HasCreatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_CreatedAt != nil
+}
+
+func (x *BankCard) HasUpdatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdatedAt != nil
+}
+
+func (x *BankCard) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *BankCard) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_UserId = nil
+}
+
+func (x *BankCard) ClearTitle() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Title = nil
+}
+
+func (x *BankCard) ClearCardholderName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_CardholderName = nil
+}
+
+func (x *BankCard) ClearCardNumber() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_CardNumber = nil
+}
+
+func (x *BankCard) ClearExpiryDate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_ExpiryDate = nil
+}
+
+func (x *BankCard) ClearCvv() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Cvv = nil
+}
+
+func (x *BankCard) ClearMetadata() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Metadata = nil
+}
+
+func (x *BankCard) ClearCreatedAt() {
+	x.xxx_hidden_CreatedAt = nil
+}
+
+func (x *BankCard) ClearUpdatedAt() {
+	x.xxx_hidden_UpdatedAt = nil
+}
+
+type BankCard_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id             *string
+	UserId         *string
+	Title          *string
+	CardholderName *string
+	CardNumber     *string
+	ExpiryDate     *string
+	Cvv            *string
+	Metadata       *string
+	CreatedAt      *timestamppb.Timestamp
+	UpdatedAt      *timestamppb.Timestamp
+}
+
+func (b0 BankCard_builder) Build() *BankCard {
+	m0 := &BankCard{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	if b.Title != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		x.xxx_hidden_Title = b.Title
+	}
+	if b.CardholderName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		x.xxx_hidden_CardholderName = b.CardholderName
+	}
+	if b.CardNumber != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
+		x.xxx_hidden_CardNumber = b.CardNumber
+	}
+	if b.ExpiryDate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		x.xxx_hidden_ExpiryDate = b.ExpiryDate
+	}
+	if b.Cvv != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
+		x.xxx_hidden_Cvv = b.Cvv
+	}
+	if b.Metadata != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
+		x.xxx_hidden_Metadata = b.Metadata
+	}
+	x.xxx_hidden_CreatedAt = b.CreatedAt
+	x.xxx_hidden_UpdatedAt = b.UpdatedAt
+	return m0
+}
+
+type CreateBankCardRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BankCard *BankCard              `protobuf:"bytes,1,opt,name=bank_card,json=bankCard"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *CreateBankCardRequest) Reset() {
+	*x = CreateBankCardRequest{}
+	mi := &file_api_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBankCardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBankCardRequest) ProtoMessage() {}
+
+func (x *CreateBankCardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateBankCardRequest) GetBankCard() *BankCard {
+	if x != nil {
+		return x.xxx_hidden_BankCard
+	}
+	return nil
+}
+
+func (x *CreateBankCardRequest) SetBankCard(v *BankCard) {
+	x.xxx_hidden_BankCard = v
+}
+
+func (x *CreateBankCardRequest) HasBankCard() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_BankCard != nil
+}
+
+func (x *CreateBankCardRequest) ClearBankCard() {
+	x.xxx_hidden_BankCard = nil
+}
+
+type CreateBankCardRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	BankCard *BankCard
+}
+
+func (b0 CreateBankCardRequest_builder) Build() *CreateBankCardRequest {
+	m0 := &CreateBankCardRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BankCard = b.BankCard
+	return m0
+}
+
+type CreateBankCardResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BankCard *BankCard              `protobuf:"bytes,1,opt,name=bank_card,json=bankCard"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *CreateBankCardResponse) Reset() {
+	*x = CreateBankCardResponse{}
+	mi := &file_api_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBankCardResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBankCardResponse) ProtoMessage() {}
+
+func (x *CreateBankCardResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateBankCardResponse) GetBankCard() *BankCard {
+	if x != nil {
+		return x.xxx_hidden_BankCard
+	}
+	return nil
+}
+
+func (x *CreateBankCardResponse) SetBankCard(v *BankCard) {
+	x.xxx_hidden_BankCard = v
+}
+
+func (x *CreateBankCardResponse) HasBankCard() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_BankCard != nil
+}
+
+func (x *CreateBankCardResponse) ClearBankCard() {
+	x.xxx_hidden_BankCard = nil
+}
+
+type CreateBankCardResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	BankCard *BankCard
+}
+
+func (b0 CreateBankCardResponse_builder) Build() *CreateBankCardResponse {
+	m0 := &CreateBankCardResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BankCard = b.BankCard
+	return m0
+}
+
+type GetBankCardByIDRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetBankCardByIDRequest) Reset() {
+	*x = GetBankCardByIDRequest{}
+	mi := &file_api_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBankCardByIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBankCardByIDRequest) ProtoMessage() {}
+
+func (x *GetBankCardByIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetBankCardByIDRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetBankCardByIDRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetBankCardByIDRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetBankCardByIDRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type GetBankCardByIDRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 GetBankCardByIDRequest_builder) Build() *GetBankCardByIDRequest {
+	m0 := &GetBankCardByIDRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type GetBankCardByIDResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BankCard *BankCard              `protobuf:"bytes,1,opt,name=bank_card,json=bankCard"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetBankCardByIDResponse) Reset() {
+	*x = GetBankCardByIDResponse{}
+	mi := &file_api_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBankCardByIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBankCardByIDResponse) ProtoMessage() {}
+
+func (x *GetBankCardByIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetBankCardByIDResponse) GetBankCard() *BankCard {
+	if x != nil {
+		return x.xxx_hidden_BankCard
+	}
+	return nil
+}
+
+func (x *GetBankCardByIDResponse) SetBankCard(v *BankCard) {
+	x.xxx_hidden_BankCard = v
+}
+
+func (x *GetBankCardByIDResponse) HasBankCard() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_BankCard != nil
+}
+
+func (x *GetBankCardByIDResponse) ClearBankCard() {
+	x.xxx_hidden_BankCard = nil
+}
+
+type GetBankCardByIDResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	BankCard *BankCard
+}
+
+func (b0 GetBankCardByIDResponse_builder) Build() *GetBankCardByIDResponse {
+	m0 := &GetBankCardByIDResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BankCard = b.BankCard
+	return m0
+}
+
+type GetBankCardsResponse struct {
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BankCards *[]*BankCard           `protobuf:"bytes,1,rep,name=bank_cards,json=bankCards"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetBankCardsResponse) Reset() {
+	*x = GetBankCardsResponse{}
+	mi := &file_api_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBankCardsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBankCardsResponse) ProtoMessage() {}
+
+func (x *GetBankCardsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetBankCardsResponse) GetBankCards() []*BankCard {
+	if x != nil {
+		if x.xxx_hidden_BankCards != nil {
+			return *x.xxx_hidden_BankCards
+		}
+	}
+	return nil
+}
+
+func (x *GetBankCardsResponse) SetBankCards(v []*BankCard) {
+	x.xxx_hidden_BankCards = &v
+}
+
+type GetBankCardsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	BankCards []*BankCard
+}
+
+func (b0 GetBankCardsResponse_builder) Build() *GetBankCardsResponse {
+	m0 := &GetBankCardsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BankCards = &b.BankCards
+	return m0
+}
+
+type UpdateBankCardRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BankCard *BankCard              `protobuf:"bytes,1,opt,name=bank_card,json=bankCard"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateBankCardRequest) Reset() {
+	*x = UpdateBankCardRequest{}
+	mi := &file_api_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateBankCardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateBankCardRequest) ProtoMessage() {}
+
+func (x *UpdateBankCardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateBankCardRequest) GetBankCard() *BankCard {
+	if x != nil {
+		return x.xxx_hidden_BankCard
+	}
+	return nil
+}
+
+func (x *UpdateBankCardRequest) SetBankCard(v *BankCard) {
+	x.xxx_hidden_BankCard = v
+}
+
+func (x *UpdateBankCardRequest) HasBankCard() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_BankCard != nil
+}
+
+func (x *UpdateBankCardRequest) ClearBankCard() {
+	x.xxx_hidden_BankCard = nil
+}
+
+type UpdateBankCardRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	BankCard *BankCard
+}
+
+func (b0 UpdateBankCardRequest_builder) Build() *UpdateBankCardRequest {
+	m0 := &UpdateBankCardRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BankCard = b.BankCard
+	return m0
+}
+
+type UpdateBankCardResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_BankCard *BankCard              `protobuf:"bytes,1,opt,name=bank_card,json=bankCard"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateBankCardResponse) Reset() {
+	*x = UpdateBankCardResponse{}
+	mi := &file_api_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateBankCardResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateBankCardResponse) ProtoMessage() {}
+
+func (x *UpdateBankCardResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateBankCardResponse) GetBankCard() *BankCard {
+	if x != nil {
+		return x.xxx_hidden_BankCard
+	}
+	return nil
+}
+
+func (x *UpdateBankCardResponse) SetBankCard(v *BankCard) {
+	x.xxx_hidden_BankCard = v
+}
+
+func (x *UpdateBankCardResponse) HasBankCard() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_BankCard != nil
+}
+
+func (x *UpdateBankCardResponse) ClearBankCard() {
+	x.xxx_hidden_BankCard = nil
+}
+
+type UpdateBankCardResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	BankCard *BankCard
+}
+
+func (b0 UpdateBankCardResponse_builder) Build() *UpdateBankCardResponse {
+	m0 := &UpdateBankCardResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_BankCard = b.BankCard
+	return m0
+}
+
+type DeleteBankCardRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteBankCardRequest) Reset() {
+	*x = DeleteBankCardRequest{}
+	mi := &file_api_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBankCardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBankCardRequest) ProtoMessage() {}
+
+func (x *DeleteBankCardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteBankCardRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeleteBankCardRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteBankCardRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteBankCardRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type DeleteBankCardRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 DeleteBankCardRequest_builder) Build() *DeleteBankCardRequest {
+	m0 := &DeleteBankCardRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type DeleteBankCardResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Success     bool                   `protobuf:"varint,1,opt,name=success"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteBankCardResponse) Reset() {
+	*x = DeleteBankCardResponse{}
+	mi := &file_api_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBankCardResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBankCardResponse) ProtoMessage() {}
+
+func (x *DeleteBankCardResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteBankCardResponse) GetSuccess() bool {
+	if x != nil {
+		return x.xxx_hidden_Success
+	}
+	return false
+}
+
+func (x *DeleteBankCardResponse) SetSuccess(v bool) {
+	x.xxx_hidden_Success = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteBankCardResponse) HasSuccess() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteBankCardResponse) ClearSuccess() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Success = false
+}
+
+type DeleteBankCardResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Success *bool
+}
+
+func (b0 DeleteBankCardResponse_builder) Build() *DeleteBankCardResponse {
+	m0 := &DeleteBankCardResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Success != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Success = *b.Success
+	}
+	return m0
+}
+
 var File_api_proto protoreflect.FileDescriptor
 
 const file_api_proto_rawDesc = "" +
@@ -1417,6 +2407,41 @@ const file_api_proto_rawDesc = "" +
 	"\x17DeleteCredentialRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
 	"\x18DeleteCredentialResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xd8\x02\n" +
+	"\bBankCard\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12'\n" +
+	"\x0fcardholder_name\x18\x04 \x01(\tR\x0ecardholderName\x12\x1f\n" +
+	"\vcard_number\x18\x05 \x01(\tR\n" +
+	"cardNumber\x12\x1f\n" +
+	"\vexpiry_date\x18\x06 \x01(\tR\n" +
+	"expiryDate\x12\x10\n" +
+	"\x03cvv\x18\a \x01(\tR\x03cvv\x12\x1a\n" +
+	"\bmetadata\x18\b \x01(\tR\bmetadata\x129\n" +
+	"\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"P\n" +
+	"\x15CreateBankCardRequest\x127\n" +
+	"\tbank_card\x18\x01 \x01(\v2\x1a.gophkeeper.proto.BankCardR\bbankCard\"Q\n" +
+	"\x16CreateBankCardResponse\x127\n" +
+	"\tbank_card\x18\x01 \x01(\v2\x1a.gophkeeper.proto.BankCardR\bbankCard\"(\n" +
+	"\x16GetBankCardByIDRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"R\n" +
+	"\x17GetBankCardByIDResponse\x127\n" +
+	"\tbank_card\x18\x01 \x01(\v2\x1a.gophkeeper.proto.BankCardR\bbankCard\"Q\n" +
+	"\x14GetBankCardsResponse\x129\n" +
+	"\n" +
+	"bank_cards\x18\x01 \x03(\v2\x1a.gophkeeper.proto.BankCardR\tbankCards\"P\n" +
+	"\x15UpdateBankCardRequest\x127\n" +
+	"\tbank_card\x18\x01 \x01(\v2\x1a.gophkeeper.proto.BankCardR\bbankCard\"Q\n" +
+	"\x16UpdateBankCardResponse\x127\n" +
+	"\tbank_card\x18\x01 \x01(\v2\x1a.gophkeeper.proto.BankCardR\bbankCard\"'\n" +
+	"\x15DeleteBankCardRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
+	"\x16DeleteBankCardResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess2\xaa\x01\n" +
 	"\vAuthService\x12Q\n" +
 	"\bRegister\x12!.gophkeeper.proto.RegisterRequest\x1a\".gophkeeper.proto.RegisterResponse\x12H\n" +
@@ -1426,9 +2451,15 @@ const file_api_proto_rawDesc = "" +
 	"\x11GetCredentialByID\x12*.gophkeeper.proto.GetCredentialByIDRequest\x1a+.gophkeeper.proto.GetCredentialByIDResponse\x12R\n" +
 	"\x0eGetCredentials\x12\x16.google.protobuf.Empty\x1a(.gophkeeper.proto.GetCredentialsResponse\x12i\n" +
 	"\x10UpdateCredential\x12).gophkeeper.proto.UpdateCredentialRequest\x1a*.gophkeeper.proto.UpdateCredentialResponse\x12i\n" +
-	"\x10DeleteCredential\x12).gophkeeper.proto.DeleteCredentialRequest\x1a*.gophkeeper.proto.DeleteCredentialResponseB<Z2github.com/ryabkov82/gophkeeper/internal/pkg/proto\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
+	"\x10DeleteCredential\x12).gophkeeper.proto.DeleteCredentialRequest\x1a*.gophkeeper.proto.DeleteCredentialResponse2\xf8\x03\n" +
+	"\x0fBankCardService\x12c\n" +
+	"\x0eCreateBankCard\x12'.gophkeeper.proto.CreateBankCardRequest\x1a(.gophkeeper.proto.CreateBankCardResponse\x12f\n" +
+	"\x0fGetBankCardByID\x12(.gophkeeper.proto.GetBankCardByIDRequest\x1a).gophkeeper.proto.GetBankCardByIDResponse\x12N\n" +
+	"\fGetBankCards\x12\x16.google.protobuf.Empty\x1a&.gophkeeper.proto.GetBankCardsResponse\x12c\n" +
+	"\x0eUpdateBankCard\x12'.gophkeeper.proto.UpdateBankCardRequest\x1a(.gophkeeper.proto.UpdateBankCardResponse\x12c\n" +
+	"\x0eDeleteBankCard\x12'.gophkeeper.proto.DeleteBankCardRequest\x1a(.gophkeeper.proto.DeleteBankCardResponseB<Z2github.com/ryabkov82/gophkeeper/internal/pkg/proto\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
 
-var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_api_proto_goTypes = []any{
 	(*RegisterRequest)(nil),           // 0: gophkeeper.proto.RegisterRequest
 	(*RegisterResponse)(nil),          // 1: gophkeeper.proto.RegisterResponse
@@ -1444,37 +2475,65 @@ var file_api_proto_goTypes = []any{
 	(*UpdateCredentialResponse)(nil),  // 11: gophkeeper.proto.UpdateCredentialResponse
 	(*DeleteCredentialRequest)(nil),   // 12: gophkeeper.proto.DeleteCredentialRequest
 	(*DeleteCredentialResponse)(nil),  // 13: gophkeeper.proto.DeleteCredentialResponse
-	(*timestamppb.Timestamp)(nil),     // 14: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),             // 15: google.protobuf.Empty
+	(*BankCard)(nil),                  // 14: gophkeeper.proto.BankCard
+	(*CreateBankCardRequest)(nil),     // 15: gophkeeper.proto.CreateBankCardRequest
+	(*CreateBankCardResponse)(nil),    // 16: gophkeeper.proto.CreateBankCardResponse
+	(*GetBankCardByIDRequest)(nil),    // 17: gophkeeper.proto.GetBankCardByIDRequest
+	(*GetBankCardByIDResponse)(nil),   // 18: gophkeeper.proto.GetBankCardByIDResponse
+	(*GetBankCardsResponse)(nil),      // 19: gophkeeper.proto.GetBankCardsResponse
+	(*UpdateBankCardRequest)(nil),     // 20: gophkeeper.proto.UpdateBankCardRequest
+	(*UpdateBankCardResponse)(nil),    // 21: gophkeeper.proto.UpdateBankCardResponse
+	(*DeleteBankCardRequest)(nil),     // 22: gophkeeper.proto.DeleteBankCardRequest
+	(*DeleteBankCardResponse)(nil),    // 23: gophkeeper.proto.DeleteBankCardResponse
+	(*timestamppb.Timestamp)(nil),     // 24: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),             // 25: google.protobuf.Empty
 }
 var file_api_proto_depIdxs = []int32{
-	14, // 0: gophkeeper.proto.Credential.created_at:type_name -> google.protobuf.Timestamp
-	14, // 1: gophkeeper.proto.Credential.updated_at:type_name -> google.protobuf.Timestamp
+	24, // 0: gophkeeper.proto.Credential.created_at:type_name -> google.protobuf.Timestamp
+	24, // 1: gophkeeper.proto.Credential.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: gophkeeper.proto.CreateCredentialRequest.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 3: gophkeeper.proto.CreateCredentialResponse.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 4: gophkeeper.proto.GetCredentialByIDResponse.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 5: gophkeeper.proto.GetCredentialsResponse.credentials:type_name -> gophkeeper.proto.Credential
 	4,  // 6: gophkeeper.proto.UpdateCredentialRequest.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 7: gophkeeper.proto.UpdateCredentialResponse.credential:type_name -> gophkeeper.proto.Credential
-	0,  // 8: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
-	2,  // 9: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
-	5,  // 10: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
-	7,  // 11: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
-	15, // 12: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
-	10, // 13: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
-	12, // 14: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
-	1,  // 15: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
-	3,  // 16: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
-	6,  // 17: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
-	8,  // 18: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
-	9,  // 19: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
-	11, // 20: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
-	13, // 21: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
-	15, // [15:22] is the sub-list for method output_type
-	8,  // [8:15] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	24, // 8: gophkeeper.proto.BankCard.created_at:type_name -> google.protobuf.Timestamp
+	24, // 9: gophkeeper.proto.BankCard.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 10: gophkeeper.proto.CreateBankCardRequest.bank_card:type_name -> gophkeeper.proto.BankCard
+	14, // 11: gophkeeper.proto.CreateBankCardResponse.bank_card:type_name -> gophkeeper.proto.BankCard
+	14, // 12: gophkeeper.proto.GetBankCardByIDResponse.bank_card:type_name -> gophkeeper.proto.BankCard
+	14, // 13: gophkeeper.proto.GetBankCardsResponse.bank_cards:type_name -> gophkeeper.proto.BankCard
+	14, // 14: gophkeeper.proto.UpdateBankCardRequest.bank_card:type_name -> gophkeeper.proto.BankCard
+	14, // 15: gophkeeper.proto.UpdateBankCardResponse.bank_card:type_name -> gophkeeper.proto.BankCard
+	0,  // 16: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
+	2,  // 17: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
+	5,  // 18: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
+	7,  // 19: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
+	25, // 20: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
+	10, // 21: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
+	12, // 22: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
+	15, // 23: gophkeeper.proto.BankCardService.CreateBankCard:input_type -> gophkeeper.proto.CreateBankCardRequest
+	17, // 24: gophkeeper.proto.BankCardService.GetBankCardByID:input_type -> gophkeeper.proto.GetBankCardByIDRequest
+	25, // 25: gophkeeper.proto.BankCardService.GetBankCards:input_type -> google.protobuf.Empty
+	20, // 26: gophkeeper.proto.BankCardService.UpdateBankCard:input_type -> gophkeeper.proto.UpdateBankCardRequest
+	22, // 27: gophkeeper.proto.BankCardService.DeleteBankCard:input_type -> gophkeeper.proto.DeleteBankCardRequest
+	1,  // 28: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
+	3,  // 29: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
+	6,  // 30: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
+	8,  // 31: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
+	9,  // 32: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
+	11, // 33: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
+	13, // 34: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
+	16, // 35: gophkeeper.proto.BankCardService.CreateBankCard:output_type -> gophkeeper.proto.CreateBankCardResponse
+	18, // 36: gophkeeper.proto.BankCardService.GetBankCardByID:output_type -> gophkeeper.proto.GetBankCardByIDResponse
+	19, // 37: gophkeeper.proto.BankCardService.GetBankCards:output_type -> gophkeeper.proto.GetBankCardsResponse
+	21, // 38: gophkeeper.proto.BankCardService.UpdateBankCard:output_type -> gophkeeper.proto.UpdateBankCardResponse
+	23, // 39: gophkeeper.proto.BankCardService.DeleteBankCard:output_type -> gophkeeper.proto.DeleteBankCardResponse
+	28, // [28:40] is the sub-list for method output_type
+	16, // [16:28] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_init() }
@@ -1488,9 +2547,9 @@ func file_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_rawDesc), len(file_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   24,
 			NumExtensions: 0,
-			NumServices:   2,
+			NumServices:   3,
 		},
 		GoTypes:           file_api_proto_goTypes,
 		DependencyIndexes: file_api_proto_depIdxs,

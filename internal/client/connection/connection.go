@@ -18,13 +18,22 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// Config содержит параметры конфигурации подключения к gRPC-серверу.
+// Config описывает параметры конфигурации подключения к gRPC-серверу.
 type Config struct {
-	ServerAddress  string        // Адрес сервера (host:port)
-	UseTLS         bool          // Использовать TLS
-	TLSSkipVerify  bool          // Пропускать проверку сертификата
-	CACertPath     string        // Путь к CA сертификату
-	ConnectTimeout time.Duration // Таймаут подключения
+	// ServerAddress — адрес сервера в формате host:port.
+	ServerAddress string
+
+	// UseTLS включает или отключает использование TLS.
+	UseTLS bool
+
+	// TLSSkipVerify пропускает проверку сертификата (не рекомендуется в продакшене).
+	TLSSkipVerify bool
+
+	// CACertPath — путь к CA сертификату для проверки подлинности сервера.
+	CACertPath string
+
+	// ConnectTimeout — максимальное время ожидания установления соединения.
+	ConnectTimeout time.Duration
 }
 
 // ConnManager определяет интерфейс для менеджера подключений к gRPC серверу.
@@ -34,7 +43,11 @@ type Config struct {
 // который оборачивает *grpc.ClientConn и предоставляет необходимые методы,
 // либо ошибку, если соединение не удалось установить.
 type ConnManager interface {
+	// Connect устанавливает соединение с сервером и возвращает gRPC-клиент.
+	// Если соединение уже активно, возвращает его повторно.
 	Connect(ctx context.Context) (GrpcConn, error)
+
+	// Close завершает активное соединение.
 	Close() error
 }
 
