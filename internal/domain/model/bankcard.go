@@ -156,12 +156,14 @@ func (b *BankCard) FormFields() []forms.FormField {
 		{
 			Label:       "Title",
 			Value:       b.Title,
+			MaxLength:   150,
 			InputType:   "text",
 			Placeholder: "Название карты (например, Основная карта)",
 		},
 		{
 			Label:       "Cardholder Name",
 			Value:       b.CardholderName,
+			MaxLength:   150,
 			InputType:   "text",
 			Placeholder: "Имя держателя карты",
 		},
