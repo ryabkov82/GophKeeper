@@ -17,6 +17,7 @@ type formWidget struct {
 	textarea    textarea.Model  // многострочное поле ввода
 	field       forms.FormField // исходное описание поля формы
 	maskedInput *MaskedInput    // объект для работы с маской, nil если маски нет
+	fullscreen  bool            // поле редактируется в полноэкранном режиме
 }
 
 // setFocus устанавливает фокус на виджет или снимает его.
@@ -43,7 +44,7 @@ func (w *formWidget) setFocus(focused bool) {
 // - "password" — создаётся текстовое поле с EchoPassword.
 // - обычный ввод — создаётся textinput с ограничением длины из field.MaxLength.
 // Если задано поле Mask, создаётся maskedInput и отображается сразу с подчеркиваниями.
-func initFormInputsFromFields(fields []forms.FormField) []formWidget {
+func initFormInputsFromFields(fields []forms.FormField, termWidth int) []formWidget {
 	widgets := make([]formWidget, len(fields))
 
 	for i, field := range fields {
@@ -55,12 +56,14 @@ func initFormInputsFromFields(fields []forms.FormField) []formWidget {
 			ta.Placeholder = ""
 			ta.Cursor.Style = cursorStyle
 			ta.SetValue(field.Value)
-			ta.ShowLineNumbers = false
-			ta.CharLimit = 0
-			ta.Prompt = " "
-
+			ta.ShowLineNumbers = true
+			//ta.CharLimit = 0
+			//ta.Prompt = " "
+			//ta.SetWidth(100) // дефолтная ширина для обычных textarea
+			ta.SetWidth(termWidth - 2)
 			w.isTextarea = true
 			w.textarea = ta
+			w.fullscreen = field.Fullscreen // сохраняем флаг
 
 		default:
 			ti := textinput.New()

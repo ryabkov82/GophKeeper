@@ -59,6 +59,10 @@ func NewGRPCServer(cfg *config.Config, logger *zap.Logger, serviceFactory servic
 	bankcardHandler := handlers.NewBankCardHandler(serviceFactory.BankCard(), logger)
 	api.RegisterBankCardServiceServer(s, bankcardHandler)
 
+	// Регистрируем Credential хендлер
+	textDataHandler := handlers.NewTextDataHandler(serviceFactory.TextData(), logger)
+	api.RegisterTextDataServiceServer(s, textDataHandler)
+
 	return s, nil
 }
 

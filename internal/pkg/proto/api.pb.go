@@ -2352,6 +2352,987 @@ func (b0 DeleteBankCardResponse_builder) Build() *DeleteBankCardResponse {
 	return m0
 }
 
+// Сообщение для TextData
+type TextData struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,2,opt,name=user_id,json=userId"`
+	xxx_hidden_Title       *string                `protobuf:"bytes,3,opt,name=title"`
+	xxx_hidden_Content     []byte                 `protobuf:"bytes,4,opt,name=content"`
+	xxx_hidden_Metadata    *string                `protobuf:"bytes,5,opt,name=metadata"`
+	xxx_hidden_CreatedAt   *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt"`
+	xxx_hidden_UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *TextData) Reset() {
+	*x = TextData{}
+	mi := &file_api_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TextData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TextData) ProtoMessage() {}
+
+func (x *TextData) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *TextData) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TextData) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TextData) GetTitle() string {
+	if x != nil {
+		if x.xxx_hidden_Title != nil {
+			return *x.xxx_hidden_Title
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TextData) GetContent() []byte {
+	if x != nil {
+		return x.xxx_hidden_Content
+	}
+	return nil
+}
+
+func (x *TextData) GetMetadata() string {
+	if x != nil {
+		if x.xxx_hidden_Metadata != nil {
+			return *x.xxx_hidden_Metadata
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *TextData) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_CreatedAt
+	}
+	return nil
+}
+
+func (x *TextData) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdatedAt
+	}
+	return nil
+}
+
+func (x *TextData) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+}
+
+func (x *TextData) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+}
+
+func (x *TextData) SetTitle(v string) {
+	x.xxx_hidden_Title = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+}
+
+func (x *TextData) SetContent(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Content = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+}
+
+func (x *TextData) SetMetadata(v string) {
+	x.xxx_hidden_Metadata = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+}
+
+func (x *TextData) SetCreatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_CreatedAt = v
+}
+
+func (x *TextData) SetUpdatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdatedAt = v
+}
+
+func (x *TextData) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *TextData) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *TextData) HasTitle() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *TextData) HasContent() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *TextData) HasMetadata() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *TextData) HasCreatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_CreatedAt != nil
+}
+
+func (x *TextData) HasUpdatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdatedAt != nil
+}
+
+func (x *TextData) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *TextData) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_UserId = nil
+}
+
+func (x *TextData) ClearTitle() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Title = nil
+}
+
+func (x *TextData) ClearContent() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Content = nil
+}
+
+func (x *TextData) ClearMetadata() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Metadata = nil
+}
+
+func (x *TextData) ClearCreatedAt() {
+	x.xxx_hidden_CreatedAt = nil
+}
+
+func (x *TextData) ClearUpdatedAt() {
+	x.xxx_hidden_UpdatedAt = nil
+}
+
+type TextData_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id        *string
+	UserId    *string
+	Title     *string
+	Content   []byte
+	Metadata  *string
+	CreatedAt *timestamppb.Timestamp
+	UpdatedAt *timestamppb.Timestamp
+}
+
+func (b0 TextData_builder) Build() *TextData {
+	m0 := &TextData{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	if b.Title != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		x.xxx_hidden_Title = b.Title
+	}
+	if b.Content != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		x.xxx_hidden_Content = b.Content
+	}
+	if b.Metadata != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		x.xxx_hidden_Metadata = b.Metadata
+	}
+	x.xxx_hidden_CreatedAt = b.CreatedAt
+	x.xxx_hidden_UpdatedAt = b.UpdatedAt
+	return m0
+}
+
+// Запрос и ответ на создание TextData
+type CreateTextDataRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TextData *TextData              `protobuf:"bytes,1,opt,name=text_data,json=textData"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *CreateTextDataRequest) Reset() {
+	*x = CreateTextDataRequest{}
+	mi := &file_api_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTextDataRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTextDataRequest) ProtoMessage() {}
+
+func (x *CreateTextDataRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateTextDataRequest) GetTextData() *TextData {
+	if x != nil {
+		return x.xxx_hidden_TextData
+	}
+	return nil
+}
+
+func (x *CreateTextDataRequest) SetTextData(v *TextData) {
+	x.xxx_hidden_TextData = v
+}
+
+func (x *CreateTextDataRequest) HasTextData() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_TextData != nil
+}
+
+func (x *CreateTextDataRequest) ClearTextData() {
+	x.xxx_hidden_TextData = nil
+}
+
+type CreateTextDataRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TextData *TextData
+}
+
+func (b0 CreateTextDataRequest_builder) Build() *CreateTextDataRequest {
+	m0 := &CreateTextDataRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TextData = b.TextData
+	return m0
+}
+
+type CreateTextDataResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TextData *TextData              `protobuf:"bytes,1,opt,name=text_data,json=textData"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *CreateTextDataResponse) Reset() {
+	*x = CreateTextDataResponse{}
+	mi := &file_api_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTextDataResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTextDataResponse) ProtoMessage() {}
+
+func (x *CreateTextDataResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateTextDataResponse) GetTextData() *TextData {
+	if x != nil {
+		return x.xxx_hidden_TextData
+	}
+	return nil
+}
+
+func (x *CreateTextDataResponse) SetTextData(v *TextData) {
+	x.xxx_hidden_TextData = v
+}
+
+func (x *CreateTextDataResponse) HasTextData() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_TextData != nil
+}
+
+func (x *CreateTextDataResponse) ClearTextData() {
+	x.xxx_hidden_TextData = nil
+}
+
+type CreateTextDataResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TextData *TextData
+}
+
+func (b0 CreateTextDataResponse_builder) Build() *CreateTextDataResponse {
+	m0 := &CreateTextDataResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TextData = b.TextData
+	return m0
+}
+
+// Запрос и ответ на получение TextData по ID
+type GetTextDataByIDRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetTextDataByIDRequest) Reset() {
+	*x = GetTextDataByIDRequest{}
+	mi := &file_api_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTextDataByIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTextDataByIDRequest) ProtoMessage() {}
+
+func (x *GetTextDataByIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetTextDataByIDRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetTextDataByIDRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetTextDataByIDRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetTextDataByIDRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type GetTextDataByIDRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 GetTextDataByIDRequest_builder) Build() *GetTextDataByIDRequest {
+	m0 := &GetTextDataByIDRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type GetTextDataByIDResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TextData *TextData              `protobuf:"bytes,1,opt,name=text_data,json=textData"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetTextDataByIDResponse) Reset() {
+	*x = GetTextDataByIDResponse{}
+	mi := &file_api_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTextDataByIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTextDataByIDResponse) ProtoMessage() {}
+
+func (x *GetTextDataByIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetTextDataByIDResponse) GetTextData() *TextData {
+	if x != nil {
+		return x.xxx_hidden_TextData
+	}
+	return nil
+}
+
+func (x *GetTextDataByIDResponse) SetTextData(v *TextData) {
+	x.xxx_hidden_TextData = v
+}
+
+func (x *GetTextDataByIDResponse) HasTextData() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_TextData != nil
+}
+
+func (x *GetTextDataByIDResponse) ClearTextData() {
+	x.xxx_hidden_TextData = nil
+}
+
+type GetTextDataByIDResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TextData *TextData
+}
+
+func (b0 GetTextDataByIDResponse_builder) Build() *GetTextDataByIDResponse {
+	m0 := &GetTextDataByIDResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TextData = b.TextData
+	return m0
+}
+
+// Запрос и ответ на получение списка заголовков TextData
+type GetTextDataTitlesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,1,opt,name=user_id,json=userId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetTextDataTitlesRequest) Reset() {
+	*x = GetTextDataTitlesRequest{}
+	mi := &file_api_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTextDataTitlesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTextDataTitlesRequest) ProtoMessage() {}
+
+func (x *GetTextDataTitlesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetTextDataTitlesRequest) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetTextDataTitlesRequest) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetTextDataTitlesRequest) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetTextDataTitlesRequest) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_UserId = nil
+}
+
+type GetTextDataTitlesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	UserId *string
+}
+
+func (b0 GetTextDataTitlesRequest_builder) Build() *GetTextDataTitlesRequest {
+	m0 := &GetTextDataTitlesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	return m0
+}
+
+type GetTextDataTitlesResponse struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TextDataTitles *[]*TextData           `protobuf:"bytes,1,rep,name=text_data_titles,json=textDataTitles"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *GetTextDataTitlesResponse) Reset() {
+	*x = GetTextDataTitlesResponse{}
+	mi := &file_api_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTextDataTitlesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTextDataTitlesResponse) ProtoMessage() {}
+
+func (x *GetTextDataTitlesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetTextDataTitlesResponse) GetTextDataTitles() []*TextData {
+	if x != nil {
+		if x.xxx_hidden_TextDataTitles != nil {
+			return *x.xxx_hidden_TextDataTitles
+		}
+	}
+	return nil
+}
+
+func (x *GetTextDataTitlesResponse) SetTextDataTitles(v []*TextData) {
+	x.xxx_hidden_TextDataTitles = &v
+}
+
+type GetTextDataTitlesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TextDataTitles []*TextData
+}
+
+func (b0 GetTextDataTitlesResponse_builder) Build() *GetTextDataTitlesResponse {
+	m0 := &GetTextDataTitlesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TextDataTitles = &b.TextDataTitles
+	return m0
+}
+
+// Запрос и ответ на обновление TextData
+type UpdateTextDataRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TextData *TextData              `protobuf:"bytes,1,opt,name=text_data,json=textData"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpdateTextDataRequest) Reset() {
+	*x = UpdateTextDataRequest{}
+	mi := &file_api_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTextDataRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTextDataRequest) ProtoMessage() {}
+
+func (x *UpdateTextDataRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateTextDataRequest) GetTextData() *TextData {
+	if x != nil {
+		return x.xxx_hidden_TextData
+	}
+	return nil
+}
+
+func (x *UpdateTextDataRequest) SetTextData(v *TextData) {
+	x.xxx_hidden_TextData = v
+}
+
+func (x *UpdateTextDataRequest) HasTextData() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_TextData != nil
+}
+
+func (x *UpdateTextDataRequest) ClearTextData() {
+	x.xxx_hidden_TextData = nil
+}
+
+type UpdateTextDataRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TextData *TextData
+}
+
+func (b0 UpdateTextDataRequest_builder) Build() *UpdateTextDataRequest {
+	m0 := &UpdateTextDataRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TextData = b.TextData
+	return m0
+}
+
+type UpdateTextDataResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Success     bool                   `protobuf:"varint,1,opt,name=success"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *UpdateTextDataResponse) Reset() {
+	*x = UpdateTextDataResponse{}
+	mi := &file_api_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTextDataResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTextDataResponse) ProtoMessage() {}
+
+func (x *UpdateTextDataResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateTextDataResponse) GetSuccess() bool {
+	if x != nil {
+		return x.xxx_hidden_Success
+	}
+	return false
+}
+
+func (x *UpdateTextDataResponse) SetSuccess(v bool) {
+	x.xxx_hidden_Success = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *UpdateTextDataResponse) HasSuccess() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *UpdateTextDataResponse) ClearSuccess() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Success = false
+}
+
+type UpdateTextDataResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Success *bool
+}
+
+func (b0 UpdateTextDataResponse_builder) Build() *UpdateTextDataResponse {
+	m0 := &UpdateTextDataResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Success != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Success = *b.Success
+	}
+	return m0
+}
+
+// Запрос и ответ на удаление TextData
+type DeleteTextDataRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteTextDataRequest) Reset() {
+	*x = DeleteTextDataRequest{}
+	mi := &file_api_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTextDataRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTextDataRequest) ProtoMessage() {}
+
+func (x *DeleteTextDataRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteTextDataRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeleteTextDataRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteTextDataRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteTextDataRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type DeleteTextDataRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 DeleteTextDataRequest_builder) Build() *DeleteTextDataRequest {
+	m0 := &DeleteTextDataRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type DeleteTextDataResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Success     bool                   `protobuf:"varint,1,opt,name=success"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteTextDataResponse) Reset() {
+	*x = DeleteTextDataResponse{}
+	mi := &file_api_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTextDataResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTextDataResponse) ProtoMessage() {}
+
+func (x *DeleteTextDataResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteTextDataResponse) GetSuccess() bool {
+	if x != nil {
+		return x.xxx_hidden_Success
+	}
+	return false
+}
+
+func (x *DeleteTextDataResponse) SetSuccess(v bool) {
+	x.xxx_hidden_Success = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteTextDataResponse) HasSuccess() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteTextDataResponse) ClearSuccess() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Success = false
+}
+
+type DeleteTextDataResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Success *bool
+}
+
+func (b0 DeleteTextDataResponse_builder) Build() *DeleteTextDataResponse {
+	m0 := &DeleteTextDataResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Success != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Success = *b.Success
+	}
+	return m0
+}
+
 var File_api_proto protoreflect.FileDescriptor
 
 const file_api_proto_rawDesc = "" +
@@ -2442,6 +3423,36 @@ const file_api_proto_rawDesc = "" +
 	"\x15DeleteBankCardRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
 	"\x16DeleteBankCardResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xf5\x01\n" +
+	"\bTextData\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x18\n" +
+	"\acontent\x18\x04 \x01(\fR\acontent\x12\x1a\n" +
+	"\bmetadata\x18\x05 \x01(\tR\bmetadata\x129\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"P\n" +
+	"\x15CreateTextDataRequest\x127\n" +
+	"\ttext_data\x18\x01 \x01(\v2\x1a.gophkeeper.proto.TextDataR\btextData\"Q\n" +
+	"\x16CreateTextDataResponse\x127\n" +
+	"\ttext_data\x18\x01 \x01(\v2\x1a.gophkeeper.proto.TextDataR\btextData\"(\n" +
+	"\x16GetTextDataByIDRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"R\n" +
+	"\x17GetTextDataByIDResponse\x127\n" +
+	"\ttext_data\x18\x01 \x01(\v2\x1a.gophkeeper.proto.TextDataR\btextData\"3\n" +
+	"\x18GetTextDataTitlesRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"a\n" +
+	"\x19GetTextDataTitlesResponse\x12D\n" +
+	"\x10text_data_titles\x18\x01 \x03(\v2\x1a.gophkeeper.proto.TextDataR\x0etextDataTitles\"P\n" +
+	"\x15UpdateTextDataRequest\x127\n" +
+	"\ttext_data\x18\x01 \x01(\v2\x1a.gophkeeper.proto.TextDataR\btextData\"2\n" +
+	"\x16UpdateTextDataResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"'\n" +
+	"\x15DeleteTextDataRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
+	"\x16DeleteTextDataResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess2\xaa\x01\n" +
 	"\vAuthService\x12Q\n" +
 	"\bRegister\x12!.gophkeeper.proto.RegisterRequest\x1a\".gophkeeper.proto.RegisterResponse\x12H\n" +
@@ -2457,9 +3468,15 @@ const file_api_proto_rawDesc = "" +
 	"\x0fGetBankCardByID\x12(.gophkeeper.proto.GetBankCardByIDRequest\x1a).gophkeeper.proto.GetBankCardByIDResponse\x12N\n" +
 	"\fGetBankCards\x12\x16.google.protobuf.Empty\x1a&.gophkeeper.proto.GetBankCardsResponse\x12c\n" +
 	"\x0eUpdateBankCard\x12'.gophkeeper.proto.UpdateBankCardRequest\x1a(.gophkeeper.proto.UpdateBankCardResponse\x12c\n" +
-	"\x0eDeleteBankCard\x12'.gophkeeper.proto.DeleteBankCardRequest\x1a(.gophkeeper.proto.DeleteBankCardResponseB<Z2github.com/ryabkov82/gophkeeper/internal/pkg/proto\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
+	"\x0eDeleteBankCard\x12'.gophkeeper.proto.DeleteBankCardRequest\x1a(.gophkeeper.proto.DeleteBankCardResponse2\x96\x04\n" +
+	"\x0fTextDataService\x12c\n" +
+	"\x0eCreateTextData\x12'.gophkeeper.proto.CreateTextDataRequest\x1a(.gophkeeper.proto.CreateTextDataResponse\x12f\n" +
+	"\x0fGetTextDataByID\x12(.gophkeeper.proto.GetTextDataByIDRequest\x1a).gophkeeper.proto.GetTextDataByIDResponse\x12l\n" +
+	"\x11GetTextDataTitles\x12*.gophkeeper.proto.GetTextDataTitlesRequest\x1a+.gophkeeper.proto.GetTextDataTitlesResponse\x12c\n" +
+	"\x0eUpdateTextData\x12'.gophkeeper.proto.UpdateTextDataRequest\x1a(.gophkeeper.proto.UpdateTextDataResponse\x12c\n" +
+	"\x0eDeleteTextData\x12'.gophkeeper.proto.DeleteTextDataRequest\x1a(.gophkeeper.proto.DeleteTextDataResponseB<Z2github.com/ryabkov82/gophkeeper/internal/pkg/proto\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
 
-var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_api_proto_goTypes = []any{
 	(*RegisterRequest)(nil),           // 0: gophkeeper.proto.RegisterRequest
 	(*RegisterResponse)(nil),          // 1: gophkeeper.proto.RegisterResponse
@@ -2485,55 +3502,83 @@ var file_api_proto_goTypes = []any{
 	(*UpdateBankCardResponse)(nil),    // 21: gophkeeper.proto.UpdateBankCardResponse
 	(*DeleteBankCardRequest)(nil),     // 22: gophkeeper.proto.DeleteBankCardRequest
 	(*DeleteBankCardResponse)(nil),    // 23: gophkeeper.proto.DeleteBankCardResponse
-	(*timestamppb.Timestamp)(nil),     // 24: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),             // 25: google.protobuf.Empty
+	(*TextData)(nil),                  // 24: gophkeeper.proto.TextData
+	(*CreateTextDataRequest)(nil),     // 25: gophkeeper.proto.CreateTextDataRequest
+	(*CreateTextDataResponse)(nil),    // 26: gophkeeper.proto.CreateTextDataResponse
+	(*GetTextDataByIDRequest)(nil),    // 27: gophkeeper.proto.GetTextDataByIDRequest
+	(*GetTextDataByIDResponse)(nil),   // 28: gophkeeper.proto.GetTextDataByIDResponse
+	(*GetTextDataTitlesRequest)(nil),  // 29: gophkeeper.proto.GetTextDataTitlesRequest
+	(*GetTextDataTitlesResponse)(nil), // 30: gophkeeper.proto.GetTextDataTitlesResponse
+	(*UpdateTextDataRequest)(nil),     // 31: gophkeeper.proto.UpdateTextDataRequest
+	(*UpdateTextDataResponse)(nil),    // 32: gophkeeper.proto.UpdateTextDataResponse
+	(*DeleteTextDataRequest)(nil),     // 33: gophkeeper.proto.DeleteTextDataRequest
+	(*DeleteTextDataResponse)(nil),    // 34: gophkeeper.proto.DeleteTextDataResponse
+	(*timestamppb.Timestamp)(nil),     // 35: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),             // 36: google.protobuf.Empty
 }
 var file_api_proto_depIdxs = []int32{
-	24, // 0: gophkeeper.proto.Credential.created_at:type_name -> google.protobuf.Timestamp
-	24, // 1: gophkeeper.proto.Credential.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 0: gophkeeper.proto.Credential.created_at:type_name -> google.protobuf.Timestamp
+	35, // 1: gophkeeper.proto.Credential.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: gophkeeper.proto.CreateCredentialRequest.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 3: gophkeeper.proto.CreateCredentialResponse.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 4: gophkeeper.proto.GetCredentialByIDResponse.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 5: gophkeeper.proto.GetCredentialsResponse.credentials:type_name -> gophkeeper.proto.Credential
 	4,  // 6: gophkeeper.proto.UpdateCredentialRequest.credential:type_name -> gophkeeper.proto.Credential
 	4,  // 7: gophkeeper.proto.UpdateCredentialResponse.credential:type_name -> gophkeeper.proto.Credential
-	24, // 8: gophkeeper.proto.BankCard.created_at:type_name -> google.protobuf.Timestamp
-	24, // 9: gophkeeper.proto.BankCard.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 8: gophkeeper.proto.BankCard.created_at:type_name -> google.protobuf.Timestamp
+	35, // 9: gophkeeper.proto.BankCard.updated_at:type_name -> google.protobuf.Timestamp
 	14, // 10: gophkeeper.proto.CreateBankCardRequest.bank_card:type_name -> gophkeeper.proto.BankCard
 	14, // 11: gophkeeper.proto.CreateBankCardResponse.bank_card:type_name -> gophkeeper.proto.BankCard
 	14, // 12: gophkeeper.proto.GetBankCardByIDResponse.bank_card:type_name -> gophkeeper.proto.BankCard
 	14, // 13: gophkeeper.proto.GetBankCardsResponse.bank_cards:type_name -> gophkeeper.proto.BankCard
 	14, // 14: gophkeeper.proto.UpdateBankCardRequest.bank_card:type_name -> gophkeeper.proto.BankCard
 	14, // 15: gophkeeper.proto.UpdateBankCardResponse.bank_card:type_name -> gophkeeper.proto.BankCard
-	0,  // 16: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
-	2,  // 17: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
-	5,  // 18: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
-	7,  // 19: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
-	25, // 20: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
-	10, // 21: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
-	12, // 22: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
-	15, // 23: gophkeeper.proto.BankCardService.CreateBankCard:input_type -> gophkeeper.proto.CreateBankCardRequest
-	17, // 24: gophkeeper.proto.BankCardService.GetBankCardByID:input_type -> gophkeeper.proto.GetBankCardByIDRequest
-	25, // 25: gophkeeper.proto.BankCardService.GetBankCards:input_type -> google.protobuf.Empty
-	20, // 26: gophkeeper.proto.BankCardService.UpdateBankCard:input_type -> gophkeeper.proto.UpdateBankCardRequest
-	22, // 27: gophkeeper.proto.BankCardService.DeleteBankCard:input_type -> gophkeeper.proto.DeleteBankCardRequest
-	1,  // 28: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
-	3,  // 29: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
-	6,  // 30: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
-	8,  // 31: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
-	9,  // 32: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
-	11, // 33: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
-	13, // 34: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
-	16, // 35: gophkeeper.proto.BankCardService.CreateBankCard:output_type -> gophkeeper.proto.CreateBankCardResponse
-	18, // 36: gophkeeper.proto.BankCardService.GetBankCardByID:output_type -> gophkeeper.proto.GetBankCardByIDResponse
-	19, // 37: gophkeeper.proto.BankCardService.GetBankCards:output_type -> gophkeeper.proto.GetBankCardsResponse
-	21, // 38: gophkeeper.proto.BankCardService.UpdateBankCard:output_type -> gophkeeper.proto.UpdateBankCardResponse
-	23, // 39: gophkeeper.proto.BankCardService.DeleteBankCard:output_type -> gophkeeper.proto.DeleteBankCardResponse
-	28, // [28:40] is the sub-list for method output_type
-	16, // [16:28] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	35, // 16: gophkeeper.proto.TextData.created_at:type_name -> google.protobuf.Timestamp
+	35, // 17: gophkeeper.proto.TextData.updated_at:type_name -> google.protobuf.Timestamp
+	24, // 18: gophkeeper.proto.CreateTextDataRequest.text_data:type_name -> gophkeeper.proto.TextData
+	24, // 19: gophkeeper.proto.CreateTextDataResponse.text_data:type_name -> gophkeeper.proto.TextData
+	24, // 20: gophkeeper.proto.GetTextDataByIDResponse.text_data:type_name -> gophkeeper.proto.TextData
+	24, // 21: gophkeeper.proto.GetTextDataTitlesResponse.text_data_titles:type_name -> gophkeeper.proto.TextData
+	24, // 22: gophkeeper.proto.UpdateTextDataRequest.text_data:type_name -> gophkeeper.proto.TextData
+	0,  // 23: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
+	2,  // 24: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
+	5,  // 25: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
+	7,  // 26: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
+	36, // 27: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
+	10, // 28: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
+	12, // 29: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
+	15, // 30: gophkeeper.proto.BankCardService.CreateBankCard:input_type -> gophkeeper.proto.CreateBankCardRequest
+	17, // 31: gophkeeper.proto.BankCardService.GetBankCardByID:input_type -> gophkeeper.proto.GetBankCardByIDRequest
+	36, // 32: gophkeeper.proto.BankCardService.GetBankCards:input_type -> google.protobuf.Empty
+	20, // 33: gophkeeper.proto.BankCardService.UpdateBankCard:input_type -> gophkeeper.proto.UpdateBankCardRequest
+	22, // 34: gophkeeper.proto.BankCardService.DeleteBankCard:input_type -> gophkeeper.proto.DeleteBankCardRequest
+	25, // 35: gophkeeper.proto.TextDataService.CreateTextData:input_type -> gophkeeper.proto.CreateTextDataRequest
+	27, // 36: gophkeeper.proto.TextDataService.GetTextDataByID:input_type -> gophkeeper.proto.GetTextDataByIDRequest
+	29, // 37: gophkeeper.proto.TextDataService.GetTextDataTitles:input_type -> gophkeeper.proto.GetTextDataTitlesRequest
+	31, // 38: gophkeeper.proto.TextDataService.UpdateTextData:input_type -> gophkeeper.proto.UpdateTextDataRequest
+	33, // 39: gophkeeper.proto.TextDataService.DeleteTextData:input_type -> gophkeeper.proto.DeleteTextDataRequest
+	1,  // 40: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
+	3,  // 41: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
+	6,  // 42: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
+	8,  // 43: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
+	9,  // 44: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
+	11, // 45: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
+	13, // 46: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
+	16, // 47: gophkeeper.proto.BankCardService.CreateBankCard:output_type -> gophkeeper.proto.CreateBankCardResponse
+	18, // 48: gophkeeper.proto.BankCardService.GetBankCardByID:output_type -> gophkeeper.proto.GetBankCardByIDResponse
+	19, // 49: gophkeeper.proto.BankCardService.GetBankCards:output_type -> gophkeeper.proto.GetBankCardsResponse
+	21, // 50: gophkeeper.proto.BankCardService.UpdateBankCard:output_type -> gophkeeper.proto.UpdateBankCardResponse
+	23, // 51: gophkeeper.proto.BankCardService.DeleteBankCard:output_type -> gophkeeper.proto.DeleteBankCardResponse
+	26, // 52: gophkeeper.proto.TextDataService.CreateTextData:output_type -> gophkeeper.proto.CreateTextDataResponse
+	28, // 53: gophkeeper.proto.TextDataService.GetTextDataByID:output_type -> gophkeeper.proto.GetTextDataByIDResponse
+	30, // 54: gophkeeper.proto.TextDataService.GetTextDataTitles:output_type -> gophkeeper.proto.GetTextDataTitlesResponse
+	32, // 55: gophkeeper.proto.TextDataService.UpdateTextData:output_type -> gophkeeper.proto.UpdateTextDataResponse
+	34, // 56: gophkeeper.proto.TextDataService.DeleteTextData:output_type -> gophkeeper.proto.DeleteTextDataResponse
+	40, // [40:57] is the sub-list for method output_type
+	23, // [23:40] is the sub-list for method input_type
+	23, // [23:23] is the sub-list for extension type_name
+	23, // [23:23] is the sub-list for extension extendee
+	0,  // [0:23] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_init() }
@@ -2547,9 +3592,9 @@ func file_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_rawDesc), len(file_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   35,
 			NumExtensions: 0,
-			NumServices:   3,
+			NumServices:   4,
 		},
 		GoTypes:           file_api_proto_goTypes,
 		DependencyIndexes: file_api_proto_depIdxs,

@@ -89,7 +89,7 @@ func TestRenderEditForm(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "A", Value: "a"},
 	}}
-	widget := initFormInputsFromFields(entity.FormFields())
+	widget := initFormInputsFromFields(entity.FormFields(), 10)
 
 	m := Model{
 		editEntity:   entity,
@@ -110,7 +110,7 @@ func TestUpdateEdit_TabNavigation(t *testing.T) {
 		{Label: "A", Value: "a"},
 		{Label: "B", Value: "b"},
 	}}
-	widgets := initFormInputsFromFields(entity.FormFields())
+	widgets := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
@@ -134,7 +134,7 @@ func TestUpdateEdit_CtrlVPasswordToggle(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "Pwd", Value: "secret", InputType: "password"},
 	}}
-	widgets := initFormInputsFromFields(entity.FormFields())
+	widgets := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
@@ -151,7 +151,7 @@ func TestUpdateEdit_CtrlVPasswordToggle(t *testing.T) {
 
 func TestUpdateEdit_EscCancels(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
-	widgets := initFormInputsFromFields(entity.FormFields())
+	widgets := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
@@ -167,7 +167,7 @@ func TestUpdateEdit_EscCancels(t *testing.T) {
 
 func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
-	widgets := initFormInputsFromFields(entity.FormFields())
+	widgets := initFormInputsFromFields(entity.FormFields(), 10)
 	fakeSvc := &fakeEditDataService{}
 
 	// Новая сущность

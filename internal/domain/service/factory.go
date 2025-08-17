@@ -6,4 +6,5 @@ type ServiceFactory interface {
 	Auth() AuthService
 	Credential() CredentialService
 	BankCard() BankCardService
+	TextData() TextDataService
 }

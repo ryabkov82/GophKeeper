@@ -90,7 +90,7 @@ func renderList(m Model) string {
 	}
 
 	b.WriteString("\n" + hintStyle.Render(
-		"↑/↓: навигация • Enter: просмотр • Ctrl+N: добавить новую запись • Esc: назад",
+		"↑/↓: навигация • Enter: просмотр • Ctrl+N: добавить новую запись • Ctrl+D: удалить выбранную запись • Esc: назад",
 	))
 
 	return b.String()
@@ -102,9 +102,9 @@ func newEmptyEntity(dataType contracts.DataType) interface{} {
 		return &model.Credential{}
 	case contracts.TypeCards:
 		return &model.BankCard{}
+	case contracts.TypeNotes:
+		return &model.TextData{}
 		/*
-			case contracts.TypeNotes:
-				return &model.Note{} // если у тебя есть такой тип
 			case contracts.TypeFiles:
 				return &model.File{} // и т.д.
 		*/

@@ -15,6 +15,7 @@ type ModelServices struct {
 	Auth       contracts.AuthService       // Сервис аутентификации
 	Credential contracts.CredentialService // Сервис управления учетными данными
 	Bankcard   contracts.BankCardService   // Сервис управления банковскими картами
+	TextData   contracts.TextDataService   // Сервис управления текстовыми данными
 	// Добавляй сюда другие интерфейсы по необходимости
 }
 
@@ -49,6 +50,13 @@ type Model struct {
 	editEntity interface{}  // храним сущность (например *model.Credential)
 	widgets    []formWidget // виджеты формы редактирования
 	editErr    error        // ошибка редактирования
+
+	fullscreenWidget *formWidget // ссылка на виджет в режиме fullscreen
+	prevState        string      // сохраняем состояние перед fullscreen
+	fullscreenErr    error       // ошибка редактирования элемента в режиме fullscreen
+
+	termWidth  int // ширина терминала
+	termHeight int // высота терминала
 }
 
 // Добавляем сообщения для системы
@@ -84,6 +92,7 @@ func NewModel(ctx context.Context, svcs ModelServices) *Model {
 		services: map[contracts.DataType]contracts.DataService{
 			contracts.TypeCredentials: adapters.NewCredentialAdapter(svcs.Credential),
 			contracts.TypeCards:       adapters.NewBankCardAdapter(svcs.Bankcard),
+			contracts.TypeNotes:       adapters.NewTextDataAdapter(svcs.TextData),
 		},
 	}
 }
@@ -95,6 +104,27 @@ func (m Model) Init() tea.Cmd {
 
 // Update обрабатывает входящие сообщения и обновляет состояние модели.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	// --- Обработка ресайза терминала ---
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.termWidth = msg.Width
+		m.termHeight = msg.Height
+
+		if m.fullscreenWidget != nil {
+			m.fullscreenWidget.textarea.SetWidth(m.termWidth - 2)
+			m.fullscreenWidget.textarea.SetHeight(m.termHeight - 8)
+		}
+		if m.widgets != nil {
+			for i, w := range m.widgets {
+				if w.isTextarea {
+					m.widgets[i].textarea.SetWidth(m.termWidth - 2)
+				}
+			}
+		}
+		return m, nil
+	}
+
 	switch m.currentState {
 	case "menu":
 		return updateMenu(m, msg)
@@ -124,6 +154,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case "edit", "edit_new":
 		return updateEdit(m, msg)
+	case "fullscreen_edit":
+		return updateFullscreenForm(m, msg)
 	default:
 		return m, nil
 	}
@@ -146,6 +178,8 @@ func (m Model) View() string {
 		return renderList(m)
 	case "edit", "edit_new":
 		return renderEditForm(m)
+	case "fullscreen_edit":
+		return renderFullscreenForm(m)
 	default:
 		return ""
 	}

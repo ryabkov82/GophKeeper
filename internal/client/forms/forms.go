@@ -16,7 +16,8 @@ type FormField struct {
 	InputType   string // "text", "password" и т.д.
 	Placeholder string
 	Mask        string
-	MaxLength   int // для ограничения длины ввода
+	MaxLength   int  // для ограничения длины ввода
+	Fullscreen  bool // если true — поле может редактироваться в полноэкранном режиме
 }
 
 // FormEntity интерфейс, который должна реализовывать любая сущность,

@@ -54,6 +54,7 @@ func Run(
 		Auth:       services,
 		Credential: services,
 		Bankcard:   services,
+		TextData:   services,
 	})
 	p := newProgram(model)
 

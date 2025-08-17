@@ -11,6 +11,7 @@ type serviceFactory struct {
 	auth       service.AuthService
 	credential service.CredentialService
 	bankCard   service.BankCardService
+	textData   service.TextDataService
 }
 
 // NewServiceFactory создает фабрику сервисов.
@@ -20,6 +21,7 @@ func NewServiceFactory(repoFactory repository.StorageFactory, jwt *jwtutils.Toke
 		auth:       NewAuthService(repoFactory.User(), jwt),
 		credential: NewCredentialService(repoFactory.Credential()),
 		bankCard:   NewBankCardService(repoFactory.BankCard()),
+		textData:   NewTextDataService(repoFactory.TextData()),
 	}
 }
 
@@ -33,4 +35,8 @@ func (f *serviceFactory) Credential() service.CredentialService {
 
 func (f *serviceFactory) BankCard() service.BankCardService {
 	return f.bankCard
+}
+
+func (f *serviceFactory) TextData() service.TextDataService {
+	return f.textData
 }

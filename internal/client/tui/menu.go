@@ -32,6 +32,8 @@ func updateMenu(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				return handleListSelection(m, contracts.TypeCredentials)
 			case "Cards":
 				return handleListSelection(m, contracts.TypeCards)
+			case "Notes":
+				return handleListSelection(m, contracts.TypeNotes)
 			case "Exit":
 				return m, tea.Quit
 			}

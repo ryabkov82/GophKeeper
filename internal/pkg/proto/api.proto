@@ -136,6 +136,62 @@ message DeleteBankCardResponse {
     bool success = 1;
 }
 
+// Сообщение для TextData
+message TextData {
+    string id = 1;
+    string user_id = 2;
+    string title = 3;
+    bytes content = 4;               // Зашифрованное содержимое
+    string metadata = 5;             // Дополнительная информация (JSON или текст)
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+// Запрос и ответ на создание TextData
+message CreateTextDataRequest {
+    TextData text_data = 1;
+}
+
+message CreateTextDataResponse {
+    TextData text_data = 1;
+}
+
+// Запрос и ответ на получение TextData по ID
+message GetTextDataByIDRequest {
+    string id = 1;
+}
+
+message GetTextDataByIDResponse {
+    TextData text_data = 1;
+}
+
+// Запрос и ответ на получение списка заголовков TextData
+message GetTextDataTitlesRequest {
+    string user_id = 1;
+}
+
+message GetTextDataTitlesResponse {
+    repeated TextData text_data_titles = 1;  // Содержит только id и title
+}
+
+// Запрос и ответ на обновление TextData
+message UpdateTextDataRequest {
+    TextData text_data = 1;
+}
+
+message UpdateTextDataResponse {
+    bool success = 1;
+}
+
+// Запрос и ответ на удаление TextData
+message DeleteTextDataRequest {
+    string id = 1;
+}
+
+message DeleteTextDataResponse {
+    bool success = 1;
+}
+
 // Сервис для работы с Credential
 service CredentialService {
     rpc CreateCredential(CreateCredentialRequest) returns (CreateCredentialResponse);
@@ -152,4 +208,13 @@ service BankCardService {
     rpc GetBankCards(google.protobuf.Empty) returns (GetBankCardsResponse);
     rpc UpdateBankCard(UpdateBankCardRequest) returns (UpdateBankCardResponse);
     rpc DeleteBankCard(DeleteBankCardRequest) returns (DeleteBankCardResponse);
+}
+
+// Сервис для работы с TextData
+service TextDataService {
+    rpc CreateTextData(CreateTextDataRequest) returns (CreateTextDataResponse);
+    rpc GetTextDataByID(GetTextDataByIDRequest) returns (GetTextDataByIDResponse);
+    rpc GetTextDataTitles(GetTextDataTitlesRequest) returns (GetTextDataTitlesResponse);
+    rpc UpdateTextData(UpdateTextDataRequest) returns (UpdateTextDataResponse);
+    rpc DeleteTextData(DeleteTextDataRequest) returns (DeleteTextDataResponse);
 }
