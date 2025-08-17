@@ -17,6 +17,7 @@ type formWidget struct {
 	textarea    textarea.Model  // многострочное поле ввода
 	field       forms.FormField // исходное описание поля формы
 	maskedInput *MaskedInput    // объект для работы с маской, nil если маски нет
+	fullscreen  bool            // поле редактируется в полноэкранном режиме
 }
 
 // setFocus устанавливает фокус на виджет или снимает его.
@@ -55,12 +56,13 @@ func initFormInputsFromFields(fields []forms.FormField) []formWidget {
 			ta.Placeholder = ""
 			ta.Cursor.Style = cursorStyle
 			ta.SetValue(field.Value)
-			ta.ShowLineNumbers = false
+			ta.ShowLineNumbers = true
 			ta.CharLimit = 0
 			ta.Prompt = " "
-
+			ta.SetWidth(100) // дефолтная ширина для обычных textarea
 			w.isTextarea = true
 			w.textarea = ta
+			w.fullscreen = field.Fullscreen // сохраняем флаг
 
 		default:
 			ti := textinput.New()

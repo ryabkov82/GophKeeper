@@ -8,5 +8,6 @@ type StorageFactory interface {
 	User() UserRepository
 	Credential() CredentialRepository
 	BankCard() BankCardRepository
+	TextData() TextDataRepository
 	// Если будут новые сущности — добавляем сюда
 }

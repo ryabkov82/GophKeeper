@@ -42,7 +42,7 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				return m, nil
 			}
 			w := m.widgets[m.focusedInput]
-			if w.isTextarea && strings.Contains(w.textarea.Value(), "\n") {
+			if w.isTextarea && !w.fullscreen && strings.Contains(w.textarea.Value(), "\n") {
 				var cmd tea.Cmd
 				w.textarea, cmd = w.textarea.Update(msg)
 				m.widgets[m.focusedInput] = w
@@ -65,7 +65,7 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				return m, nil
 			}
 			w := m.widgets[m.focusedInput]
-			if w.isTextarea {
+			if w.isTextarea && !w.fullscreen {
 				var cmd tea.Cmd
 				w.textarea, cmd = w.textarea.Update(msg)
 				m.widgets[m.focusedInput] = w
@@ -87,6 +87,19 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				}
 			}
 			return m, nil
+		case "f2":
+			if len(m.widgets) == 0 {
+				return m, nil
+			}
+			w := m.widgets[m.focusedInput]
+			if w.isTextarea && w.fullscreen {
+				// Переключаемся в отдельный режим редактирования fullscreen
+				m.prevState = m.currentState // сохраняем текущее состояние
+				m.currentState = "fullscreen_edit"
+				m.fullscreenWidget = &w // сохраняем текущий виджет
+				m = initFullscreenForm(m)
+			}
+			return m, nil
 		}
 
 		if len(m.widgets) == 0 {
@@ -94,6 +107,10 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		w := &m.widgets[m.focusedInput]
+		if w.fullscreen {
+			// не обрабатываем никакой ввод, просто возвращаем модель без изменений
+			return m, nil
+		}
 
 		// --- Обработка maskedInput ---
 		if w.maskedInput != nil && w.maskedInput.Mask != "" {
@@ -124,12 +141,6 @@ func renderEditForm(m Model) string {
 	}
 	b.WriteString(lipgloss.NewStyle().Bold(true).Render(title) + "\n\n")
 
-	// Обертка при рендере
-	blockStyle := lipgloss.NewStyle().
-		Background(lipgloss.Color("236")).
-		Foreground(lipgloss.Color("15")).
-		Padding(1, 1)
-
 	for i, widget := range m.widgets {
 		label := widget.field.Label + ": "
 		if i == m.focusedInput {
@@ -139,7 +150,25 @@ func renderEditForm(m Model) string {
 		}
 
 		if widget.isTextarea {
-			b.WriteString(label + "\n" + blockStyle.Render(widget.textarea.View()) + "\n")
+			content := widget.textarea.Value() // получаем всё содержимое
+			if widget.fullscreen {
+				lines := strings.Split(content, "\n")
+				if len(lines) > 5 {
+					lines = lines[:5]
+					lines = append(lines, "…") // добавляем многоточие
+				}
+				content = strings.Join(lines, "\n")
+				// делаем readonly-стиль
+				label += " (только просмотр, F2 для полноэкранного редактирования)\n"
+				b.WriteString(label)
+				if len(content) > 0 {
+					content = readonlyStyle.Render(content)
+					b.WriteString(formBlockStyle.Render(content) + "\n")
+				}
+			} else {
+				b.WriteString(label + "\n" + formBlockStyle.Render(widget.textarea.View()) + "\n")
+			}
+
 		} else {
 			b.WriteString(label + widget.input.View() + "\n")
 		}
@@ -150,7 +179,7 @@ func renderEditForm(m Model) string {
 	}
 
 	b.WriteString("\n" + hintStyle.Render(
-		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+B — переключить видимость пароля\n",
+		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+B: переключить видимость пароля\n",
 	))
 
 	return b.String()

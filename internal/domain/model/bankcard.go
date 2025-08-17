@@ -192,6 +192,7 @@ func (b *BankCard) FormFields() []forms.FormField {
 			Label:       "Metadata",
 			Value:       b.Metadata,
 			InputType:   "multiline",
+			Fullscreen:  false,
 			Placeholder: "Дополнительная информация о карте",
 		},
 	}

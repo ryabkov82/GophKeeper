@@ -712,3 +712,271 @@ func (mr *MockUnsafeBankCardServiceServerMockRecorder) mustEmbedUnimplementedBan
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedBankCardServiceServer", reflect.TypeOf((*MockUnsafeBankCardServiceServer)(nil).mustEmbedUnimplementedBankCardServiceServer))
 }
+
+// MockTextDataServiceClient is a mock of TextDataServiceClient interface.
+type MockTextDataServiceClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockTextDataServiceClientMockRecorder
+}
+
+// MockTextDataServiceClientMockRecorder is the mock recorder for MockTextDataServiceClient.
+type MockTextDataServiceClientMockRecorder struct {
+	mock *MockTextDataServiceClient
+}
+
+// NewMockTextDataServiceClient creates a new mock instance.
+func NewMockTextDataServiceClient(ctrl *gomock.Controller) *MockTextDataServiceClient {
+	mock := &MockTextDataServiceClient{ctrl: ctrl}
+	mock.recorder = &MockTextDataServiceClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTextDataServiceClient) EXPECT() *MockTextDataServiceClientMockRecorder {
+	return m.recorder
+}
+
+// CreateTextData mocks base method.
+func (m *MockTextDataServiceClient) CreateTextData(ctx context.Context, in *proto.CreateTextDataRequest, opts ...grpc.CallOption) (*proto.CreateTextDataResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateTextData", varargs...)
+	ret0, _ := ret[0].(*proto.CreateTextDataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTextData indicates an expected call of CreateTextData.
+func (mr *MockTextDataServiceClientMockRecorder) CreateTextData(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTextData", reflect.TypeOf((*MockTextDataServiceClient)(nil).CreateTextData), varargs...)
+}
+
+// DeleteTextData mocks base method.
+func (m *MockTextDataServiceClient) DeleteTextData(ctx context.Context, in *proto.DeleteTextDataRequest, opts ...grpc.CallOption) (*proto.DeleteTextDataResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteTextData", varargs...)
+	ret0, _ := ret[0].(*proto.DeleteTextDataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteTextData indicates an expected call of DeleteTextData.
+func (mr *MockTextDataServiceClientMockRecorder) DeleteTextData(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTextData", reflect.TypeOf((*MockTextDataServiceClient)(nil).DeleteTextData), varargs...)
+}
+
+// GetTextDataByID mocks base method.
+func (m *MockTextDataServiceClient) GetTextDataByID(ctx context.Context, in *proto.GetTextDataByIDRequest, opts ...grpc.CallOption) (*proto.GetTextDataByIDResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTextDataByID", varargs...)
+	ret0, _ := ret[0].(*proto.GetTextDataByIDResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTextDataByID indicates an expected call of GetTextDataByID.
+func (mr *MockTextDataServiceClientMockRecorder) GetTextDataByID(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTextDataByID", reflect.TypeOf((*MockTextDataServiceClient)(nil).GetTextDataByID), varargs...)
+}
+
+// GetTextDataTitles mocks base method.
+func (m *MockTextDataServiceClient) GetTextDataTitles(ctx context.Context, in *proto.GetTextDataTitlesRequest, opts ...grpc.CallOption) (*proto.GetTextDataTitlesResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTextDataTitles", varargs...)
+	ret0, _ := ret[0].(*proto.GetTextDataTitlesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTextDataTitles indicates an expected call of GetTextDataTitles.
+func (mr *MockTextDataServiceClientMockRecorder) GetTextDataTitles(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTextDataTitles", reflect.TypeOf((*MockTextDataServiceClient)(nil).GetTextDataTitles), varargs...)
+}
+
+// UpdateTextData mocks base method.
+func (m *MockTextDataServiceClient) UpdateTextData(ctx context.Context, in *proto.UpdateTextDataRequest, opts ...grpc.CallOption) (*proto.UpdateTextDataResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateTextData", varargs...)
+	ret0, _ := ret[0].(*proto.UpdateTextDataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateTextData indicates an expected call of UpdateTextData.
+func (mr *MockTextDataServiceClientMockRecorder) UpdateTextData(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTextData", reflect.TypeOf((*MockTextDataServiceClient)(nil).UpdateTextData), varargs...)
+}
+
+// MockTextDataServiceServer is a mock of TextDataServiceServer interface.
+type MockTextDataServiceServer struct {
+	ctrl     *gomock.Controller
+	recorder *MockTextDataServiceServerMockRecorder
+}
+
+// MockTextDataServiceServerMockRecorder is the mock recorder for MockTextDataServiceServer.
+type MockTextDataServiceServerMockRecorder struct {
+	mock *MockTextDataServiceServer
+}
+
+// NewMockTextDataServiceServer creates a new mock instance.
+func NewMockTextDataServiceServer(ctrl *gomock.Controller) *MockTextDataServiceServer {
+	mock := &MockTextDataServiceServer{ctrl: ctrl}
+	mock.recorder = &MockTextDataServiceServerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTextDataServiceServer) EXPECT() *MockTextDataServiceServerMockRecorder {
+	return m.recorder
+}
+
+// CreateTextData mocks base method.
+func (m *MockTextDataServiceServer) CreateTextData(arg0 context.Context, arg1 *proto.CreateTextDataRequest) (*proto.CreateTextDataResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTextData", arg0, arg1)
+	ret0, _ := ret[0].(*proto.CreateTextDataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTextData indicates an expected call of CreateTextData.
+func (mr *MockTextDataServiceServerMockRecorder) CreateTextData(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTextData", reflect.TypeOf((*MockTextDataServiceServer)(nil).CreateTextData), arg0, arg1)
+}
+
+// DeleteTextData mocks base method.
+func (m *MockTextDataServiceServer) DeleteTextData(arg0 context.Context, arg1 *proto.DeleteTextDataRequest) (*proto.DeleteTextDataResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTextData", arg0, arg1)
+	ret0, _ := ret[0].(*proto.DeleteTextDataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteTextData indicates an expected call of DeleteTextData.
+func (mr *MockTextDataServiceServerMockRecorder) DeleteTextData(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTextData", reflect.TypeOf((*MockTextDataServiceServer)(nil).DeleteTextData), arg0, arg1)
+}
+
+// GetTextDataByID mocks base method.
+func (m *MockTextDataServiceServer) GetTextDataByID(arg0 context.Context, arg1 *proto.GetTextDataByIDRequest) (*proto.GetTextDataByIDResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTextDataByID", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GetTextDataByIDResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTextDataByID indicates an expected call of GetTextDataByID.
+func (mr *MockTextDataServiceServerMockRecorder) GetTextDataByID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTextDataByID", reflect.TypeOf((*MockTextDataServiceServer)(nil).GetTextDataByID), arg0, arg1)
+}
+
+// GetTextDataTitles mocks base method.
+func (m *MockTextDataServiceServer) GetTextDataTitles(arg0 context.Context, arg1 *proto.GetTextDataTitlesRequest) (*proto.GetTextDataTitlesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTextDataTitles", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GetTextDataTitlesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTextDataTitles indicates an expected call of GetTextDataTitles.
+func (mr *MockTextDataServiceServerMockRecorder) GetTextDataTitles(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTextDataTitles", reflect.TypeOf((*MockTextDataServiceServer)(nil).GetTextDataTitles), arg0, arg1)
+}
+
+// UpdateTextData mocks base method.
+func (m *MockTextDataServiceServer) UpdateTextData(arg0 context.Context, arg1 *proto.UpdateTextDataRequest) (*proto.UpdateTextDataResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTextData", arg0, arg1)
+	ret0, _ := ret[0].(*proto.UpdateTextDataResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateTextData indicates an expected call of UpdateTextData.
+func (mr *MockTextDataServiceServerMockRecorder) UpdateTextData(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTextData", reflect.TypeOf((*MockTextDataServiceServer)(nil).UpdateTextData), arg0, arg1)
+}
+
+// mustEmbedUnimplementedTextDataServiceServer mocks base method.
+func (m *MockTextDataServiceServer) mustEmbedUnimplementedTextDataServiceServer() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "mustEmbedUnimplementedTextDataServiceServer")
+}
+
+// mustEmbedUnimplementedTextDataServiceServer indicates an expected call of mustEmbedUnimplementedTextDataServiceServer.
+func (mr *MockTextDataServiceServerMockRecorder) mustEmbedUnimplementedTextDataServiceServer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedTextDataServiceServer", reflect.TypeOf((*MockTextDataServiceServer)(nil).mustEmbedUnimplementedTextDataServiceServer))
+}
+
+// MockUnsafeTextDataServiceServer is a mock of UnsafeTextDataServiceServer interface.
+type MockUnsafeTextDataServiceServer struct {
+	ctrl     *gomock.Controller
+	recorder *MockUnsafeTextDataServiceServerMockRecorder
+}
+
+// MockUnsafeTextDataServiceServerMockRecorder is the mock recorder for MockUnsafeTextDataServiceServer.
+type MockUnsafeTextDataServiceServerMockRecorder struct {
+	mock *MockUnsafeTextDataServiceServer
+}
+
+// NewMockUnsafeTextDataServiceServer creates a new mock instance.
+func NewMockUnsafeTextDataServiceServer(ctrl *gomock.Controller) *MockUnsafeTextDataServiceServer {
+	mock := &MockUnsafeTextDataServiceServer{ctrl: ctrl}
+	mock.recorder = &MockUnsafeTextDataServiceServerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUnsafeTextDataServiceServer) EXPECT() *MockUnsafeTextDataServiceServerMockRecorder {
+	return m.recorder
+}
+
+// mustEmbedUnimplementedTextDataServiceServer mocks base method.
+func (m *MockUnsafeTextDataServiceServer) mustEmbedUnimplementedTextDataServiceServer() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "mustEmbedUnimplementedTextDataServiceServer")
+}
+
+// mustEmbedUnimplementedTextDataServiceServer indicates an expected call of mustEmbedUnimplementedTextDataServiceServer.
+func (mr *MockUnsafeTextDataServiceServerMockRecorder) mustEmbedUnimplementedTextDataServiceServer() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "mustEmbedUnimplementedTextDataServiceServer", reflect.TypeOf((*MockUnsafeTextDataServiceServer)(nil).mustEmbedUnimplementedTextDataServiceServer))
+}

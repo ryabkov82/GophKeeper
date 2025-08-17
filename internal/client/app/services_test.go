@@ -190,6 +190,42 @@ func (m *mockBankCardManager) DeleteBankCard(ctx context.Context, id string) err
 	return m.deleteErr
 }
 
+// mockTextDataManager - мок TextDataManagerIface
+type mockTextDataManager struct {
+	createErr       error
+	getByIDResult   *model.TextData
+	getByIDErr      error
+	getTitlesResult []*model.TextData
+	getTitlesErr    error
+	updateErr       error
+	deleteErr       error
+	setClientCalled bool
+}
+
+func (m *mockTextDataManager) CreateTextData(ctx context.Context, td *model.TextData) error {
+	return m.createErr
+}
+
+func (m *mockTextDataManager) GetTextDataByID(ctx context.Context, id string) (*model.TextData, error) {
+	return m.getByIDResult, m.getByIDErr
+}
+
+func (m *mockTextDataManager) GetTextDataTitles(ctx context.Context) ([]*model.TextData, error) {
+	return m.getTitlesResult, m.getTitlesErr
+}
+
+func (m *mockTextDataManager) UpdateTextData(ctx context.Context, td *model.TextData) error {
+	return m.updateErr
+}
+
+func (m *mockTextDataManager) DeleteTextData(ctx context.Context, id string) error {
+	return m.deleteErr
+}
+
+func (m *mockTextDataManager) SetClient(client proto.TextDataServiceClient) {
+	m.setClientCalled = true
+}
+
 func TestNewAppServices_Success(t *testing.T) {
 	tempLogDir := t.TempDir()
 

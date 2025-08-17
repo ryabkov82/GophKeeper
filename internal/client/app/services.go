@@ -12,6 +12,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/client/service/bankcard"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/credential"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/cryptokey"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/textdata"
 	"github.com/ryabkov82/gophkeeper/internal/client/storage"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/logger"
 	"go.uber.org/zap"
@@ -36,6 +37,7 @@ type AppServices struct {
 	AuthManager       auth.AuthManagerIface
 	CredentialManager credential.CredentialManagerIface
 	BankCardManager   bankcard.BankCardManagerIface
+	TextDataManager   textdata.TextDataManagerIface
 	CryptoKeyManager  cryptokey.CryptoKeyManagerIface
 	ConnManager       connection.ConnManager
 	Logger            *zap.Logger
@@ -70,8 +72,11 @@ func NewAppServices(cfg *config.ClientConfig) (*AppServices, error) {
 	// Создаем CredentialManager, передав logger
 	credentialManager := credential.NewCredentialManager(log)
 
-	// Создаем CredentialManager, передав logger
+	// Создаем BankCardManager, передав logger
 	bankcardManager := bankcard.NewBankCardManager(log)
+
+	// Создаем BankCardManager, передав logger
+	textdataManager := textdata.NewTextDataManager(log)
 
 	connManager := connection.New(connConfig, log, authManager)
 
@@ -79,6 +84,7 @@ func NewAppServices(cfg *config.ClientConfig) (*AppServices, error) {
 		AuthManager:       authManager,
 		CredentialManager: credentialManager,
 		BankCardManager:   bankcardManager,
+		TextDataManager:   textdataManager,
 		CryptoKeyManager:  cryptoKeyManager,
 		ConnManager:       connManager,
 		Logger:            log,

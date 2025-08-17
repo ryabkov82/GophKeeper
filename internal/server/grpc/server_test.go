@@ -57,6 +57,10 @@ func (m *mockServiceFactory) BankCard() service.BankCardService {
 	return nil
 }
 
+func (m *mockServiceFactory) TextData() service.TextDataService {
+	return nil
+}
+
 func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {
 	addr := getFreePort(t)
 

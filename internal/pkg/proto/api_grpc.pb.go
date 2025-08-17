@@ -678,3 +678,261 @@ var BankCardService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "api.proto",
 }
+
+const (
+	TextDataService_CreateTextData_FullMethodName    = "/gophkeeper.proto.TextDataService/CreateTextData"
+	TextDataService_GetTextDataByID_FullMethodName   = "/gophkeeper.proto.TextDataService/GetTextDataByID"
+	TextDataService_GetTextDataTitles_FullMethodName = "/gophkeeper.proto.TextDataService/GetTextDataTitles"
+	TextDataService_UpdateTextData_FullMethodName    = "/gophkeeper.proto.TextDataService/UpdateTextData"
+	TextDataService_DeleteTextData_FullMethodName    = "/gophkeeper.proto.TextDataService/DeleteTextData"
+)
+
+// TextDataServiceClient is the client API for TextDataService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Сервис для работы с TextData
+type TextDataServiceClient interface {
+	CreateTextData(ctx context.Context, in *CreateTextDataRequest, opts ...grpc.CallOption) (*CreateTextDataResponse, error)
+	GetTextDataByID(ctx context.Context, in *GetTextDataByIDRequest, opts ...grpc.CallOption) (*GetTextDataByIDResponse, error)
+	GetTextDataTitles(ctx context.Context, in *GetTextDataTitlesRequest, opts ...grpc.CallOption) (*GetTextDataTitlesResponse, error)
+	UpdateTextData(ctx context.Context, in *UpdateTextDataRequest, opts ...grpc.CallOption) (*UpdateTextDataResponse, error)
+	DeleteTextData(ctx context.Context, in *DeleteTextDataRequest, opts ...grpc.CallOption) (*DeleteTextDataResponse, error)
+}
+
+type textDataServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTextDataServiceClient(cc grpc.ClientConnInterface) TextDataServiceClient {
+	return &textDataServiceClient{cc}
+}
+
+func (c *textDataServiceClient) CreateTextData(ctx context.Context, in *CreateTextDataRequest, opts ...grpc.CallOption) (*CreateTextDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateTextDataResponse)
+	err := c.cc.Invoke(ctx, TextDataService_CreateTextData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textDataServiceClient) GetTextDataByID(ctx context.Context, in *GetTextDataByIDRequest, opts ...grpc.CallOption) (*GetTextDataByIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTextDataByIDResponse)
+	err := c.cc.Invoke(ctx, TextDataService_GetTextDataByID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textDataServiceClient) GetTextDataTitles(ctx context.Context, in *GetTextDataTitlesRequest, opts ...grpc.CallOption) (*GetTextDataTitlesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTextDataTitlesResponse)
+	err := c.cc.Invoke(ctx, TextDataService_GetTextDataTitles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textDataServiceClient) UpdateTextData(ctx context.Context, in *UpdateTextDataRequest, opts ...grpc.CallOption) (*UpdateTextDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateTextDataResponse)
+	err := c.cc.Invoke(ctx, TextDataService_UpdateTextData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textDataServiceClient) DeleteTextData(ctx context.Context, in *DeleteTextDataRequest, opts ...grpc.CallOption) (*DeleteTextDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTextDataResponse)
+	err := c.cc.Invoke(ctx, TextDataService_DeleteTextData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TextDataServiceServer is the server API for TextDataService service.
+// All implementations must embed UnimplementedTextDataServiceServer
+// for forward compatibility.
+//
+// Сервис для работы с TextData
+type TextDataServiceServer interface {
+	CreateTextData(context.Context, *CreateTextDataRequest) (*CreateTextDataResponse, error)
+	GetTextDataByID(context.Context, *GetTextDataByIDRequest) (*GetTextDataByIDResponse, error)
+	GetTextDataTitles(context.Context, *GetTextDataTitlesRequest) (*GetTextDataTitlesResponse, error)
+	UpdateTextData(context.Context, *UpdateTextDataRequest) (*UpdateTextDataResponse, error)
+	DeleteTextData(context.Context, *DeleteTextDataRequest) (*DeleteTextDataResponse, error)
+	mustEmbedUnimplementedTextDataServiceServer()
+}
+
+// UnimplementedTextDataServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedTextDataServiceServer struct{}
+
+func (UnimplementedTextDataServiceServer) CreateTextData(context.Context, *CreateTextDataRequest) (*CreateTextDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTextData not implemented")
+}
+func (UnimplementedTextDataServiceServer) GetTextDataByID(context.Context, *GetTextDataByIDRequest) (*GetTextDataByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTextDataByID not implemented")
+}
+func (UnimplementedTextDataServiceServer) GetTextDataTitles(context.Context, *GetTextDataTitlesRequest) (*GetTextDataTitlesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTextDataTitles not implemented")
+}
+func (UnimplementedTextDataServiceServer) UpdateTextData(context.Context, *UpdateTextDataRequest) (*UpdateTextDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTextData not implemented")
+}
+func (UnimplementedTextDataServiceServer) DeleteTextData(context.Context, *DeleteTextDataRequest) (*DeleteTextDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTextData not implemented")
+}
+func (UnimplementedTextDataServiceServer) mustEmbedUnimplementedTextDataServiceServer() {}
+func (UnimplementedTextDataServiceServer) testEmbeddedByValue()                         {}
+
+// UnsafeTextDataServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TextDataServiceServer will
+// result in compilation errors.
+type UnsafeTextDataServiceServer interface {
+	mustEmbedUnimplementedTextDataServiceServer()
+}
+
+func RegisterTextDataServiceServer(s grpc.ServiceRegistrar, srv TextDataServiceServer) {
+	// If the following call pancis, it indicates UnimplementedTextDataServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&TextDataService_ServiceDesc, srv)
+}
+
+func _TextDataService_CreateTextData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTextDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextDataServiceServer).CreateTextData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TextDataService_CreateTextData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextDataServiceServer).CreateTextData(ctx, req.(*CreateTextDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextDataService_GetTextDataByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTextDataByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextDataServiceServer).GetTextDataByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TextDataService_GetTextDataByID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextDataServiceServer).GetTextDataByID(ctx, req.(*GetTextDataByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextDataService_GetTextDataTitles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTextDataTitlesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextDataServiceServer).GetTextDataTitles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TextDataService_GetTextDataTitles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextDataServiceServer).GetTextDataTitles(ctx, req.(*GetTextDataTitlesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextDataService_UpdateTextData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTextDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextDataServiceServer).UpdateTextData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TextDataService_UpdateTextData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextDataServiceServer).UpdateTextData(ctx, req.(*UpdateTextDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextDataService_DeleteTextData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTextDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextDataServiceServer).DeleteTextData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TextDataService_DeleteTextData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextDataServiceServer).DeleteTextData(ctx, req.(*DeleteTextDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// TextDataService_ServiceDesc is the grpc.ServiceDesc for TextDataService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var TextDataService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "gophkeeper.proto.TextDataService",
+	HandlerType: (*TextDataServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateTextData",
+			Handler:    _TextDataService_CreateTextData_Handler,
+		},
+		{
+			MethodName: "GetTextDataByID",
+			Handler:    _TextDataService_GetTextDataByID_Handler,
+		},
+		{
+			MethodName: "GetTextDataTitles",
+			Handler:    _TextDataService_GetTextDataTitles_Handler,
+		},
+		{
+			MethodName: "UpdateTextData",
+			Handler:    _TextDataService_UpdateTextData_Handler,
+		},
+		{
+			MethodName: "DeleteTextData",
+			Handler:    _TextDataService_DeleteTextData_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api.proto",
+}

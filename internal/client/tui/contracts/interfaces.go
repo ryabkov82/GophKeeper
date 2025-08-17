@@ -48,3 +48,21 @@ type BankCardService interface {
 	// DeleteBankCard удаляет запись банковской карты по идентификатору.
 	DeleteBankCard(ctx context.Context, id string) error
 }
+
+// TextDataService описывает интерфейс управления текстовыми данными.
+type TextDataService interface {
+	// CreateTextData создаёт новый текстовый объект на сервере с шифрованием содержимого
+	CreateTextData(ctx context.Context, text *model.TextData) error
+
+	// GetTextDataByID получает текстовые данные по ID с расшифровкой содержимого
+	GetTextDataByID(ctx context.Context, id string) (*model.TextData, error)
+
+	// GetTextDataTitles получает только заголовки текстовых данных (без расшифровки контента)
+	GetTextDataTitles(ctx context.Context) ([]*model.TextData, error)
+
+	// UpdateTextData обновляет текстовые данные с шифрованием содержимого
+	UpdateTextData(ctx context.Context, text *model.TextData) error
+
+	// DeleteTextData удаляет текстовые данные по ID
+	DeleteTextData(ctx context.Context, id string) error
+}

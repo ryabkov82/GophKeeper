@@ -13,6 +13,7 @@ type postgresFactory struct {
 	userRepo       repository.UserRepository
 	credentialRepo repository.CredentialRepository
 	bankCardRepo   repository.BankCardRepository
+	textDataRepo   repository.TextDataRepository
 }
 
 // NewPostgresFactory создаёт фабрику, использующую Postgres как источник данных.
@@ -21,6 +22,7 @@ func NewPostgresFactory(db *sql.DB) repository.StorageFactory {
 		userRepo:       postgres.NewUserStorage(db),
 		credentialRepo: postgres.NewCredentialStorage(db),
 		bankCardRepo:   postgres.NewBankCardStorage(db),
+		textDataRepo:   postgres.NewTextDataStorage(db),
 	}
 }
 
@@ -34,6 +36,10 @@ func (f *postgresFactory) Credential() repository.CredentialRepository {
 
 func (f *postgresFactory) BankCard() repository.BankCardRepository {
 	return f.bankCardRepo
+}
+
+func (f *postgresFactory) TextData() repository.TextDataRepository {
+	return f.textDataRepo
 }
 
 // NewStorageFactory создает фабрику репозиториев для указанного драйвера БД.
