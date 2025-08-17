@@ -70,7 +70,7 @@ func TestInitFullscreenForm_NotTextarea(t *testing.T) {
 func TestUpdateFullscreenForm_EnterInsertsNewline(t *testing.T) {
 	m := makeFullscreenModel("h")
 	m2, _ := updateFullscreenForm(m, tea.KeyMsg{Type: tea.KeyEnter})
-	assert.Equal(t, "\nh", m2.fullscreenWidget.textarea.Value())
+	assert.Equal(t, "h\n", m2.fullscreenWidget.textarea.Value())
 }
 
 func TestUpdateFullscreenForm_CtrlHomeAndCtrlEnd(t *testing.T) {

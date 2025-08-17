@@ -115,6 +115,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.fullscreenWidget.textarea.SetWidth(m.termWidth - 2)
 			m.fullscreenWidget.textarea.SetHeight(m.termHeight - 8)
 		}
+		if m.widgets != nil {
+			for i, w := range m.widgets {
+				if w.isTextarea {
+					m.widgets[i].textarea.SetWidth(m.termWidth - 2)
+				}
+			}
+		}
 		return m, nil
 	}
 

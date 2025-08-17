@@ -28,6 +28,9 @@ func initFullscreenForm(m Model) Model {
 	fullscreenTA.SetWidth(m.termWidth - 2)   // оставляем по 1 символу слева/справа
 	fullscreenTA.SetHeight(m.termHeight - 8) //
 	fullscreenTA.SetValue(w.textarea.Value())
+	for fullscreenTA.Line() > 0 {
+		fullscreenTA.CursorUp()
+	}
 	fullscreenTA.Cursor.Style = cursorStyle
 	fullscreenTA.Focus()
 
@@ -61,28 +64,38 @@ func updateFullscreenForm(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			for i := 0; i < step; i++ {
 				w.textarea.CursorUp()
 			}
+			w.textarea.CursorStart()
 			m.fullscreenWidget = w
 			return m, nil
 		case "pgdown":
 			for i := 0; i < step; i++ {
 				w.textarea.CursorDown()
 			}
+			w.textarea.CursorEnd()
 			m.fullscreenWidget = w
 			return m, nil
 		case "ctrl+home":
-			for i := 0; i < len(strings.Split(w.textarea.Value(), "\n")); i++ {
+			for w.textarea.Line() > 0 {
 				w.textarea.CursorUp()
 			}
+			w.textarea.CursorStart()
+
 			m.fullscreenWidget = w
 			return m, nil
 
 		case "ctrl+end":
 
-			for i := 0; i < len(strings.Split(w.textarea.Value(), "\n")); i++ {
-				w.textarea.CursorDown()
-			}
-			w.textarea.CursorEnd()
+			// Бесконечный цикл, который прервётся когда достигнем последней строки
+			for {
+				currentLine := w.textarea.Line() // Запоминаем текущую строку
+				w.textarea.CursorDown()          // Пробуем переместиться вниз
+				w.textarea.CursorEnd()           // и в конец строки
 
+				// Если после перемещения строка не изменилась - мы достигли конца
+				if w.textarea.Line() == currentLine {
+					break // Выходим из цикла
+				}
+			}
 			m.fullscreenWidget = w
 			return m, nil
 		case "esc":
@@ -107,8 +120,8 @@ func updateFullscreenForm(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		case "ctrl+v":
 			clipText := clipboardRead()
 			if clipText != "" {
-				newValue := w.textarea.Value() + clipText
-				w.textarea.SetValue(newValue)
+				//newValue := w.textarea.Value() + clipText
+				w.textarea.SetValue(clipText)
 				m.fullscreenWidget = w
 				return m, nil
 			}

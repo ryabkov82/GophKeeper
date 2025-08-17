@@ -44,7 +44,7 @@ func (w *formWidget) setFocus(focused bool) {
 // - "password" — создаётся текстовое поле с EchoPassword.
 // - обычный ввод — создаётся textinput с ограничением длины из field.MaxLength.
 // Если задано поле Mask, создаётся maskedInput и отображается сразу с подчеркиваниями.
-func initFormInputsFromFields(fields []forms.FormField) []formWidget {
+func initFormInputsFromFields(fields []forms.FormField, termWidth int) []formWidget {
 	widgets := make([]formWidget, len(fields))
 
 	for i, field := range fields {
@@ -57,9 +57,10 @@ func initFormInputsFromFields(fields []forms.FormField) []formWidget {
 			ta.Cursor.Style = cursorStyle
 			ta.SetValue(field.Value)
 			ta.ShowLineNumbers = true
-			ta.CharLimit = 0
-			ta.Prompt = " "
-			ta.SetWidth(100) // дефолтная ширина для обычных textarea
+			//ta.CharLimit = 0
+			//ta.Prompt = " "
+			//ta.SetWidth(100) // дефолтная ширина для обычных textarea
+			ta.SetWidth(termWidth - 2)
 			w.isTextarea = true
 			w.textarea = ta
 			w.fullscreen = field.Fullscreen // сохраняем флаг

@@ -17,7 +17,7 @@ func initEditForm(m Model) Model {
 
 	if entity, ok := m.editEntity.(forms.FormEntity); ok {
 		formFields := entity.FormFields()
-		m.widgets = initFormInputsFromFields(formFields)
+		m.widgets = initFormInputsFromFields(formFields, m.termWidth)
 		m.focusedInput = 0
 	} else {
 		m.editErr = fmt.Errorf("entity does not implement FormEntity")
@@ -42,7 +42,7 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				return m, nil
 			}
 			w := m.widgets[m.focusedInput]
-			if w.isTextarea && !w.fullscreen && strings.Contains(w.textarea.Value(), "\n") {
+			if w.isTextarea && strings.Contains(w.textarea.Value(), "\n") {
 				var cmd tea.Cmd
 				w.textarea, cmd = w.textarea.Update(msg)
 				m.widgets[m.focusedInput] = w
@@ -65,7 +65,7 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				return m, nil
 			}
 			w := m.widgets[m.focusedInput]
-			if w.isTextarea && !w.fullscreen {
+			if w.isTextarea {
 				var cmd tea.Cmd
 				w.textarea, cmd = w.textarea.Update(msg)
 				m.widgets[m.focusedInput] = w
@@ -150,25 +150,25 @@ func renderEditForm(m Model) string {
 		}
 
 		if widget.isTextarea {
-			content := widget.textarea.Value() // получаем всё содержимое
 			if widget.fullscreen {
-				lines := strings.Split(content, "\n")
-				if len(lines) > 5 {
-					lines = lines[:5]
-					lines = append(lines, "…") // добавляем многоточие
-				}
-				content = strings.Join(lines, "\n")
-				// делаем readonly-стиль
-				label += " (только просмотр, F2 для полноэкранного редактирования)\n"
-				b.WriteString(label)
-				if len(content) > 0 {
-					content = readonlyStyle.Render(content)
-					b.WriteString(formBlockStyle.Render(content) + "\n")
-				}
-			} else {
-				b.WriteString(label + "\n" + formBlockStyle.Render(widget.textarea.View()) + "\n")
+				label += " (F2 для полноэкранного просмотра/редактирования)"
+				/*
+					content := widget.textarea.Value() // получаем всё содержимое
+					lines := strings.Split(content, "\n")
+					if len(lines) > 5 {
+						lines = lines[:5]
+						lines = append(lines, "…") // добавляем многоточие
+					}
+					content = strings.Join(lines, "\n")
+					// делаем readonly-стиль
+					b.WriteString(label)
+					if len(content) > 0 {
+						content = readonlyStyle.Render(content)
+						b.WriteString(formBlockStyle.Render(content) + "\n")
+					}
+				*/
 			}
-
+			b.WriteString(label + "\n" + formBlockStyle.Render(widget.textarea.View()) + "\n")
 		} else {
 			b.WriteString(label + widget.input.View() + "\n")
 		}
