@@ -20,4 +20,6 @@ type BinaryDataRepository interface {
 
 	// Delete удаляет запись по идентификатору и владельцу.
 	Delete(ctx context.Context, userID, id string) error
+
+	Update(ctx context.Context, data *model.BinaryData) error
 }

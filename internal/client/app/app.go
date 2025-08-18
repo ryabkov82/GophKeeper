@@ -10,6 +10,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/client/connection"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/auth"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/bankcard"
+	"github.com/ryabkov82/gophkeeper/internal/client/service/binarydata"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/credential"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/cryptokey"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/textdata"
@@ -38,6 +39,7 @@ type AppServices struct {
 	CredentialManager credential.CredentialManagerIface
 	BankCardManager   bankcard.BankCardManagerIface
 	TextDataManager   textdata.TextDataManagerIface
+	BinaryDataManager binarydata.BinaryDataManagerIface
 	CryptoKeyManager  cryptokey.CryptoKeyManagerIface
 	ConnManager       connection.ConnManager
 	Logger            *zap.Logger
@@ -75,8 +77,11 @@ func NewAppServices(cfg *config.ClientConfig) (*AppServices, error) {
 	// Создаем BankCardManager, передав logger
 	bankcardManager := bankcard.NewBankCardManager(log)
 
-	// Создаем BankCardManager, передав logger
+	// Создаем TextDataManager, передав logger
 	textdataManager := textdata.NewTextDataManager(log)
+
+	// Создаем BinaryDataManager, передав logger
+	binarydataManager := binarydata.NewBinaryDataManager(log)
 
 	connManager := connection.New(connConfig, log, authManager)
 
@@ -85,6 +90,7 @@ func NewAppServices(cfg *config.ClientConfig) (*AppServices, error) {
 		CredentialManager: credentialManager,
 		BankCardManager:   bankcardManager,
 		TextDataManager:   textdataManager,
+		BinaryDataManager: binarydataManager,
 		CryptoKeyManager:  cryptoKeyManager,
 		ConnManager:       connManager,
 		Logger:            log,

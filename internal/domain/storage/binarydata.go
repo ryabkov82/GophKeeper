@@ -27,10 +27,10 @@ import (
 type BinaryDataStorage interface {
 	// Save сохраняет бинарные данные из r в хранилище.
 	// Возвращает относительный путь или ключ (storagePath), который можно
-	// сохранить в БД для последующего доступа к файлу.
+	// сохранить в БД для последующего доступа к файлу, и размер файла.
 	//
 	// userID — владелец данных, может использоваться для организации структуры каталогов.
-	Save(ctx context.Context, userID string, r io.Reader) (storagePath string, err error)
+	Save(ctx context.Context, userID string, r io.Reader) (storagePath string, size int64, err error)
 
 	// Load возвращает поток для чтения бинарных данных по указанному storagePath.
 	// Вызвавший код обязан закрыть возвращённый io.ReadCloser.

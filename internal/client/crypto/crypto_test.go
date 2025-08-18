@@ -2,9 +2,11 @@ package crypto_test
 
 import (
 	"bytes"
+	"crypto/rand"
 	"testing"
 
 	"github.com/ryabkov82/gophkeeper/internal/client/crypto"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDeriveKey_Success(t *testing.T) {
@@ -117,4 +119,79 @@ func TestEncryptDecryptAESGCM_WrongKey(t *testing.T) {
 	if err == nil {
 		t.Error("expected error when decrypting with wrong key, got nil")
 	}
+}
+
+func TestEncryptDecryptStream_Success(t *testing.T) {
+	key := make([]byte, 32) // AES-256
+	_, err := rand.Read(key)
+	assert.NoError(t, err)
+
+	plaintext := []byte("Hello, this is a test of EncryptStream and DecryptStream!")
+
+	var encrypted bytes.Buffer
+	err = crypto.EncryptStream(bytes.NewReader(plaintext), &encrypted, key)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, encrypted.Bytes())
+
+	var decrypted bytes.Buffer
+	err = crypto.DecryptStream(&encrypted, &decrypted, key)
+	assert.NoError(t, err)
+
+	assert.Equal(t, plaintext, decrypted.Bytes())
+}
+
+func TestEncryptStream_InvalidKey(t *testing.T) {
+	key := []byte("short") // некорректный размер ключа
+	var buf bytes.Buffer
+	err := crypto.EncryptStream(bytes.NewReader([]byte("data")), &buf, key)
+	assert.Error(t, err)
+}
+
+func TestDecryptStream_InvalidKey(t *testing.T) {
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+
+	plaintext := []byte("test data")
+	var encrypted bytes.Buffer
+	err := crypto.EncryptStream(bytes.NewReader(plaintext), &encrypted, key)
+	assert.NoError(t, err)
+
+	badKey := make([]byte, 32)
+	_, _ = rand.Read(badKey)
+	var decrypted bytes.Buffer
+	err = crypto.DecryptStream(&encrypted, &decrypted, badKey)
+	assert.Error(t, err) // ошибка из-за неверного ключа
+}
+
+func TestDecryptStream_TruncatedData(t *testing.T) {
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+
+	plaintext := []byte("test data")
+	var encrypted bytes.Buffer
+	err := crypto.EncryptStream(bytes.NewReader(plaintext), &encrypted, key)
+	assert.NoError(t, err)
+
+	// Укорачиваем зашифрованные данные
+	truncated := encrypted.Bytes()[:len(encrypted.Bytes())-5]
+	var decrypted bytes.Buffer
+	err = crypto.DecryptStream(bytes.NewReader(truncated), &decrypted, key)
+	assert.Error(t, err)
+}
+
+func TestEncryptDecryptStream_LargeData(t *testing.T) {
+	key := make([]byte, 32)
+	_, _ = rand.Read(key)
+
+	plaintext := bytes.Repeat([]byte("A"), 1024*1024) // 1 MB данных
+
+	var encrypted bytes.Buffer
+	err := crypto.EncryptStream(bytes.NewReader(plaintext), &encrypted, key)
+	assert.NoError(t, err)
+
+	var decrypted bytes.Buffer
+	err = crypto.DecryptStream(&encrypted, &decrypted, key)
+	assert.NoError(t, err)
+
+	assert.Equal(t, plaintext, decrypted.Bytes())
 }

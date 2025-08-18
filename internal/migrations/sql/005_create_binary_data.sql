@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS binary_data (
     -- Путь к файлу в хранилище (локальная ФС, S3 и т.п.)
     storage_path TEXT NOT NULL CHECK (char_length(storage_path) <= 1024),
 
+    -- Размер файла в байтах
+    size BIGINT NOT NULL DEFAULT 0;
+
     -- Произвольная дополнительная информация (в зашифрованном виде)
     metadata TEXT CHECK (char_length(metadata) <= 4096),
 

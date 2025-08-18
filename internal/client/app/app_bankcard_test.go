@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ryabkov82/gophkeeper/internal/client/app"
-	"github.com/ryabkov82/gophkeeper/internal/client/app/cryptowrap"
+	"github.com/ryabkov82/gophkeeper/internal/client/cryptowrap"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"

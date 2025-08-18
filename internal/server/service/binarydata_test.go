@@ -26,6 +26,11 @@ func (m *mockRepo) Save(ctx context.Context, data *model.BinaryData) error {
 	return args.Error(0)
 }
 
+func (m *mockRepo) Update(ctx context.Context, data *model.BinaryData) error {
+	args := m.Called(ctx, data)
+	return args.Error(0)
+}
+
 func (m *mockRepo) GetByID(ctx context.Context, userID, id string) (*model.BinaryData, error) {
 	args := m.Called(ctx, userID, id)
 	if v := args.Get(0); v != nil {
@@ -53,9 +58,9 @@ type mockStorage struct {
 	mock.Mock
 }
 
-func (m *mockStorage) Save(ctx context.Context, userID string, r io.Reader) (string, error) {
+func (m *mockStorage) Save(ctx context.Context, userID string, r io.Reader) (string, int64, error) {
 	args := m.Called(ctx, userID, r)
-	return args.String(0), args.Error(1)
+	return args.String(0), args.Get(1).(int64), args.Error(2)
 }
 
 func (m *mockStorage) Load(ctx context.Context, path string) (io.ReadCloser, error) {
@@ -89,7 +94,7 @@ func TestBinaryDataService_Create_Success(t *testing.T) {
 	storagePath := "path/to/file"
 
 	// моки
-	storage.On("Save", ctx, userID, mock.Anything).Return(storagePath, nil).Once()
+	storage.On("Save", ctx, userID, mock.Anything).Return(storagePath, int64(1), nil).Once()
 	repo.On("Save", ctx, mock.AnythingOfType("*model.BinaryData")).Return(nil).Once()
 
 	data, err := svc.Create(ctx, userID, "title", "meta", reader)
@@ -115,7 +120,7 @@ func TestBinaryDataService_Create_RepoError(t *testing.T) {
 	reader := bytes.NewReader([]byte("fail"))
 	storagePath := "path/to/file"
 
-	storage.On("Save", ctx, userID, mock.Anything).Return(storagePath, nil).Once()
+	storage.On("Save", ctx, userID, mock.Anything).Return(storagePath, int64(1), nil).Once()
 	repo.On("Save", ctx, mock.AnythingOfType("*model.BinaryData")).Return(errors.New("db fail")).Once()
 	storage.On("Delete", ctx, storagePath).Return(nil).Once()
 
@@ -148,6 +153,27 @@ func TestBinaryDataService_Get_Success(t *testing.T) {
 
 	storage.AssertExpectations(t)
 	repo.AssertExpectations(t)
+}
+
+func TestBinaryDataService_GetInfo_Success(t *testing.T) {
+	ctx := context.Background()
+	repo := new(mockRepo)
+	storage := new(mockStorage) // нужен для конструктора, но в тесте не используется
+	svc := service.NewBinaryDataService(repo, storage)
+
+	userID := "user1"
+	id := uuid.NewString()
+	bd := &model.BinaryData{ID: id, UserID: userID, Title: "test"}
+
+	// Ожидаем вызов только репозитория
+	repo.On("GetByID", ctx, userID, id).Return(bd, nil).Once()
+
+	got, err := svc.GetInfo(ctx, userID, id)
+	assert.NoError(t, err)
+	assert.Equal(t, bd, got)
+
+	repo.AssertExpectations(t)
+	storage.AssertExpectations(t) // не должно быть вызовов
 }
 
 func TestBinaryDataService_List(t *testing.T) {
@@ -224,10 +250,10 @@ func TestBinaryDataService_Update_Success(t *testing.T) {
 
 	// Моки репозитория
 	repo.On("GetByID", ctx, userID, id).Return(existing, nil).Once()
-	repo.On("Save", ctx, mock.Anything).Return(nil).Once()
+	repo.On("Update", ctx, mock.Anything).Return(nil).Once()
 
 	// Моки хранилища
-	storage.On("Save", ctx, userID, mock.Anything).Return(newPath, nil).Once()
+	storage.On("Save", ctx, userID, mock.Anything).Return(newPath, int64(1), nil).Once()
 	storage.On("Delete", ctx, oldPath).Return(nil).Once()
 
 	// Вызываем метод

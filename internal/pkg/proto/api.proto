@@ -221,6 +221,7 @@ message BinaryDataInfo {
     string id = 1;
     string title = 2;
     string metadata = 3;
+    int64 size = 4;
 }
 
 message DeleteBinaryDataRequest {
@@ -228,6 +229,16 @@ message DeleteBinaryDataRequest {
 }
 
 message DeleteBinaryDataResponse {}
+
+// Запрос информации о файле
+message GetBinaryDataInfoRequest {
+    string id = 1; // UUID записи
+}
+
+// Ответ с метаданными файла
+message GetBinaryDataInfoResponse {
+    BinaryDataInfo binary_info = 1;
+}
 
 // Запрос для обновления бинарных данных (поток)
 message UpdateBinaryDataRequest {
@@ -276,4 +287,5 @@ service BinaryDataService {
     rpc ListBinaryData(ListBinaryDataRequest) returns (ListBinaryDataResponse);
     rpc DeleteBinaryData(DeleteBinaryDataRequest) returns (DeleteBinaryDataResponse);
     rpc UpdateBinaryData(stream UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);
+    rpc GetBinaryDataInfo(GetBinaryDataInfoRequest) returns (GetBinaryDataInfoResponse);
 }

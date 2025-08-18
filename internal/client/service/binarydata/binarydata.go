@@ -13,10 +13,11 @@ import (
 // BinaryDataManagerIface описывает интерфейс управления бинарными данными.
 type BinaryDataManagerIface interface {
 	Upload(ctx context.Context, data *model.BinaryData, r io.Reader) error
-	Download(ctx context.Context, userID, id string) ([]byte, error)
-	List(ctx context.Context, userID string) ([]model.BinaryData, error)
+	Download(ctx context.Context, id string) (io.ReadCloser, error)
+	List(ctx context.Context) ([]model.BinaryData, error)
+	GetInfo(ctx context.Context, id string) (*model.BinaryData, error)
 	Update(ctx context.Context, data *model.BinaryData, r io.Reader) error
-	Delete(ctx context.Context, userID, id string) error
+	Delete(ctx context.Context, id string) error
 	SetClient(client pb.BinaryDataServiceClient)
 }
 
@@ -84,8 +85,8 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 }
 
 // Download возвращает поток бинарных данных с сервера.
-func (m *BinaryDataManager) Download(ctx context.Context, userID, id string) (io.ReadCloser, error) {
-	m.logger.Debug("Download started", zap.String("userID", userID), zap.String("binaryDataID", id))
+func (m *BinaryDataManager) Download(ctx context.Context, id string) (io.ReadCloser, error) {
+	m.logger.Debug("Download started", zap.String("binaryDataID", id))
 
 	req := &pb.DownloadBinaryDataRequest{}
 	req.SetId(id)
@@ -122,8 +123,8 @@ func (m *BinaryDataManager) Download(ctx context.Context, userID, id string) (io
 }
 
 // List возвращает список бинарных данных пользователя.
-func (m *BinaryDataManager) List(ctx context.Context, userID string) ([]model.BinaryData, error) {
-	m.logger.Debug("List started", zap.String("userID", userID))
+func (m *BinaryDataManager) List(ctx context.Context) ([]model.BinaryData, error) {
+	m.logger.Debug("List started")
 
 	resp, err := m.client.ListBinaryData(ctx, &pb.ListBinaryDataRequest{})
 	if err != nil {
@@ -192,8 +193,8 @@ func (m *BinaryDataManager) Update(ctx context.Context, data *model.BinaryData, 
 }
 
 // Delete удаляет бинарные данные по ID.
-func (m *BinaryDataManager) Delete(ctx context.Context, userID, id string) error {
-	m.logger.Debug("Delete started", zap.String("userID", userID), zap.String("binaryDataID", id))
+func (m *BinaryDataManager) Delete(ctx context.Context, id string) error {
+	m.logger.Debug("Delete started", zap.String("binaryDataID", id))
 
 	req := &pb.DeleteBinaryDataRequest{}
 	req.SetId(id)
@@ -205,4 +206,32 @@ func (m *BinaryDataManager) Delete(ctx context.Context, userID, id string) error
 
 	m.logger.Info("Delete succeeded", zap.String("binaryDataID", id))
 	return nil
+}
+
+// GetInfo возвращает информацию о конкретных бинарных данных по их ID.
+func (m *BinaryDataManager) GetInfo(ctx context.Context, id string) (*model.BinaryData, error) {
+	m.logger.Debug("GetInfo started", zap.String("binaryDataID", id))
+
+	req := &pb.GetBinaryDataInfoRequest{}
+	req.SetId(id)
+
+	resp, err := m.client.GetBinaryDataInfo(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("GetBinaryDataInfo RPC failed: %w", err)
+	}
+
+	info := resp.GetBinaryInfo()
+	if info == nil {
+		return nil, fmt.Errorf("binary data info is nil")
+	}
+
+	data := &model.BinaryData{
+		ID:       info.GetId(),
+		Title:    info.GetTitle(),
+		Metadata: info.GetMetadata(),
+		Size:     info.GetSize(),
+	}
+
+	m.logger.Info("GetInfo succeeded", zap.String("binaryDataID", data.ID))
+	return data, nil
 }

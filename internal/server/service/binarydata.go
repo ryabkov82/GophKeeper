@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"io"
 	"time"
 
@@ -23,7 +24,7 @@ func NewBinaryDataService(repo repository.BinaryDataRepository, storage storage.
 // Create сохраняет файл и метаданные
 func (s *BinaryDataService) Create(ctx context.Context, userID string, title string, metadata string, r io.Reader) (*model.BinaryData, error) {
 	// Сохраняем файл в хранилище
-	storagePath, err := s.storage.Save(ctx, userID, r)
+	storagePath, size, err := s.storage.Save(ctx, userID, r)
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +34,7 @@ func (s *BinaryDataService) Create(ctx context.Context, userID string, title str
 		UserID:      userID,
 		Title:       title,
 		StoragePath: storagePath,
+		Size:        size,
 		Metadata:    metadata,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -56,10 +58,15 @@ func (s *BinaryDataService) Update(ctx context.Context, userID, id, title, metad
 		return nil, err
 	}
 
+	if data == nil {
+		return nil, errors.New("binary data not found")
+	}
+
 	var newStoragePath string
+	var newSize int64
 	// Если передан поток новых данных, сохраняем их в хранилище
 	if r != nil {
-		newStoragePath, err = s.storage.Save(ctx, userID, r)
+		newStoragePath, newSize, err = s.storage.Save(ctx, userID, r)
 		if err != nil {
 			return nil, err
 		}
@@ -75,10 +82,11 @@ func (s *BinaryDataService) Update(ctx context.Context, userID, id, title, metad
 	if metadata != "" {
 		data.Metadata = metadata
 	}
+	data.Size = newSize
 	data.UpdatedAt = time.Now()
 
 	// Сохраняем изменения в репозитории
-	if err := s.repo.Save(ctx, data); err != nil {
+	if err := s.repo.Update(ctx, data); err != nil {
 		// Если запись в БД не удалась, восстанавливаем старый файл при необходимости
 		if newStoragePath != "" {
 			_ = s.storage.Delete(ctx, newStoragePath)
@@ -102,6 +110,18 @@ func (s *BinaryDataService) Get(ctx context.Context, userID, id string) (*model.
 	}
 
 	return data, reader, nil
+}
+
+// GetInfo возвращает только метаданные без чтения бинарного содержимого.
+func (s *BinaryDataService) GetInfo(ctx context.Context, userID, id string) (*model.BinaryData, error) {
+	data, err := s.repo.GetByID(ctx, userID, id)
+	if err != nil {
+		return nil, err
+	}
+	if data == nil {
+		return nil, errors.New("binary data not found")
+	}
+	return data, nil
 }
 
 // List возвращает список метаданных

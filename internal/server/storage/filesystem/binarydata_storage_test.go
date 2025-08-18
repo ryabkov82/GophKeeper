@@ -25,7 +25,7 @@ func TestBinaryDataStorage_SaveLoadDelete(t *testing.T) {
 	data := []byte("hello world")
 
 	// --- Save ---
-	storagePath, err := fs.Save(ctx, userID, bytes.NewReader(data))
+	storagePath, _, err := fs.Save(ctx, userID, bytes.NewReader(data))
 	assert.NoError(t, err)
 	assert.NotEmpty(t, storagePath)
 

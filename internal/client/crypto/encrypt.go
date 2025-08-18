@@ -56,3 +56,79 @@ func DecryptAESGCM(ciphertext, key []byte) ([]byte, error) {
 	ct := ciphertext[gcm.NonceSize():]
 	return gcm.Open(nil, nonce, ct, nil)
 }
+
+// EncryptStream шифрует поток данных из r и пишет в w.
+func EncryptStream(r io.Reader, w io.Writer, key []byte) error {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return err
+	}
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
+		return err
+	}
+	if _, err := w.Write(nonce); err != nil {
+		return err
+	}
+
+	buf := make([]byte, 32*1024)
+	for {
+		n, err := r.Read(buf)
+		if n > 0 {
+			ct := gcm.Seal(nil, nonce, buf[:n], nil)
+			if _, err := w.Write(ct); err != nil {
+				return err
+			}
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// DecryptStream расшифровывает поток данных из r и пишет результат в w.
+func DecryptStream(r io.Reader, w io.Writer, key []byte) error {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return err
+	}
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(r, nonce); err != nil {
+		return err
+	}
+
+	buf := make([]byte, 32*1024+gcm.Overhead())
+	for {
+		n, err := r.Read(buf)
+		if n > 0 {
+			plain, err := gcm.Open(nil, nonce, buf[:n], nil)
+			if err != nil {
+				return err
+			}
+			if _, err := w.Write(plain); err != nil {
+				return err
+			}
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

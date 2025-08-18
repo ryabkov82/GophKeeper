@@ -63,6 +63,14 @@ func (m *mockBinaryDataService) Get(ctx context.Context, userID, id string) (*mo
 	return data, io.NopCloser(content), nil
 }
 
+func (m *mockBinaryDataService) GetInfo(ctx context.Context, userID, id string) (*model.BinaryData, error) {
+	args := m.Called(ctx, userID, id)
+	if v := args.Get(0); v != nil {
+		return v.(*model.BinaryData), args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 func (m *mockBinaryDataService) List(ctx context.Context, userID string) ([]*model.BinaryData, error) {
 	args := m.Called(ctx, userID)
 	return args.Get(0).([]*model.BinaryData), args.Error(1)
@@ -193,6 +201,37 @@ func TestBinaryDataHandler_ListBinaryData(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, resp.GetItems(), 2)
 	assert.Equal(t, "id1", resp.GetItems()[0].GetId())
+	mockSvc.AssertExpectations(t)
+}
+
+func TestBinaryDataHandler_GetBinaryDataInfo_Success(t *testing.T) {
+	mockSvc := &mockBinaryDataService{}
+	logger := zap.NewNop()
+	handler := handlers.NewBinaryDataHandler(mockSvc, logger)
+
+	userID := "user123"
+	dataID := "id123"
+	bd := &model.BinaryData{
+		ID:       dataID,
+		Title:    "My File",
+		Metadata: "some meta",
+		Size:     1024,
+	}
+
+	// Мокаем GetInfo
+	mockSvc.On("GetInfo", mock.Anything, userID, dataID).Return(bd, nil).Once()
+
+	req := &pb.GetBinaryDataInfoRequest{}
+	req.SetId(dataID)
+	resp, err := handler.GetBinaryDataInfo(ctxWithUserID(userID), req)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, dataID, resp.GetBinaryInfo().GetId())
+	assert.Equal(t, "My File", resp.GetBinaryInfo().GetTitle())
+	assert.Equal(t, "some meta", resp.GetBinaryInfo().GetMetadata())
+	assert.EqualValues(t, 1024, resp.GetBinaryInfo().GetSize())
+
 	mockSvc.AssertExpectations(t)
 }
 

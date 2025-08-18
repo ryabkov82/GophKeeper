@@ -83,6 +83,15 @@ func (m *mockBinaryDataService) Get(ctx context.Context, userID, id string) (*mo
 	return bd, rc, args.Error(2)
 }
 
+func (m *mockBinaryDataService) GetInfo(ctx context.Context, userID, id string) (*model.BinaryData, error) {
+	args := m.Called(ctx, userID, id)
+	var bd *model.BinaryData
+	if v := args.Get(0); v != nil {
+		bd = v.(*model.BinaryData)
+	}
+	return bd, args.Error(1)
+}
+
 func (m *mockBinaryDataService) List(ctx context.Context, userID string) ([]*model.BinaryData, error) {
 	args := m.Called(ctx, userID)
 	var list []*model.BinaryData

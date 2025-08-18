@@ -55,6 +55,18 @@ type BinaryDataService interface {
 	//   - ошибку, если запись не найдена или произошла ошибка чтения
 	Get(ctx context.Context, userID, id string) (*model.BinaryData, io.ReadCloser, error)
 
+	// GetInfo возвращает только метаданные бинарных данных без чтения содержимого.
+	//
+	// Параметры:
+	//   - ctx: контекст выполнения операции
+	//   - userID: идентификатор владельца данных
+	//   - id: идентификатор бинарной записи
+	//
+	// Возвращает:
+	//   - модель BinaryData (без потока содержимого)
+	//   - ошибку, если запись не найдена
+	GetInfo(ctx context.Context, userID, id string) (*model.BinaryData, error)
+
 	// List возвращает список всех бинарных данных конкретного пользователя.
 	//
 	// Параметры:

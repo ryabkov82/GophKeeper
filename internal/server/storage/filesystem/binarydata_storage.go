@@ -34,14 +34,14 @@ func NewBinaryDataStorage(basePath string, interval, maxAge time.Duration) stora
 	return fs
 }
 
-// Save безопасно сохраняет бинарные данные в локальном хранилище.
+// Save безопасно сохраняет бинарные данные в локальном хранилище и возвращает размер файла.
 // Данные сначала пишутся во временный файл (*.tmp). Если запись завершилась успешно,
 // файл переименовывается в финальное имя. В случае ошибки временный файл удаляется.
-func (fs *binaryDataStorage) Save(ctx context.Context, userID string, r io.Reader) (string, error) {
+func (fs *binaryDataStorage) Save(ctx context.Context, userID string, r io.Reader) (storagePath string, size int64, err error) {
 	// Путь к каталогу пользователя
 	userDir := filepath.Join(fs.basePath, userID)
 	if err := os.MkdirAll(userDir, 0o755); err != nil {
-		return "", fmt.Errorf("failed to create user dir: %w", err)
+		return "", 0, fmt.Errorf("failed to create user dir: %w", err)
 	}
 
 	// Уникальное имя файла
@@ -53,35 +53,36 @@ func (fs *binaryDataStorage) Save(ctx context.Context, userID string, r io.Reade
 	// Создаём временный файл
 	tmpFile, err := os.Create(tmpPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to create temp file: %w", err)
+		return "", 0, fmt.Errorf("failed to create temp file: %w", err)
 	}
 
 	// Если что-то пойдёт не так, удаляем временный файл
 	defer func() {
 		tmpFile.Close()
-		if _, err := os.Stat(tmpPath); err == nil {
+		if _, statErr := os.Stat(tmpPath); statErr == nil {
 			_ = os.Remove(tmpPath)
 		}
 	}()
 
-	// Копируем данные в временный файл
-	if _, err := io.Copy(tmpFile, r); err != nil {
-		return "", fmt.Errorf("failed to write data: %w", err)
+	// Копируем данные в временный файл и получаем размер
+	size, err = io.Copy(tmpFile, r)
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to write data: %w", err)
 	}
 
 	// Закрываем файл перед переименованием
 	if err := tmpFile.Close(); err != nil {
-		return "", fmt.Errorf("failed to close temp file: %w", err)
+		return "", 0, fmt.Errorf("failed to close temp file: %w", err)
 	}
 
 	// Переименовываем временный файл в финальный
 	if err := os.Rename(tmpPath, finalPath); err != nil {
-		return "", fmt.Errorf("failed to finalize file: %w", err)
+		return "", 0, fmt.Errorf("failed to finalize file: %w", err)
 	}
 
-	// Возвращаем относительный путь
-	storagePath := filepath.Join(userID, fileName)
-	return storagePath, nil
+	// Возвращаем относительный путь и размер
+	storagePath = filepath.Join(userID, fileName)
+	return storagePath, size, nil
 }
 
 // Load открывает файл для чтения по относительному пути storagePath.

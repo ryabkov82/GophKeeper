@@ -220,11 +220,45 @@ func (h *BinaryDataHandler) ListBinaryData(ctx context.Context, req *pb.ListBina
 		item := &pb.BinaryDataInfo{}
 		item.SetId(d.ID)
 		item.SetTitle(d.Title)
-		item.SetMetadata(d.Metadata)
+		//item.SetMetadata(d.Metadata)
 		resp.SetItems(append(resp.GetItems(), item))
 	}
 
 	h.logger.Info("ListBinaryData succeeded", zap.String("userID", userID), zap.Int("items", len(list)))
+	return resp, nil
+}
+
+// GetBinaryDataInfo возвращает информацию о конкретных бинарных данных
+func (h *BinaryDataHandler) GetBinaryDataInfo(ctx context.Context, req *pb.GetBinaryDataInfoRequest) (*pb.GetBinaryDataInfoResponse, error) {
+	userID, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "userID not found in context")
+	}
+
+	data, err := h.binarySvc.GetInfo(ctx, userID, req.GetId())
+	if err != nil {
+		h.logger.Warn("GetBinaryDataInfo failed",
+			zap.String("userID", userID),
+			zap.String("binaryDataID", req.GetId()),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	info := &pb.BinaryDataInfo{}
+	info.SetId(data.ID)
+	info.SetTitle(data.Title)
+	info.SetMetadata(data.Metadata)
+	info.SetSize(data.Size)
+
+	resp := &pb.GetBinaryDataInfoResponse{}
+	resp.SetBinaryInfo(info)
+
+	h.logger.Info("GetBinaryDataInfo succeeded",
+		zap.String("userID", userID),
+		zap.String("binaryDataID", data.ID),
+	)
+
 	return resp, nil
 }
 

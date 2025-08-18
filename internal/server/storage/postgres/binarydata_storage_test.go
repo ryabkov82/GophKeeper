@@ -6,6 +6,7 @@ import (
 	"errors"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -13,6 +14,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/repository"
 	"github.com/ryabkov82/gophkeeper/internal/server/storage/postgres"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func setupMockBinaryDataDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock, repository.BinaryDataRepository) {
@@ -31,12 +33,13 @@ func TestBinaryDataStorage_Save(t *testing.T) {
 	data := &model.BinaryData{
 		UserID:      uuid.NewString(),
 		Title:       "Test File",
+		Size:        1,
 		StoragePath: "/tmp/testfile.bin",
 		Metadata:    "{}",
 	}
 
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO binary_data`)).
-		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.Metadata).
+		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.Size, data.Metadata).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	err := repo.Save(context.Background(), data)
@@ -131,14 +134,81 @@ func TestBinaryDataStorage_Save_Error(t *testing.T) {
 	data := &model.BinaryData{
 		UserID:      uuid.NewString(),
 		Title:       "Test File",
+		Size:        1,
 		StoragePath: "/tmp/testfile.bin",
 	}
 
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO binary_data`)).
-		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.Metadata).
+		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.Size, data.Metadata).
 		WillReturnError(errors.New("insert failed"))
 
 	err := repo.Save(context.Background(), data)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "insert failed")
+}
+
+func TestBinaryDataStorage_Update(t *testing.T) {
+
+	db, mock, repo := setupMockBinaryDataDB(t)
+	defer db.Close()
+
+	data := &model.BinaryData{
+		ID:          "123",
+		UserID:      "456",
+		Title:       "new title",
+		StoragePath: "/tmp/file.bin",
+		Size:        100,
+		Metadata:    "{}",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	// --- 1. Успешное обновление ---
+	mock.ExpectExec(`UPDATE binary_data`).
+		WithArgs(
+			data.Title,
+			data.StoragePath,
+			data.Size,
+			data.Metadata,
+			data.ID,
+			data.UserID,
+		).
+		WillReturnResult(sqlmock.NewResult(0, 1)) // 1 строка обновлена
+
+	err := repo.Update(context.Background(), data)
+	require.NoError(t, err)
+
+	// --- 2. Нет обновлённых строк ---
+	mock.ExpectExec(`UPDATE binary_data`).
+		WithArgs(
+			data.Title,
+			data.StoragePath,
+			data.Size,
+			data.Metadata,
+			data.ID,
+			data.UserID,
+		).
+		WillReturnResult(sqlmock.NewResult(0, 0)) // 0 строк обновлено
+
+	err = repo.Update(context.Background(), data)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "binary data with id")
+
+	// --- 3. Ошибка БД ---
+	mock.ExpectExec(`UPDATE binary_data`).
+		WithArgs(
+			data.Title,
+			data.StoragePath,
+			data.Size,
+			data.Metadata,
+			data.ID,
+			data.UserID,
+		).
+		WillReturnError(sql.ErrConnDone)
+
+	err = repo.Update(context.Background(), data)
+	require.Error(t, err)
+	require.Equal(t, sql.ErrConnDone, err)
+
+	require.NoError(t, mock.ExpectationsWereMet())
 }

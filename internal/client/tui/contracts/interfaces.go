@@ -3,6 +3,7 @@ package contracts
 import (
 	"context"
 
+	"github.com/ryabkov82/gophkeeper/internal/client/app"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 )
 
@@ -65,4 +66,24 @@ type TextDataService interface {
 
 	// DeleteTextData удаляет текстовые данные по ID
 	DeleteTextData(ctx context.Context, id string) error
+}
+
+type BinaryDataService interface {
+	// UploadBinaryData загружает бинарный объект на сервер с шифрованием содержимого и прогрессом
+	UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- app.ProgressMsg) error
+
+	// UpdateBinaryData обновляет бинарный объект на сервере с шифрованием содержимого и прогрессом
+	UpdateBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- app.ProgressMsg) error
+
+	// DownloadBinaryData скачивает бинарный объект с сервера, расшифровывает и отправляет прогресс через канал
+	DownloadBinaryData(ctx context.Context, dataID, destPath string, progressCh chan<- int64) error
+
+	// GetBinaryDataInfo получает метаданные бинарного объекта по ID (без содержимого)
+	GetBinaryDataInfo(ctx context.Context, id string) (*model.BinaryData, error)
+
+	// ListBinaryData возвращает список всех бинарных объектов пользователя (только метаданные)
+	ListBinaryData(ctx context.Context) ([]model.BinaryData, error)
+
+	// DeleteBinaryData удаляет бинарный объект по ID
+	DeleteBinaryData(ctx context.Context, id string) error
 }
