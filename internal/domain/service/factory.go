@@ -7,4 +7,5 @@ type ServiceFactory interface {
 	Credential() CredentialService
 	BankCard() BankCardService
 	TextData() TextDataService
+	BinaryData() BinaryDataService
 }

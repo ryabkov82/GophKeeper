@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/repository"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
+	"github.com/ryabkov82/gophkeeper/internal/domain/storage"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtutils"
 )
 
@@ -12,16 +13,18 @@ type serviceFactory struct {
 	credential service.CredentialService
 	bankCard   service.BankCardService
 	textData   service.TextDataService
+	binaryData service.BinaryDataService
 }
 
 // NewServiceFactory создает фабрику сервисов.
 // repoFactory — фабрика репозиториев, jwt — менеджер токенов.
-func NewServiceFactory(repoFactory repository.StorageFactory, jwt *jwtutils.TokenManager) service.ServiceFactory {
+func NewServiceFactory(repoFactory repository.StorageFactory, binaryDataStorage storage.BinaryDataStorage, jwt *jwtutils.TokenManager) service.ServiceFactory {
 	return &serviceFactory{
 		auth:       NewAuthService(repoFactory.User(), jwt),
 		credential: NewCredentialService(repoFactory.Credential()),
 		bankCard:   NewBankCardService(repoFactory.BankCard()),
 		textData:   NewTextDataService(repoFactory.TextData()),
+		binaryData: NewBinaryDataService(repoFactory.BinaryData(), binaryDataStorage),
 	}
 }
 
@@ -39,4 +42,8 @@ func (f *serviceFactory) BankCard() service.BankCardService {
 
 func (f *serviceFactory) TextData() service.TextDataService {
 	return f.textData
+}
+
+func (f *serviceFactory) BinaryData() service.BinaryDataService {
+	return f.binaryData
 }

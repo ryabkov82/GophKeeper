@@ -14,32 +14,50 @@ type postgresFactory struct {
 	credentialRepo repository.CredentialRepository
 	bankCardRepo   repository.BankCardRepository
 	textDataRepo   repository.TextDataRepository
+	binaryDataRepo repository.BinaryDataRepository
 }
 
-// NewPostgresFactory создаёт фабрику, использующую Postgres как источник данных.
+// NewPostgresFactory создаёт фабрику postgresFactory с репозиториями,
+// подключенными к указанной базе данных.
+//
+// Параметры:
+//   - db: подключение к базе данных (*sql.DB)
+//
+// Возвращает:
+//   - StorageFactory с PostgreSQL-реализациями репозиториев
 func NewPostgresFactory(db *sql.DB) repository.StorageFactory {
 	return &postgresFactory{
 		userRepo:       postgres.NewUserStorage(db),
 		credentialRepo: postgres.NewCredentialStorage(db),
 		bankCardRepo:   postgres.NewBankCardStorage(db),
 		textDataRepo:   postgres.NewTextDataStorage(db),
+		binaryDataRepo: postgres.NewBinaryDataStorage(db),
 	}
 }
 
+// User возвращает репозиторий для работы с пользователями.
 func (f *postgresFactory) User() repository.UserRepository {
 	return f.userRepo
 }
 
+// Credential возвращает репозиторий для работы с Credential.
 func (f *postgresFactory) Credential() repository.CredentialRepository {
 	return f.credentialRepo
 }
 
+// BankCard возвращает репозиторий для работы с BankCard.
 func (f *postgresFactory) BankCard() repository.BankCardRepository {
 	return f.bankCardRepo
 }
 
+// TextData возвращает репозиторий для работы с TextData.
 func (f *postgresFactory) TextData() repository.TextDataRepository {
 	return f.textDataRepo
+}
+
+// BinaryData возвращает репозиторий для работы с BinaryData.
+func (f *postgresFactory) BinaryData() repository.BinaryDataRepository {
+	return f.binaryDataRepo
 }
 
 // NewStorageFactory создает фабрику репозиториев для указанного драйвера БД.

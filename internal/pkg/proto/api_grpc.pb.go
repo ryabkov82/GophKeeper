@@ -936,3 +936,251 @@ var TextDataService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "api.proto",
 }
+
+const (
+	BinaryDataService_UploadBinaryData_FullMethodName   = "/gophkeeper.proto.BinaryDataService/UploadBinaryData"
+	BinaryDataService_DownloadBinaryData_FullMethodName = "/gophkeeper.proto.BinaryDataService/DownloadBinaryData"
+	BinaryDataService_ListBinaryData_FullMethodName     = "/gophkeeper.proto.BinaryDataService/ListBinaryData"
+	BinaryDataService_DeleteBinaryData_FullMethodName   = "/gophkeeper.proto.BinaryDataService/DeleteBinaryData"
+	BinaryDataService_UpdateBinaryData_FullMethodName   = "/gophkeeper.proto.BinaryDataService/UpdateBinaryData"
+)
+
+// BinaryDataServiceClient is the client API for BinaryDataService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Сервис для работы с BinaryData
+type BinaryDataServiceClient interface {
+	UploadBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadBinaryDataRequest, UploadBinaryDataResponse], error)
+	DownloadBinaryData(ctx context.Context, in *DownloadBinaryDataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadBinaryDataResponse], error)
+	ListBinaryData(ctx context.Context, in *ListBinaryDataRequest, opts ...grpc.CallOption) (*ListBinaryDataResponse, error)
+	DeleteBinaryData(ctx context.Context, in *DeleteBinaryDataRequest, opts ...grpc.CallOption) (*DeleteBinaryDataResponse, error)
+	UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateBinaryDataRequest, UpdateBinaryDataResponse], error)
+}
+
+type binaryDataServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewBinaryDataServiceClient(cc grpc.ClientConnInterface) BinaryDataServiceClient {
+	return &binaryDataServiceClient{cc}
+}
+
+func (c *binaryDataServiceClient) UploadBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadBinaryDataRequest, UploadBinaryDataResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &BinaryDataService_ServiceDesc.Streams[0], BinaryDataService_UploadBinaryData_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[UploadBinaryDataRequest, UploadBinaryDataResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BinaryDataService_UploadBinaryDataClient = grpc.ClientStreamingClient[UploadBinaryDataRequest, UploadBinaryDataResponse]
+
+func (c *binaryDataServiceClient) DownloadBinaryData(ctx context.Context, in *DownloadBinaryDataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadBinaryDataResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &BinaryDataService_ServiceDesc.Streams[1], BinaryDataService_DownloadBinaryData_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[DownloadBinaryDataRequest, DownloadBinaryDataResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BinaryDataService_DownloadBinaryDataClient = grpc.ServerStreamingClient[DownloadBinaryDataResponse]
+
+func (c *binaryDataServiceClient) ListBinaryData(ctx context.Context, in *ListBinaryDataRequest, opts ...grpc.CallOption) (*ListBinaryDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBinaryDataResponse)
+	err := c.cc.Invoke(ctx, BinaryDataService_ListBinaryData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binaryDataServiceClient) DeleteBinaryData(ctx context.Context, in *DeleteBinaryDataRequest, opts ...grpc.CallOption) (*DeleteBinaryDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBinaryDataResponse)
+	err := c.cc.Invoke(ctx, BinaryDataService_DeleteBinaryData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *binaryDataServiceClient) UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UpdateBinaryDataRequest, UpdateBinaryDataResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &BinaryDataService_ServiceDesc.Streams[2], BinaryDataService_UpdateBinaryData_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[UpdateBinaryDataRequest, UpdateBinaryDataResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BinaryDataService_UpdateBinaryDataClient = grpc.ClientStreamingClient[UpdateBinaryDataRequest, UpdateBinaryDataResponse]
+
+// BinaryDataServiceServer is the server API for BinaryDataService service.
+// All implementations must embed UnimplementedBinaryDataServiceServer
+// for forward compatibility.
+//
+// Сервис для работы с BinaryData
+type BinaryDataServiceServer interface {
+	UploadBinaryData(grpc.ClientStreamingServer[UploadBinaryDataRequest, UploadBinaryDataResponse]) error
+	DownloadBinaryData(*DownloadBinaryDataRequest, grpc.ServerStreamingServer[DownloadBinaryDataResponse]) error
+	ListBinaryData(context.Context, *ListBinaryDataRequest) (*ListBinaryDataResponse, error)
+	DeleteBinaryData(context.Context, *DeleteBinaryDataRequest) (*DeleteBinaryDataResponse, error)
+	UpdateBinaryData(grpc.ClientStreamingServer[UpdateBinaryDataRequest, UpdateBinaryDataResponse]) error
+	mustEmbedUnimplementedBinaryDataServiceServer()
+}
+
+// UnimplementedBinaryDataServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedBinaryDataServiceServer struct{}
+
+func (UnimplementedBinaryDataServiceServer) UploadBinaryData(grpc.ClientStreamingServer[UploadBinaryDataRequest, UploadBinaryDataResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method UploadBinaryData not implemented")
+}
+func (UnimplementedBinaryDataServiceServer) DownloadBinaryData(*DownloadBinaryDataRequest, grpc.ServerStreamingServer[DownloadBinaryDataResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method DownloadBinaryData not implemented")
+}
+func (UnimplementedBinaryDataServiceServer) ListBinaryData(context.Context, *ListBinaryDataRequest) (*ListBinaryDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBinaryData not implemented")
+}
+func (UnimplementedBinaryDataServiceServer) DeleteBinaryData(context.Context, *DeleteBinaryDataRequest) (*DeleteBinaryDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBinaryData not implemented")
+}
+func (UnimplementedBinaryDataServiceServer) UpdateBinaryData(grpc.ClientStreamingServer[UpdateBinaryDataRequest, UpdateBinaryDataResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method UpdateBinaryData not implemented")
+}
+func (UnimplementedBinaryDataServiceServer) mustEmbedUnimplementedBinaryDataServiceServer() {}
+func (UnimplementedBinaryDataServiceServer) testEmbeddedByValue()                           {}
+
+// UnsafeBinaryDataServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to BinaryDataServiceServer will
+// result in compilation errors.
+type UnsafeBinaryDataServiceServer interface {
+	mustEmbedUnimplementedBinaryDataServiceServer()
+}
+
+func RegisterBinaryDataServiceServer(s grpc.ServiceRegistrar, srv BinaryDataServiceServer) {
+	// If the following call pancis, it indicates UnimplementedBinaryDataServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&BinaryDataService_ServiceDesc, srv)
+}
+
+func _BinaryDataService_UploadBinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BinaryDataServiceServer).UploadBinaryData(&grpc.GenericServerStream[UploadBinaryDataRequest, UploadBinaryDataResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BinaryDataService_UploadBinaryDataServer = grpc.ClientStreamingServer[UploadBinaryDataRequest, UploadBinaryDataResponse]
+
+func _BinaryDataService_DownloadBinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(DownloadBinaryDataRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(BinaryDataServiceServer).DownloadBinaryData(m, &grpc.GenericServerStream[DownloadBinaryDataRequest, DownloadBinaryDataResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BinaryDataService_DownloadBinaryDataServer = grpc.ServerStreamingServer[DownloadBinaryDataResponse]
+
+func _BinaryDataService_ListBinaryData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBinaryDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinaryDataServiceServer).ListBinaryData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinaryDataService_ListBinaryData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinaryDataServiceServer).ListBinaryData(ctx, req.(*ListBinaryDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinaryDataService_DeleteBinaryData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBinaryDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BinaryDataServiceServer).DeleteBinaryData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BinaryDataService_DeleteBinaryData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BinaryDataServiceServer).DeleteBinaryData(ctx, req.(*DeleteBinaryDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BinaryDataService_UpdateBinaryData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BinaryDataServiceServer).UpdateBinaryData(&grpc.GenericServerStream[UpdateBinaryDataRequest, UpdateBinaryDataResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BinaryDataService_UpdateBinaryDataServer = grpc.ClientStreamingServer[UpdateBinaryDataRequest, UpdateBinaryDataResponse]
+
+// BinaryDataService_ServiceDesc is the grpc.ServiceDesc for BinaryDataService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var BinaryDataService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "gophkeeper.proto.BinaryDataService",
+	HandlerType: (*BinaryDataServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListBinaryData",
+			Handler:    _BinaryDataService_ListBinaryData_Handler,
+		},
+		{
+			MethodName: "DeleteBinaryData",
+			Handler:    _BinaryDataService_DeleteBinaryData_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "UploadBinaryData",
+			Handler:       _BinaryDataService_UploadBinaryData_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "DownloadBinaryData",
+			Handler:       _BinaryDataService_DownloadBinaryData_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "UpdateBinaryData",
+			Handler:       _BinaryDataService_UpdateBinaryData_Handler,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "api.proto",
+}

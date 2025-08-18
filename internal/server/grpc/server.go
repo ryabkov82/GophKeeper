@@ -55,19 +55,29 @@ func NewGRPCServer(cfg *config.Config, logger *zap.Logger, serviceFactory servic
 	credHandler := handlers.NewCredentialHandler(serviceFactory.Credential(), logger)
 	api.RegisterCredentialServiceServer(s, credHandler)
 
-	// Регистрируем Credential хендлер
+	// Регистрируем BankCard хендлер
 	bankcardHandler := handlers.NewBankCardHandler(serviceFactory.BankCard(), logger)
 	api.RegisterBankCardServiceServer(s, bankcardHandler)
 
-	// Регистрируем Credential хендлер
+	// Регистрируем TextData хендлер
 	textDataHandler := handlers.NewTextDataHandler(serviceFactory.TextData(), logger)
 	api.RegisterTextDataServiceServer(s, textDataHandler)
+
+	// Регистрируем TextData хендлер
+	binaryDataHandler := handlers.NewBinaryDataHandler(serviceFactory.BinaryData(), logger)
+	api.RegisterBinaryDataServiceServer(s, binaryDataHandler)
 
 	return s, nil
 }
 
 // функция запуска gRPC сервера с graceful shutdown
-func ServeGRPC(s *grpc.Server, lis net.Listener, signals <-chan os.Signal, logger *zap.Logger) {
+func ServeGRPC(
+	s *grpc.Server,
+	lis net.Listener,
+	signals <-chan os.Signal,
+	logger *zap.Logger,
+	svcFactory service.ServiceFactory,
+) {
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			logger.Fatal("gRPC serve error", zap.Error(err))
@@ -78,6 +88,9 @@ func ServeGRPC(s *grpc.Server, lis net.Listener, signals <-chan os.Signal, logge
 	<-signals // ждём сигнала завершения
 
 	logger.Info("Shutting down gRPC server...")
+
+	// Закрываем бинарное хранилище перед остановкой сервера
+	svcFactory.BinaryData().Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -131,6 +144,6 @@ func StartGRPCServer(log *zap.Logger, cfg *config.Config, serviceFactory service
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	ServeGRPC(srv, lis, sigChan, log)
+	ServeGRPC(srv, lis, sigChan, log, serviceFactory)
 	return nil
 }

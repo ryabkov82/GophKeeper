@@ -4,7 +4,7 @@ run-client:
 	go run ./cmd/client --tls=true --skip-verify=false --log-level='debug'
 
 run-server:
-	go run ./cmd/server --s=true
+	go run ./cmd/server --s=true --binary-path='E:\gophkeeper\binary_data'
 
 generate:
 	protoc --go_out=. \

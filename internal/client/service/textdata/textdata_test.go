@@ -5,13 +5,13 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/ryabkov82/gophkeeper/internal/client/service/textdata"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto/mocks"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	"go.uber.org/zap"
 )
 

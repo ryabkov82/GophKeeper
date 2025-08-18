@@ -2,6 +2,7 @@ package grpc_test
 
 import (
 	"context"
+	"io"
 	"net"
 	"os"
 	"syscall"
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
+	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	"github.com/ryabkov82/gophkeeper/internal/server/config"
 	"github.com/ryabkov82/gophkeeper/internal/server/grpc"
@@ -45,7 +47,63 @@ func getFreePort(t *testing.T) string {
 	return l.Addr().String()
 }
 
-type mockServiceFactory struct{}
+// --- мок BinaryDataService ---
+type mockBinaryDataService struct {
+	mock.Mock
+}
+
+func (m *mockBinaryDataService) Create(ctx context.Context, userID string, title string, metadata string, r io.Reader) (*model.BinaryData, error) {
+	args := m.Called(ctx, userID, title, metadata, r)
+	var bd *model.BinaryData
+	if v := args.Get(0); v != nil {
+		bd = v.(*model.BinaryData)
+	}
+	return bd, args.Error(1)
+}
+
+func (m *mockBinaryDataService) Update(ctx context.Context, userID, id, title, metadata string, r io.Reader) (*model.BinaryData, error) {
+	args := m.Called(ctx, userID, id, title, metadata, r)
+	var bd *model.BinaryData
+	if v := args.Get(0); v != nil {
+		bd = v.(*model.BinaryData)
+	}
+	return bd, args.Error(1)
+}
+
+func (m *mockBinaryDataService) Get(ctx context.Context, userID, id string) (*model.BinaryData, io.ReadCloser, error) {
+	args := m.Called(ctx, userID, id)
+	var bd *model.BinaryData
+	if v := args.Get(0); v != nil {
+		bd = v.(*model.BinaryData)
+	}
+	var rc io.ReadCloser
+	if v := args.Get(1); v != nil {
+		rc = v.(io.ReadCloser)
+	}
+	return bd, rc, args.Error(2)
+}
+
+func (m *mockBinaryDataService) List(ctx context.Context, userID string) ([]*model.BinaryData, error) {
+	args := m.Called(ctx, userID)
+	var list []*model.BinaryData
+	if v := args.Get(0); v != nil {
+		list = v.([]*model.BinaryData)
+	}
+	return list, args.Error(1)
+}
+
+func (m *mockBinaryDataService) Delete(ctx context.Context, userID, id string) error {
+	return m.Called(ctx, userID, id).Error(0)
+}
+
+func (m *mockBinaryDataService) Close() {
+	m.Called()
+}
+
+// --- мок ServiceFactory ---
+type mockServiceFactory struct {
+	binarySvc *mockBinaryDataService
+}
 
 func (m *mockServiceFactory) Auth() service.AuthService {
 	return &mockAuthService{}
@@ -59,6 +117,10 @@ func (m *mockServiceFactory) BankCard() service.BankCardService {
 
 func (m *mockServiceFactory) TextData() service.TextDataService {
 	return nil
+}
+
+func (m *mockServiceFactory) BinaryData() service.BinaryDataService {
+	return m.binarySvc
 }
 
 func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {
@@ -75,7 +137,10 @@ func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {
 	}
 
 	logger := zap.NewNop()
-	serviceFactory := &mockServiceFactory{}
+	binarySvc := &mockBinaryDataService{}
+	binarySvc.On("Close").Return() // метод ничего не возвращает
+
+	serviceFactory := &mockServiceFactory{binarySvc: binarySvc}
 
 	srv, err := grpc.NewGRPCServer(cfg, logger, serviceFactory)
 	require.NoError(t, err)
@@ -87,7 +152,10 @@ func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {
 		sigChan <- syscall.SIGINT
 	}()
 
-	grpc.ServeGRPC(srv, lis, sigChan, logger)
+	grpc.ServeGRPC(srv, lis, sigChan, logger, serviceFactory)
+
+	// Проверяем, что Close() был вызван
+	binarySvc.AssertCalled(t, "Close")
 }
 
 func TestNewGRPCServer_NoTLS(t *testing.T) {
