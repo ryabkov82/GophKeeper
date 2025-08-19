@@ -52,8 +52,8 @@ type mockBinaryDataService struct {
 	mock.Mock
 }
 
-func (m *mockBinaryDataService) Create(ctx context.Context, userID string, title string, metadata string, r io.Reader) (*model.BinaryData, error) {
-	args := m.Called(ctx, userID, title, metadata, r)
+func (m *mockBinaryDataService) Create(ctx context.Context, data *model.BinaryData, r io.Reader) (*model.BinaryData, error) {
+	args := m.Called(ctx, data, r)
 	var bd *model.BinaryData
 	if v := args.Get(0); v != nil {
 		bd = v.(*model.BinaryData)
@@ -61,8 +61,25 @@ func (m *mockBinaryDataService) Create(ctx context.Context, userID string, title
 	return bd, args.Error(1)
 }
 
-func (m *mockBinaryDataService) Update(ctx context.Context, userID, id, title, metadata string, r io.Reader) (*model.BinaryData, error) {
-	args := m.Called(ctx, userID, id, title, metadata, r)
+func (m *mockBinaryDataService) Update(ctx context.Context, data *model.BinaryData, r io.Reader) (*model.BinaryData, error) {
+	args := m.Called(ctx, data, r)
+	var bd *model.BinaryData
+	if v := args.Get(0); v != nil {
+		bd = v.(*model.BinaryData)
+	}
+	return bd, args.Error(1)
+}
+
+func (m *mockBinaryDataService) CreateInfo(ctx context.Context, data *model.BinaryData) (*model.BinaryData, error) {
+	args := m.Called(ctx, data)
+	var bd *model.BinaryData
+	if v := args.Get(0); v != nil {
+		bd = v.(*model.BinaryData)
+	}
+	return bd, args.Error(1)
+}
+func (m *mockBinaryDataService) UpdateInfo(ctx context.Context, data *model.BinaryData) (*model.BinaryData, error) {
+	args := m.Called(ctx, data)
 	var bd *model.BinaryData
 	if v := args.Get(0); v != nil {
 		bd = v.(*model.BinaryData)
@@ -130,6 +147,12 @@ func (m *mockServiceFactory) TextData() service.TextDataService {
 
 func (m *mockServiceFactory) BinaryData() service.BinaryDataService {
 	return m.binarySvc
+}
+
+func (m *mockServiceFactory) Close() {
+	if m.binarySvc != nil {
+		m.binarySvc.Close()
+	}
 }
 
 func TestGRPCServer_StartAndGracefulShutdown(t *testing.T) {

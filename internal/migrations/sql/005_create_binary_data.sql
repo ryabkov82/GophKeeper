@@ -8,11 +8,14 @@ CREATE TABLE IF NOT EXISTS binary_data (
     -- Заголовок записи (например, "Фото паспорта", "Ключ для SSH")
     title TEXT CHECK (char_length(title) <= 255),
 
+    -- Путь к исходному файлу на стороне клиента
+    client_path TEXT NOT NULL CHECK (char_length(client_path) <= 1024),
+    
     -- Путь к файлу в хранилище (локальная ФС, S3 и т.п.)
     storage_path TEXT NOT NULL CHECK (char_length(storage_path) <= 1024),
 
     -- Размер файла в байтах
-    size BIGINT NOT NULL DEFAULT 0;
+    size BIGINT NOT NULL DEFAULT 0,
 
     -- Произвольная дополнительная информация (в зашифрованном виде)
     metadata TEXT CHECK (char_length(metadata) <= 4096),

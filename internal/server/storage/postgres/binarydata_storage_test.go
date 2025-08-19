@@ -35,11 +35,12 @@ func TestBinaryDataStorage_Save(t *testing.T) {
 		Title:       "Test File",
 		Size:        1,
 		StoragePath: "/tmp/testfile.bin",
+		ClientPath:  "orig/file.bin",
 		Metadata:    "{}",
 	}
 
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO binary_data`)).
-		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.Size, data.Metadata).
+		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.ClientPath, data.Size, data.Metadata).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	err := repo.Save(context.Background(), data)
@@ -57,11 +58,12 @@ func TestBinaryDataStorage_GetByID(t *testing.T) {
 		UserID:      userID,
 		Title:       "Test File",
 		StoragePath: "/tmp/testfile.bin",
+		ClientPath:  "orig/file.bin",
 		Metadata:    "{}",
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "user_id", "title", "storage_path", "metadata"}).
-		AddRow(data.ID, data.UserID, data.Title, data.StoragePath, data.Metadata)
+	rows := sqlmock.NewRows([]string{"id", "user_id", "title", "storage_path", "client_path", "metadata"}).
+		AddRow(data.ID, data.UserID, data.Title, data.StoragePath, data.ClientPath, data.Metadata)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM binary_data WHERE id = $1 AND user_id = $2")).
 		WithArgs(id, userID).
@@ -79,13 +81,13 @@ func TestBinaryDataStorage_ListByUser(t *testing.T) {
 
 	userID := uuid.NewString()
 	list := []*model.BinaryData{
-		{ID: uuid.NewString(), Title: "File 1", StoragePath: "/tmp/1.bin"},
-		{ID: uuid.NewString(), Title: "File 2", StoragePath: "/tmp/2.bin"},
+		{ID: uuid.NewString(), Title: "File 1", StoragePath: "/tmp/1.bin", ClientPath: "orig/1.bin"},
+		{ID: uuid.NewString(), Title: "File 2", StoragePath: "/tmp/2.bin", ClientPath: "orig/2.bin"},
 	}
 
-	rows := sqlmock.NewRows([]string{"id", "user_id", "title", "storage_path", "metadata"}).
-		AddRow(list[0].ID, userID, list[0].Title, list[0].StoragePath, "{}").
-		AddRow(list[1].ID, userID, list[1].Title, list[1].StoragePath, "{}")
+	rows := sqlmock.NewRows([]string{"id", "user_id", "title", "storage_path", "client_path", "metadata"}).
+		AddRow(list[0].ID, userID, list[0].Title, list[0].StoragePath, list[0].ClientPath, "{}").
+		AddRow(list[1].ID, userID, list[1].Title, list[1].StoragePath, list[1].ClientPath, "{}")
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM binary_data WHERE user_id = $1 ORDER BY created_at DESC")).
 		WithArgs(userID).
@@ -136,10 +138,11 @@ func TestBinaryDataStorage_Save_Error(t *testing.T) {
 		Title:       "Test File",
 		Size:        1,
 		StoragePath: "/tmp/testfile.bin",
+		ClientPath:  "orig/file.bin",
 	}
 
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO binary_data`)).
-		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.Size, data.Metadata).
+		WithArgs(sqlmock.AnyArg(), data.UserID, data.Title, data.StoragePath, data.ClientPath, data.Size, data.Metadata).
 		WillReturnError(errors.New("insert failed"))
 
 	err := repo.Save(context.Background(), data)
@@ -157,6 +160,7 @@ func TestBinaryDataStorage_Update(t *testing.T) {
 		UserID:      "456",
 		Title:       "new title",
 		StoragePath: "/tmp/file.bin",
+		ClientPath:  "orig/file.bin",
 		Size:        100,
 		Metadata:    "{}",
 		CreatedAt:   time.Now(),
@@ -168,6 +172,7 @@ func TestBinaryDataStorage_Update(t *testing.T) {
 		WithArgs(
 			data.Title,
 			data.StoragePath,
+			data.ClientPath,
 			data.Size,
 			data.Metadata,
 			data.ID,
@@ -183,6 +188,7 @@ func TestBinaryDataStorage_Update(t *testing.T) {
 		WithArgs(
 			data.Title,
 			data.StoragePath,
+			data.ClientPath,
 			data.Size,
 			data.Metadata,
 			data.ID,
@@ -199,6 +205,7 @@ func TestBinaryDataStorage_Update(t *testing.T) {
 		WithArgs(
 			data.Title,
 			data.StoragePath,
+			data.ClientPath,
 			data.Size,
 			data.Metadata,
 			data.ID,

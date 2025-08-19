@@ -89,8 +89,8 @@ func ServeGRPC(
 
 	logger.Info("Shutting down gRPC server...")
 
-	// Закрываем бинарное хранилище перед остановкой сервера
-	svcFactory.BinaryData().Close()
+	// Закрываем все ресурсы перед остановкой сервера
+	svcFactory.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -8,4 +8,6 @@ type ServiceFactory interface {
 	BankCard() BankCardService
 	TextData() TextDataService
 	BinaryData() BinaryDataService
+	// Close освобождает ресурсы сервисов и нижележащих слоёв.
+	Close()
 }

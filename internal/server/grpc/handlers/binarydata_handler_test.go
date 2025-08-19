@@ -23,20 +23,28 @@ type mockBinaryDataService struct {
 	Received []byte // сюда запишем, что реально пришло
 }
 
-func (m *mockBinaryDataService) Create(ctx context.Context, userID, title, metadata string, r io.Reader) (*model.BinaryData, error) {
+func (m *mockBinaryDataService) Create(ctx context.Context, data *model.BinaryData, r io.Reader) (*model.BinaryData, error) {
 	buf := new(bytes.Buffer)
 	_, _ = io.Copy(buf, r)   // читаем все данные
 	m.Received = buf.Bytes() // сохраняем для проверки
 	return &model.BinaryData{
 		ID:          "123",
-		UserID:      userID,
-		Title:       title,
+		UserID:      data.UserID,
+		Title:       data.Title,
 		StoragePath: "user123/123.bin",
-		Metadata:    metadata,
+		Metadata:    data.Metadata,
 	}, nil
 }
 
-func (m *mockBinaryDataService) Update(ctx context.Context, userID, id, title, metadata string, r io.Reader) (*model.BinaryData, error) {
+func (m *mockBinaryDataService) CreateInfo(ctx context.Context, data *model.BinaryData) (*model.BinaryData, error) {
+	return &model.BinaryData{ID: "new-id", UserID: data.UserID, Title: data.Title, Metadata: data.Metadata, ClientPath: data.ClientPath}, nil
+}
+
+func (m *mockBinaryDataService) UpdateInfo(ctx context.Context, data *model.BinaryData) (*model.BinaryData, error) {
+	return data, nil
+}
+
+func (m *mockBinaryDataService) Update(ctx context.Context, data *model.BinaryData, r io.Reader) (*model.BinaryData, error) {
 	buf := new(bytes.Buffer)
 	if r != nil {
 		_, _ = io.Copy(buf, r)   // читаем все данные
@@ -44,11 +52,11 @@ func (m *mockBinaryDataService) Update(ctx context.Context, userID, id, title, m
 	}
 
 	return &model.BinaryData{
-		ID:          id,
-		UserID:      userID,
-		Title:       title,
-		StoragePath: "user123/" + id + ".bin", // имитация нового пути
-		Metadata:    metadata,
+		ID:          data.ID,
+		UserID:      data.UserID,
+		Title:       data.Title,
+		StoragePath: "user123/" + data.ID + ".bin", // имитация нового пути
+		Metadata:    data.Metadata,
 	}, nil
 }
 
@@ -97,16 +105,20 @@ func TestBinaryDataHandler_UploadBinaryData(t *testing.T) {
 	userID := "user123"
 	title := "MyFile"
 	metadata := "meta"
+	clientPath := "/tmp/file.txt"
 	content := []byte("hello world")
 
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetTitle(title)
+	dataInfo.SetMetadata(metadata)
+	dataInfo.SetClientPath(clientPath)
 	// Мок stream
 	stream := &mockUploadStream{
 		ctx: ctxWithUserID(userID),
 		recvMsgs: []*pb.UploadBinaryDataRequest{
 			func() *pb.UploadBinaryDataRequest {
 				r := &pb.UploadBinaryDataRequest{}
-				r.SetTitle(title)
-				r.SetMetadata(metadata)
+				r.SetInfo(dataInfo)
 				return r
 			}(),
 			func() *pb.UploadBinaryDataRequest {
@@ -133,7 +145,14 @@ func TestBinaryDataHandler_UpdateBinaryData(t *testing.T) {
 	dataID := "data123"
 	newTitle := "UpdatedFile"
 	newMeta := "newMeta"
+	clientPath := "/tmp/newfile.txt"
 	content := []byte("new content")
+
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetId(dataID)
+	dataInfo.SetTitle(newTitle)
+	dataInfo.SetMetadata(newMeta)
+	dataInfo.SetClientPath(clientPath)
 
 	// Мок stream
 	stream := &mockUpdateStream{
@@ -141,9 +160,7 @@ func TestBinaryDataHandler_UpdateBinaryData(t *testing.T) {
 		recvMsgs: []*pb.UpdateBinaryDataRequest{
 			func() *pb.UpdateBinaryDataRequest {
 				r := &pb.UpdateBinaryDataRequest{}
-				r.SetId(dataID)
-				r.SetTitle(newTitle)
-				r.SetMetadata(newMeta)
+				r.SetInfo(dataInfo)
 				return r
 			}(),
 			func() *pb.UpdateBinaryDataRequest {
@@ -158,6 +175,31 @@ func TestBinaryDataHandler_UpdateBinaryData(t *testing.T) {
 	assert.NoError(t, err)
 	require.Equal(t, content, mockSvc.Received)
 	require.Equal(t, dataID, stream.sentResp.GetId())
+}
+
+// --- Тест UpdateBinaryDataInfo ---
+func TestBinaryDataHandler_UpdateBinaryDataInfo(t *testing.T) {
+	mockSvc := &mockBinaryDataService{}
+	logger := zap.NewNop()
+	handler := handlers.NewBinaryDataHandler(mockSvc, logger)
+
+	userID := "user123"
+	dataID := "data123"
+	newTitle := "UpdatedFile"
+	newMeta := "newMeta"
+
+	req := &pb.UpdateBinaryDataRequest{}
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetId(dataID)
+	dataInfo.SetTitle(newTitle)
+	dataInfo.SetMetadata(newMeta)
+
+	req.SetInfo(dataInfo)
+
+	resp, err := handler.UpdateBinaryDataInfo(ctxWithUserID(userID), req)
+	assert.NoError(t, err)
+	assert.Equal(t, dataID, resp.GetId())
+	mockSvc.AssertExpectations(t)
 }
 
 // --- Тест DownloadBinaryData ---
@@ -233,6 +275,26 @@ func TestBinaryDataHandler_GetBinaryDataInfo_Success(t *testing.T) {
 	assert.EqualValues(t, 1024, resp.GetBinaryInfo().GetSize())
 
 	mockSvc.AssertExpectations(t)
+}
+
+func TestBinaryDataHandler_SaveBinaryDataInfo_Create(t *testing.T) {
+	mockSvc := &mockBinaryDataService{}
+	logger := zap.NewNop()
+	handler := handlers.NewBinaryDataHandler(mockSvc, logger)
+
+	userID := "user123"
+
+	info := &pb.BinaryDataInfo{}
+	info.SetTitle("InfoTitle")
+	info.SetMetadata("meta")
+	info.SetClientPath("/tmp/info.txt")
+
+	req := &pb.SaveBinaryDataInfoRequest{}
+	req.SetInfo(info)
+
+	resp, err := handler.SaveBinaryDataInfo(ctxWithUserID(userID), req)
+	assert.NoError(t, err)
+	assert.Equal(t, "new-id", resp.GetId())
 }
 
 // --- Тест DeleteBinaryData ---

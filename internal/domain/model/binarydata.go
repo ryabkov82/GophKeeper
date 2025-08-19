@@ -12,6 +12,7 @@ type BinaryData struct {
 	UserID      string    `db:"user_id"`
 	Title       string    `db:"title"`
 	StoragePath string    `db:"storage_path"`
+	ClientPath  string    `db:"client_path"`
 	Size        int64     `db:"size"`
 	Metadata    string    `db:"metadata"`
 	CreatedAt   time.Time `db:"created_at"`

@@ -27,9 +27,9 @@ func (s *binaryDataStorage) Save(ctx context.Context, data *model.BinaryData) er
 	data.ID = uuid.NewString()
 	query := `
 		INSERT INTO binary_data (
-			id, user_id, title, storage_path, metadata, created_at, updated_at
+			id, user_id, title, storage_path, client_path, size, metadata, created_at, updated_at
 		) VALUES (
-			:id, :user_id, :title, :storage_path, :size, :metadata, NOW(), NOW()
+				:id, :user_id, :title, :storage_path, :client_path, :size, :metadata, NOW(), NOW()
 		)`
 	_, err := s.db.NamedExecContext(ctx, query, data)
 	return err
@@ -39,10 +39,11 @@ func (s *binaryDataStorage) Update(ctx context.Context, data *model.BinaryData) 
 	query := `
 		UPDATE binary_data
 		SET title = :title,
-		    storage_path = :storage_path,
-		    size = :size,
-		    metadata = :metadata,
-		    updated_at = NOW()
+			storage_path = :storage_path,
+			client_path = :client_path,
+			size = :size,
+			metadata = :metadata,
+			updated_at = NOW()
 		WHERE id = :id AND user_id = :user_id`
 
 	res, err := s.db.NamedExecContext(ctx, query, data)

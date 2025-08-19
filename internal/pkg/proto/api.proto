@@ -195,8 +195,7 @@ message DeleteTextDataResponse {
 // Сообщения для BinaryData
 message UploadBinaryDataRequest {
     bytes chunk = 1;           // фрагмент файла
-    string title = 2;          // название файла
-    string metadata = 3;       // зашифрованная метаинформация
+    BinaryDataInfo info = 2;   // метаданные файла
 }
 
 message UploadBinaryDataResponse {
@@ -222,6 +221,7 @@ message BinaryDataInfo {
     string title = 2;
     string metadata = 3;
     int64 size = 4;
+    string client_path = 5;
 }
 
 message DeleteBinaryDataRequest {
@@ -243,14 +243,20 @@ message GetBinaryDataInfoResponse {
 // Запрос для обновления бинарных данных (поток)
 message UpdateBinaryDataRequest {
     bytes chunk = 1;       // фрагмент файла
-    string id = 2;         // ID существующей записи (передается в первом пакете)
-    string title = 3;      // новое название (по желанию)
-    string metadata = 4;   // новая метаинформация (по желанию)
+    BinaryDataInfo info = 2; // информация о файле (передается в первом пакете)
 }
 
 // Ответ после завершения обновления
 message UpdateBinaryDataResponse {
     string id = 1;         // ID обновленной записи
+}
+
+message SaveBinaryDataInfoRequest {
+    BinaryDataInfo info = 1;
+}
+
+message SaveBinaryDataInfoResponse {
+    string id = 1;
 }
 
 // Сервис для работы с Credential
@@ -282,10 +288,12 @@ service TextDataService {
 
 // Сервис для работы с BinaryData
 service BinaryDataService {
-    rpc UploadBinaryData(stream UploadBinaryDataRequest) returns (UploadBinaryDataResponse);
-    rpc DownloadBinaryData(DownloadBinaryDataRequest) returns (stream DownloadBinaryDataResponse);
-    rpc ListBinaryData(ListBinaryDataRequest) returns (ListBinaryDataResponse);
-    rpc DeleteBinaryData(DeleteBinaryDataRequest) returns (DeleteBinaryDataResponse);
-    rpc UpdateBinaryData(stream UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);
+    rpc SaveBinaryDataInfo(SaveBinaryDataInfoRequest) returns (SaveBinaryDataInfoResponse);
     rpc GetBinaryDataInfo(GetBinaryDataInfoRequest) returns (GetBinaryDataInfoResponse);
+    rpc ListBinaryData(ListBinaryDataRequest) returns (ListBinaryDataResponse);
+    rpc UpdateBinaryDataInfo(UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);    
+    rpc DeleteBinaryData(DeleteBinaryDataRequest) returns (DeleteBinaryDataResponse);    
+    rpc UploadBinaryData(stream UploadBinaryDataRequest) returns (UploadBinaryDataResponse);
+    rpc UpdateBinaryData(stream UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);        
+    rpc DownloadBinaryData(DownloadBinaryDataRequest) returns (stream DownloadBinaryDataResponse);
 }

@@ -97,7 +97,9 @@ func TestBinaryDataService_Create_Success(t *testing.T) {
 	storage.On("Save", ctx, userID, mock.Anything).Return(storagePath, int64(1), nil).Once()
 	repo.On("Save", ctx, mock.AnythingOfType("*model.BinaryData")).Return(nil).Once()
 
-	data, err := svc.Create(ctx, userID, "title", "meta", reader)
+	bd := &model.BinaryData{UserID: userID, Title: "title", ClientPath: "path", Metadata: "meta"}
+	data, err := svc.Create(ctx, bd, reader)
+
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 	assert.Equal(t, userID, data.UserID)
@@ -124,12 +126,54 @@ func TestBinaryDataService_Create_RepoError(t *testing.T) {
 	repo.On("Save", ctx, mock.AnythingOfType("*model.BinaryData")).Return(errors.New("db fail")).Once()
 	storage.On("Delete", ctx, storagePath).Return(nil).Once()
 
-	data, err := svc.Create(ctx, userID, "title", "meta", reader)
+	bd := &model.BinaryData{UserID: userID, Title: "title", ClientPath: "path", Metadata: "meta"}
+	data, err := svc.Create(ctx, bd, reader)
+
 	assert.Nil(t, data)
 	assert.EqualError(t, err, "db fail")
 
 	storage.AssertExpectations(t)
 	repo.AssertExpectations(t)
+}
+
+func TestBinaryDataService_CreateInfo(t *testing.T) {
+	ctx := context.Background()
+	repo := new(mockRepo)
+	storage := new(mockStorage)
+	svc := service.NewBinaryDataService(repo, storage)
+
+	bd := &model.BinaryData{UserID: "user1", Title: "title", Metadata: "meta", ClientPath: "path"}
+
+	repo.On("Save", ctx, mock.AnythingOfType("*model.BinaryData")).Return(nil).Once()
+
+	data, err := svc.CreateInfo(ctx, bd)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, data.ID)
+
+	repo.AssertExpectations(t)
+	storage.AssertExpectations(t) // не должно быть вызовов
+}
+
+func TestBinaryDataService_UpdateInfo(t *testing.T) {
+	ctx := context.Background()
+	repo := new(mockRepo)
+	storage := new(mockStorage)
+	svc := service.NewBinaryDataService(repo, storage)
+
+	userID := "user1"
+	id := "id1"
+	existing := &model.BinaryData{ID: id, UserID: userID, Title: "old", Metadata: "old", ClientPath: "old"}
+
+	repo.On("GetByID", ctx, userID, id).Return(existing, nil).Once()
+	repo.On("Update", ctx, mock.Anything).Return(nil).Once()
+
+	bd := &model.BinaryData{ID: id, UserID: userID, Title: "new", Metadata: "new", ClientPath: "new"}
+	updated, err := svc.UpdateInfo(ctx, bd)
+	assert.NoError(t, err)
+	assert.Equal(t, "new", updated.Title)
+
+	repo.AssertExpectations(t)
+	storage.AssertExpectations(t)
 }
 
 func TestBinaryDataService_Get_Success(t *testing.T) {
@@ -258,11 +302,45 @@ func TestBinaryDataService_Update_Success(t *testing.T) {
 
 	// Вызываем метод
 	r := bytes.NewReader(newContent)
-	updated, err := svc.Update(ctx, userID, id, newTitle, newMetadata, r)
+	bd := &model.BinaryData{ID: id, UserID: userID, Title: newTitle, ClientPath: "/new/path", Metadata: newMetadata}
+	updated, err := svc.Update(ctx, bd, r)
+
 	assert.NoError(t, err)
 	assert.Equal(t, newTitle, updated.Title)
 	assert.Equal(t, newMetadata, updated.Metadata)
 	assert.Equal(t, newPath, updated.StoragePath)
+
+	repo.AssertExpectations(t)
+	storage.AssertExpectations(t)
+}
+
+func TestBinaryDataService_UpdateInfo_Success(t *testing.T) {
+	ctx := context.Background()
+	repo := new(mockRepo)
+	storage := new(mockStorage)
+	svc := service.NewBinaryDataService(repo, storage)
+
+	userID := "user1"
+	id := "file123"
+	newTitle := "NewTitle"
+	newMetadata := "newMeta"
+
+	existing := &model.BinaryData{
+		ID:       id,
+		UserID:   userID,
+		Title:    "OldTitle",
+		Metadata: "oldMeta",
+	}
+
+	repo.On("GetByID", ctx, userID, id).Return(existing, nil).Once()
+	repo.On("Update", ctx, mock.Anything).Return(nil).Once()
+
+	bd := &model.BinaryData{ID: id, UserID: userID, Title: newTitle, ClientPath: "/new/path", Metadata: newMetadata}
+	updated, err := svc.UpdateInfo(ctx, bd)
+
+	assert.NoError(t, err)
+	assert.Equal(t, newTitle, updated.Title)
+	assert.Equal(t, newMetadata, updated.Metadata)
 
 	repo.AssertExpectations(t)
 	storage.AssertExpectations(t)

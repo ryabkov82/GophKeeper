@@ -232,13 +232,14 @@ type mockBinaryDataManager struct {
 	setClientCalled bool
 	client          proto.BinaryDataServiceClient
 
-	uploadErr  error
-	updateErr  error
-	downloadFn func(ctx context.Context, id string) (io.ReadCloser, error)
-	deleteErr  error
-	listResult []model.BinaryData
-	listErr    error
-	getInfoFn  func(ctx context.Context, id string) (*model.BinaryData, error)
+	uploadErr     error
+	updateErr     error
+	updateInfoErr error
+	downloadFn    func(ctx context.Context, id string) (io.ReadCloser, error)
+	deleteErr     error
+	listResult    []model.BinaryData
+	listErr       error
+	getInfoFn     func(ctx context.Context, id string) (*model.BinaryData, error)
 }
 
 func (m *mockBinaryDataManager) SetClient(client proto.BinaryDataServiceClient) {
@@ -252,6 +253,10 @@ func (m *mockBinaryDataManager) Upload(ctx context.Context, data *model.BinaryDa
 
 func (m *mockBinaryDataManager) Update(ctx context.Context, data *model.BinaryData, content io.Reader) error {
 	return m.updateErr
+}
+
+func (m *mockBinaryDataManager) UpdateInfo(ctx context.Context, data *model.BinaryData) error {
+	return m.updateInfoErr
 }
 
 func (m *mockBinaryDataManager) Download(ctx context.Context, id string) (io.ReadCloser, error) {

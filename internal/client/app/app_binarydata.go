@@ -194,6 +194,25 @@ func (s *AppServices) UpdateBinaryData(ctx context.Context, data *model.BinaryDa
 	return s.sendBinaryData(ctx, data, filePath, progressChan, s.BinaryDataManager.Update)
 }
 
+// UpdateBinaryDataInfo обновляет только метаданные бинарных данных без пересылки содержимого
+func (s *AppServices) UpdateBinaryDataInfo(ctx context.Context, data *model.BinaryData) error {
+	if err := s.ensureBinaryDataClient(ctx); err != nil {
+		return err
+	}
+
+	key, err := s.CryptoKeyManager.LoadKey()
+	if err != nil {
+		return err
+	}
+
+	wrapper := &cryptowrap.BinaryDataCryptoWrapper{BinaryData: data}
+	if err := wrapper.Encrypt(key); err != nil {
+		return err
+	}
+
+	return s.BinaryDataManager.UpdateInfo(ctx, data)
+}
+
 // DownloadBinaryData скачивает файл с сервера, расшифровывает его и отправляет прогресс через канал
 func (s *AppServices) DownloadBinaryData(
 	ctx context.Context,

@@ -10,6 +10,7 @@ import (
 
 // postgresFactory — реализация StorageFactory для работы с PostgreSQL.
 type postgresFactory struct {
+	db             *sql.DB
 	userRepo       repository.UserRepository
 	credentialRepo repository.CredentialRepository
 	bankCardRepo   repository.BankCardRepository
@@ -27,6 +28,7 @@ type postgresFactory struct {
 //   - StorageFactory с PostgreSQL-реализациями репозиториев
 func NewPostgresFactory(db *sql.DB) repository.StorageFactory {
 	return &postgresFactory{
+		db:             db,
 		userRepo:       postgres.NewUserStorage(db),
 		credentialRepo: postgres.NewCredentialStorage(db),
 		bankCardRepo:   postgres.NewBankCardStorage(db),
@@ -58,6 +60,14 @@ func (f *postgresFactory) TextData() repository.TextDataRepository {
 // BinaryData возвращает репозиторий для работы с BinaryData.
 func (f *postgresFactory) BinaryData() repository.BinaryDataRepository {
 	return f.binaryDataRepo
+}
+
+// Close закрывает соединение с базой данных.
+func (f *postgresFactory) Close() error {
+	if f.db != nil {
+		return f.db.Close()
+	}
+	return nil
 }
 
 // NewStorageFactory создает фабрику репозиториев для указанного драйвера БД.

@@ -156,3 +156,32 @@ func TestDeleteBinaryData(t *testing.T) {
 	err := svc.DeleteBinaryData(context.Background(), "user1", "id1")
 	assert.NoError(t, err)
 }
+
+// Тест UpdateBinaryDataInfo
+func TestUpdateBinaryDataInfo(t *testing.T) {
+	key := []byte("1234567890123456")
+
+	mockMgr := &mockBinaryDataManager{}
+	mockCrypto := &mockCryptoKeyManager{loadKeyData: key}
+
+	svc := &app.AppServices{
+		ConnManager:       &mockConnManager{},
+		BinaryDataManager: mockMgr,
+		CryptoKeyManager:  mockCrypto,
+		Logger:            zap.NewNop(),
+	}
+
+	data := &model.BinaryData{ID: "id1", Title: "title", Metadata: "meta"}
+
+	err := svc.UpdateBinaryDataInfo(context.Background(), data)
+	assert.NoError(t, err)
+	assert.True(t, mockMgr.setClientCalled)
+	assert.True(t, mockCrypto.loadCalled)
+
+	// проверяем, что данные шифровались
+	assert.NotEqual(t, "meta", data.Metadata)
+	wrapper := &cryptowrap.BinaryDataCryptoWrapper{BinaryData: data}
+	err = wrapper.Decrypt(key)
+	assert.NoError(t, err)
+	assert.Equal(t, "meta", data.Metadata)
+}

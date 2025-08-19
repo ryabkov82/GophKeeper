@@ -19,11 +19,12 @@ import (
 type mockBinaryDataClient struct {
 	pb.BinaryDataServiceClient
 
-	ListErr      error
-	UploadErr    error
-	UpdateErr    error
-	DeleteErr    error
-	DownloadData [][]byte
+	ListErr       error
+	UploadErr     error
+	UpdateErr     error
+	UpdateInfoErr error
+	DeleteErr     error
+	DownloadData  [][]byte
 }
 
 func (m *mockBinaryDataClient) ListBinaryData(ctx context.Context, req *pb.ListBinaryDataRequest, opts ...grpc.CallOption) (*pb.ListBinaryDataResponse, error) {
@@ -60,6 +61,12 @@ func (m *mockBinaryDataClient) UploadBinaryData(ctx context.Context, opts ...grp
 
 func (m *mockBinaryDataClient) UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (pb.BinaryDataService_UpdateBinaryDataClient, error) {
 	return &mockUpdateStream{client: m}, m.UpdateErr
+}
+
+func (m *mockBinaryDataClient) UpdateBinaryDataInfo(ctx context.Context, req *pb.UpdateBinaryDataRequest, opts ...grpc.CallOption) (*pb.UpdateBinaryDataResponse, error) {
+	resp := &pb.UpdateBinaryDataResponse{}
+	resp.SetId(req.GetInfo().GetId())
+	return resp, m.UpdateInfoErr
 }
 
 func (m *mockBinaryDataClient) DeleteBinaryData(ctx context.Context, req *pb.DeleteBinaryDataRequest, opts ...grpc.CallOption) (*pb.DeleteBinaryDataResponse, error) {
@@ -151,6 +158,19 @@ func TestBinaryDataManager_Update(t *testing.T) {
 	content := bytes.NewReader([]byte("updated content"))
 
 	err := manager.Update(context.Background(), data, content)
+	assert.NoError(t, err)
+	assert.Equal(t, "123", data.ID)
+}
+
+func TestBinaryDataManager_UpdateInfo(t *testing.T) {
+	logger := zap.NewNop()
+	manager := binarydata.NewBinaryDataManager(logger)
+	client := &mockBinaryDataClient{}
+	manager.SetClient(client)
+
+	data := &model.BinaryData{ID: "123", UserID: "user1", Title: "file1", Metadata: "meta1"}
+
+	err := manager.UpdateInfo(context.Background(), data)
 	assert.NoError(t, err)
 	assert.Equal(t, "123", data.ID)
 }

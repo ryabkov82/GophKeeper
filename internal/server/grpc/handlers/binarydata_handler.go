@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtauth"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
@@ -42,8 +43,16 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 		return status.Error(codes.InvalidArgument, fmt.Sprintf("failed to receive initial message: %v", err))
 	}
 
-	title := req.GetTitle()
-	metadata := req.GetMetadata()
+	title := req.GetInfo().GetTitle()
+	metadata := req.GetInfo().GetMetadata()
+	clientPath := req.GetInfo().GetClientPath()
+
+	data := &model.BinaryData{
+		UserID:     userID,
+		Title:      title,
+		Metadata:   metadata,
+		ClientPath: clientPath,
+	}
 
 	h.logger.Debug("UploadBinaryData started",
 		zap.String("userID", userID),
@@ -75,7 +84,7 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 	}()
 
 	// Создаем запись в сервисе
-	data, err := h.binarySvc.Create(stream.Context(), userID, title, metadata, pr)
+	data, err = h.binarySvc.Create(stream.Context(), data, pr)
 	if err != nil {
 		h.logger.Warn("UploadBinaryData failed", zap.String("userID", userID), zap.String("title", title), zap.Error(err))
 		return err
@@ -102,13 +111,21 @@ func (h *BinaryDataHandler) UpdateBinaryData(stream pb.BinaryDataService_UpdateB
 		return status.Error(codes.InvalidArgument, fmt.Sprintf("failed to receive initial message: %v", err))
 	}
 
-	id := req.GetId()
-	title := req.GetTitle()
-	metadata := req.GetMetadata()
+	id := req.GetInfo().GetId()
+	title := req.GetInfo().GetTitle()
+	metadata := req.GetInfo().GetMetadata()
+	clientPath := req.GetInfo().GetClientPath()
+
+	data := &model.BinaryData{
+		ID:         id,
+		UserID:     userID,
+		Title:      title,
+		Metadata:   metadata,
+		ClientPath: clientPath,
+	}
 
 	h.logger.Debug("UpdateBinaryData started",
 		zap.String("userID", userID),
-		zap.String("id", id),
 		zap.String("title", title),
 	)
 
@@ -137,11 +154,10 @@ func (h *BinaryDataHandler) UpdateBinaryData(stream pb.BinaryDataService_UpdateB
 	}()
 
 	// Вызываем сервис для обновления записи
-	data, err := h.binarySvc.Update(stream.Context(), userID, id, title, metadata, pr)
+	data, err = h.binarySvc.Update(stream.Context(), data, pr)
 	if err != nil {
 		h.logger.Warn("UpdateBinaryData failed",
 			zap.String("userID", userID),
-			zap.String("id", id),
 			zap.String("title", title),
 			zap.Error(err),
 		)
@@ -156,6 +172,41 @@ func (h *BinaryDataHandler) UpdateBinaryData(stream pb.BinaryDataService_UpdateB
 	resp := &pb.UpdateBinaryDataResponse{}
 	resp.SetId(data.ID)
 	return stream.SendAndClose(resp)
+}
+
+// UpdateBinaryDataInfo обновляет только метаданные бинарных данных
+func (h *BinaryDataHandler) UpdateBinaryDataInfo(ctx context.Context, req *pb.UpdateBinaryDataRequest) (*pb.UpdateBinaryDataResponse, error) {
+	userID, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "userID not found in context")
+	}
+
+	data := &model.BinaryData{
+		ID:       req.GetInfo().GetId(),
+		UserID:   userID,
+		Title:    req.GetInfo().GetTitle(),
+		Metadata: req.GetInfo().GetMetadata(),
+	}
+
+	data, err = h.binarySvc.UpdateInfo(ctx, data)
+	if err != nil {
+		h.logger.Warn("UpdateBinaryDataInfo failed",
+			zap.String("userID", userID),
+			zap.String("id", req.GetInfo().GetId()),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	resp := &pb.UpdateBinaryDataResponse{}
+	resp.SetId(data.ID)
+
+	h.logger.Info("UpdateBinaryDataInfo succeeded",
+		zap.String("userID", userID),
+		zap.String("binaryDataID", data.ID),
+	)
+
+	return resp, nil
 }
 
 // DownloadBinaryData возвращает бинарные данные пользователю
@@ -221,6 +272,7 @@ func (h *BinaryDataHandler) ListBinaryData(ctx context.Context, req *pb.ListBina
 		item.SetId(d.ID)
 		item.SetTitle(d.Title)
 		//item.SetMetadata(d.Metadata)
+		item.SetClientPath(d.ClientPath)
 		resp.SetItems(append(resp.GetItems(), item))
 	}
 
@@ -250,6 +302,7 @@ func (h *BinaryDataHandler) GetBinaryDataInfo(ctx context.Context, req *pb.GetBi
 	info.SetTitle(data.Title)
 	info.SetMetadata(data.Metadata)
 	info.SetSize(data.Size)
+	info.SetClientPath(data.ClientPath)
 
 	resp := &pb.GetBinaryDataInfoResponse{}
 	resp.SetBinaryInfo(info)
@@ -259,6 +312,47 @@ func (h *BinaryDataHandler) GetBinaryDataInfo(ctx context.Context, req *pb.GetBi
 		zap.String("binaryDataID", data.ID),
 	)
 
+	return resp, nil
+}
+
+// SaveBinaryDataInfo создает метаданные бинарных данных без их содержимого
+func (h *BinaryDataHandler) SaveBinaryDataInfo(ctx context.Context, req *pb.SaveBinaryDataInfoRequest) (*pb.SaveBinaryDataInfoResponse, error) {
+	userID, err := jwtauth.FromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "userID not found in context")
+	}
+
+	info := req.GetInfo()
+	if info == nil {
+		return nil, status.Error(codes.InvalidArgument, "info is required")
+	}
+
+	data := &model.BinaryData{
+		UserID:     userID,
+		Title:      info.GetTitle(),
+		Metadata:   info.GetMetadata(),
+		ClientPath: info.GetClientPath(),
+	}
+
+	var res *model.BinaryData
+	res, err = h.binarySvc.CreateInfo(ctx, data)
+
+	if err != nil {
+		h.logger.Warn("SaveBinaryDataInfo failed",
+			zap.String("userID", userID),
+			zap.String("binaryDataID", data.ID),
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	h.logger.Info("SaveBinaryDataInfo succeeded",
+		zap.String("userID", userID),
+		zap.String("binaryDataID", res.ID),
+	)
+
+	resp := &pb.SaveBinaryDataInfoResponse{}
+	resp.SetId(res.ID)
 	return resp, nil
 }
 

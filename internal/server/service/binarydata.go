@@ -22,23 +22,18 @@ func NewBinaryDataService(repo repository.BinaryDataRepository, storage storage.
 }
 
 // Create сохраняет файл и метаданные
-func (s *BinaryDataService) Create(ctx context.Context, userID string, title string, metadata string, r io.Reader) (*model.BinaryData, error) {
+func (s *BinaryDataService) Create(ctx context.Context, data *model.BinaryData, r io.Reader) (*model.BinaryData, error) {
 	// Сохраняем файл в хранилище
-	storagePath, size, err := s.storage.Save(ctx, userID, r)
+	storagePath, size, err := s.storage.Save(ctx, data.UserID, r)
 	if err != nil {
 		return nil, err
 	}
 
-	data := &model.BinaryData{
-		ID:          uuid.NewString(),
-		UserID:      userID,
-		Title:       title,
-		StoragePath: storagePath,
-		Size:        size,
-		Metadata:    metadata,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
+	data.ID = uuid.NewString()
+	data.StoragePath = storagePath
+	data.Size = size
+	data.CreatedAt = time.Now()
+	data.UpdatedAt = time.Now()
 
 	// Сохраняем метаданные в Postgres
 	if err := s.repo.Save(ctx, data); err != nil {
@@ -50,51 +45,88 @@ func (s *BinaryDataService) Create(ctx context.Context, userID string, title str
 	return data, nil
 }
 
+// CreateInfo сохраняет только метаданные без бинарного содержимого.
+func (s *BinaryDataService) CreateInfo(ctx context.Context, data *model.BinaryData) (*model.BinaryData, error) {
+
+	data.ID = uuid.NewString()
+	data.StoragePath = ""
+	data.Size = 0
+	data.CreatedAt = time.Now()
+	data.UpdatedAt = time.Now()
+
+	if err := s.repo.Save(ctx, data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 // Update перезаписывает бинарные данные и/или метаданные существующей записи.
-func (s *BinaryDataService) Update(ctx context.Context, userID, id, title, metadata string, r io.Reader) (*model.BinaryData, error) {
+func (s *BinaryDataService) Update(ctx context.Context, data *model.BinaryData, r io.Reader) (*model.BinaryData, error) {
 	// Получаем существующую запись
-	data, err := s.repo.GetByID(ctx, userID, id)
+	stored, err := s.repo.GetByID(ctx, data.UserID, data.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	if data == nil {
+	if stored == nil {
 		return nil, errors.New("binary data not found")
 	}
 
-	var newStoragePath string
+	var newStoragePath, oldStoragePath string
 	var newSize int64
 	// Если передан поток новых данных, сохраняем их в хранилище
 	if r != nil {
-		newStoragePath, newSize, err = s.storage.Save(ctx, userID, r)
+		newStoragePath, newSize, err = s.storage.Save(ctx, data.UserID, r)
 		if err != nil {
 			return nil, err
 		}
-		// Удаляем старый файл после успешной записи нового
-		_ = s.storage.Delete(ctx, data.StoragePath)
-		data.StoragePath = newStoragePath
+		oldStoragePath = stored.StoragePath
+		stored.StoragePath = newStoragePath
 	}
 
 	// Обновляем метаданные, если они изменились
-	if title != "" {
-		data.Title = title
-	}
-	if metadata != "" {
-		data.Metadata = metadata
-	}
-	data.Size = newSize
-	data.UpdatedAt = time.Now()
+	stored.Title = data.Title
+	stored.Metadata = data.Metadata
+	stored.ClientPath = data.ClientPath
+	stored.Size = newSize
+	stored.UpdatedAt = time.Now()
 
 	// Сохраняем изменения в репозитории
-	if err := s.repo.Update(ctx, data); err != nil {
+	if err := s.repo.Update(ctx, stored); err != nil {
 		// Если запись в БД не удалась, восстанавливаем старый файл при необходимости
 		if newStoragePath != "" {
 			_ = s.storage.Delete(ctx, newStoragePath)
 		}
 		return nil, err
 	}
+	if newStoragePath != "" {
+		// Удаляем старый файл после успешной записи нового
+		_ = s.storage.Delete(ctx, oldStoragePath)
+	}
 
-	return data, nil
+	return stored, nil
+}
+
+// UpdateInfo изменяет только метаданные файла без перезаписи его содержимого.
+func (s *BinaryDataService) UpdateInfo(ctx context.Context, data *model.BinaryData) (*model.BinaryData, error) {
+
+	stored, err := s.repo.GetByID(ctx, data.UserID, data.ID)
+	if err != nil {
+		return nil, err
+	}
+	if stored == nil {
+		return nil, errors.New("binary data not found")
+	}
+
+	stored.Title = data.Title
+	stored.Metadata = data.Metadata
+	stored.UpdatedAt = time.Now()
+
+	if err := s.repo.Update(ctx, stored); err != nil {
+		return nil, err
+	}
+	return stored, nil
 }
 
 // Get возвращает метаданные и открытый поток для чтения

@@ -17,6 +17,7 @@ type BinaryDataManagerIface interface {
 	List(ctx context.Context) ([]model.BinaryData, error)
 	GetInfo(ctx context.Context, id string) (*model.BinaryData, error)
 	Update(ctx context.Context, data *model.BinaryData, r io.Reader) error
+	UpdateInfo(ctx context.Context, data *model.BinaryData) error
 	Delete(ctx context.Context, id string) error
 	SetClient(client pb.BinaryDataServiceClient)
 }
@@ -49,9 +50,13 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 	}
 
 	// Отправляем метаданные первым сообщением
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetTitle(data.Title)
+	dataInfo.SetMetadata(data.Metadata)
+	dataInfo.SetClientPath(data.ClientPath)
+
 	metaReq := &pb.UploadBinaryDataRequest{}
-	metaReq.SetTitle(data.Title)
-	metaReq.SetMetadata(data.Metadata)
+	metaReq.SetInfo(dataInfo)
 	if err := stream.Send(metaReq); err != nil {
 		return fmt.Errorf("failed to send metadata: %w", err)
 	}
@@ -81,6 +86,28 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 
 	data.ID = resp.GetId()
 	m.logger.Info("Upload succeeded", zap.String("binaryDataID", data.ID))
+	return nil
+}
+
+// UpdateInfo обновляет только метаданные бинарных данных без загрузки содержимого.
+func (m *BinaryDataManager) UpdateInfo(ctx context.Context, data *model.BinaryData) error {
+	m.logger.Debug("UpdateInfo started", zap.String("binaryDataID", data.ID))
+
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetId(data.ID)
+	dataInfo.SetTitle(data.Title)
+	dataInfo.SetMetadata(data.Metadata)
+
+	req := &pb.UpdateBinaryDataRequest{}
+	req.SetInfo(dataInfo)
+
+	resp, err := m.client.UpdateBinaryDataInfo(ctx, req)
+	if err != nil {
+		return fmt.Errorf("UpdateBinaryDataInfo RPC failed: %w", err)
+	}
+
+	data.ID = resp.GetId()
+	m.logger.Info("UpdateInfo succeeded", zap.String("binaryDataID", data.ID))
 	return nil
 }
 
@@ -154,10 +181,15 @@ func (m *BinaryDataManager) Update(ctx context.Context, data *model.BinaryData, 
 	}
 
 	// Отправляем метаданные первым сообщением
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetId(data.ID)
+	dataInfo.SetTitle(data.Title)
+	dataInfo.SetMetadata(data.Metadata)
+	dataInfo.SetClientPath(data.ClientPath)
+
 	metaReq := &pb.UpdateBinaryDataRequest{}
-	metaReq.SetId(data.ID)
-	metaReq.SetTitle(data.Title)
-	metaReq.SetMetadata(data.Metadata)
+	metaReq.SetInfo(dataInfo)
+
 	if err := stream.Send(metaReq); err != nil {
 		return fmt.Errorf("failed to send metadata: %w", err)
 	}
