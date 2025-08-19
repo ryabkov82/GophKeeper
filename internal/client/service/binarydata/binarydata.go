@@ -16,6 +16,7 @@ type BinaryDataManagerIface interface {
 	Download(ctx context.Context, id string) (io.ReadCloser, error)
 	List(ctx context.Context) ([]model.BinaryData, error)
 	GetInfo(ctx context.Context, id string) (*model.BinaryData, error)
+	CreateInfo(ctx context.Context, data *model.BinaryData) error
 	Update(ctx context.Context, data *model.BinaryData, r io.Reader) error
 	UpdateInfo(ctx context.Context, data *model.BinaryData) error
 	Delete(ctx context.Context, id string) error
@@ -86,6 +87,28 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 
 	data.ID = resp.GetId()
 	m.logger.Info("Upload succeeded", zap.String("binaryDataID", data.ID))
+	return nil
+}
+
+// CreateInfo сохраняет только метаданные бинарных данных без содержимого.
+func (m *BinaryDataManager) CreateInfo(ctx context.Context, data *model.BinaryData) error {
+	m.logger.Debug("CreateInfo started", zap.String("title", data.Title))
+
+	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetTitle(data.Title)
+	dataInfo.SetMetadata(data.Metadata)
+	dataInfo.SetClientPath(data.ClientPath)
+
+	req := &pb.SaveBinaryDataInfoRequest{}
+	req.SetInfo(dataInfo)
+
+	resp, err := m.client.SaveBinaryDataInfo(ctx, req)
+	if err != nil {
+		return fmt.Errorf("SaveBinaryDataInfo RPC failed: %w", err)
+	}
+
+	data.ID = resp.GetId()
+	m.logger.Info("CreateInfo succeeded", zap.String("binaryDataID", data.ID))
 	return nil
 }
 

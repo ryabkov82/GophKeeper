@@ -15,11 +15,19 @@ type BinaryDataCryptoWrapper struct {
 
 // Encrypt шифрует только Metadata и кодирует в Base64.
 func (b *BinaryDataCryptoWrapper) Encrypt(key []byte) error {
+
 	encMetadata, err := crypto.EncryptAESGCM([]byte(b.Metadata), key)
 	if err != nil {
 		return err
 	}
+
+	encClientPath, err := crypto.EncryptAESGCM([]byte(b.ClientPath), key)
+	if err != nil {
+		return err
+	}
+
 	b.Metadata = base64.StdEncoding.EncodeToString(encMetadata)
+	b.ClientPath = base64.StdEncoding.EncodeToString(encClientPath)
 	return nil
 }
 
@@ -34,5 +42,16 @@ func (b *BinaryDataCryptoWrapper) Decrypt(key []byte) error {
 		return err
 	}
 	b.Metadata = string(decMetadata)
+
+	encClientPath, err := base64.StdEncoding.DecodeString(b.ClientPath)
+	if err != nil {
+		return err
+	}
+	decClientPath, err := crypto.DecryptAESGCM(encClientPath, key)
+	if err != nil {
+		return err
+	}
+	b.ClientPath = string(decClientPath)
+
 	return nil
 }

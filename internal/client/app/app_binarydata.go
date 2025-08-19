@@ -213,6 +213,25 @@ func (s *AppServices) UpdateBinaryDataInfo(ctx context.Context, data *model.Bina
 	return s.BinaryDataManager.UpdateInfo(ctx, data)
 }
 
+// CreateBinaryDataInfo создаёт запись метаданных без отправки содержимого файла
+func (s *AppServices) CreateBinaryDataInfo(ctx context.Context, data *model.BinaryData) error {
+	if err := s.ensureBinaryDataClient(ctx); err != nil {
+		return err
+	}
+
+	key, err := s.CryptoKeyManager.LoadKey()
+	if err != nil {
+		return err
+	}
+
+	wrapper := &cryptowrap.BinaryDataCryptoWrapper{BinaryData: data}
+	if err := wrapper.Encrypt(key); err != nil {
+		return err
+	}
+
+	return s.BinaryDataManager.CreateInfo(ctx, data)
+}
+
 // DownloadBinaryData скачивает файл с сервера, расшифровывает его и отправляет прогресс через канал
 func (s *AppServices) DownloadBinaryData(
 	ctx context.Context,

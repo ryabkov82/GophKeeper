@@ -235,6 +235,7 @@ type mockBinaryDataManager struct {
 	uploadErr     error
 	updateErr     error
 	updateInfoErr error
+	createInfoErr error
 	downloadFn    func(ctx context.Context, id string) (io.ReadCloser, error)
 	deleteErr     error
 	listResult    []model.BinaryData
@@ -257,6 +258,10 @@ func (m *mockBinaryDataManager) Update(ctx context.Context, data *model.BinaryDa
 
 func (m *mockBinaryDataManager) UpdateInfo(ctx context.Context, data *model.BinaryData) error {
 	return m.updateInfoErr
+}
+
+func (m *mockBinaryDataManager) CreateInfo(ctx context.Context, data *model.BinaryData) error {
+	return m.createInfoErr
 }
 
 func (m *mockBinaryDataManager) Download(ctx context.Context, id string) (io.ReadCloser, error) {

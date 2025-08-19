@@ -23,6 +23,7 @@ type mockBinaryDataClient struct {
 	UploadErr     error
 	UpdateErr     error
 	UpdateInfoErr error
+	SaveInfoErr   error
 	DeleteErr     error
 	DownloadData  [][]byte
 }
@@ -61,6 +62,12 @@ func (m *mockBinaryDataClient) UploadBinaryData(ctx context.Context, opts ...grp
 
 func (m *mockBinaryDataClient) UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (pb.BinaryDataService_UpdateBinaryDataClient, error) {
 	return &mockUpdateStream{client: m}, m.UpdateErr
+}
+
+func (m *mockBinaryDataClient) SaveBinaryDataInfo(ctx context.Context, req *pb.SaveBinaryDataInfoRequest, opts ...grpc.CallOption) (*pb.SaveBinaryDataInfoResponse, error) {
+	resp := &pb.SaveBinaryDataInfoResponse{}
+	resp.SetId("123")
+	return resp, m.SaveInfoErr
 }
 
 func (m *mockBinaryDataClient) UpdateBinaryDataInfo(ctx context.Context, req *pb.UpdateBinaryDataRequest, opts ...grpc.CallOption) (*pb.UpdateBinaryDataResponse, error) {
@@ -171,6 +178,19 @@ func TestBinaryDataManager_UpdateInfo(t *testing.T) {
 	data := &model.BinaryData{ID: "123", UserID: "user1", Title: "file1", Metadata: "meta1"}
 
 	err := manager.UpdateInfo(context.Background(), data)
+	assert.NoError(t, err)
+	assert.Equal(t, "123", data.ID)
+}
+
+func TestBinaryDataManager_CreateInfo(t *testing.T) {
+	logger := zap.NewNop()
+	manager := binarydata.NewBinaryDataManager(logger)
+	client := &mockBinaryDataClient{}
+	manager.SetClient(client)
+
+	data := &model.BinaryData{UserID: "user1", Title: "file1", Metadata: "meta1", ClientPath: "/tmp/file1"}
+
+	err := manager.CreateInfo(context.Background(), data)
 	assert.NoError(t, err)
 	assert.Equal(t, "123", data.ID)
 }

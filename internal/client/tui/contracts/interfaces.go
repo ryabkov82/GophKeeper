@@ -86,4 +86,10 @@ type BinaryDataService interface {
 
 	// DeleteBinaryData удаляет бинарный объект по ID
 	DeleteBinaryData(ctx context.Context, id string) error
+
+	// CreateBinaryDataInfo сохраняет метаданные бинарного объекта
+	CreateBinaryDataInfo(ctx context.Context, data *model.BinaryData) error
+
+	// CreateBinaryDataInfo обновляет метаданные бинарного объекта
+	UpdateBinaryDataInfo(ctx context.Context, data *model.BinaryData) error
 }
