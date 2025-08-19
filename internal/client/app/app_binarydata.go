@@ -37,6 +37,40 @@ type ProgressMsg struct {
 	Total int64
 }
 
+// progressWriter считает суммарно записанные байты и шлёт прогресс в канал.
+type progressWriter struct {
+	w  io.Writer
+	n  int64
+	ch chan<- int64
+}
+
+func (pw *progressWriter) Write(p []byte) (int, error) {
+	n, err := pw.w.Write(p)
+	if n > 0 && pw.ch != nil {
+		pw.n += int64(n)
+		select {
+		case pw.ch <- pw.n:
+		default:
+		}
+	}
+	return n, err
+}
+
+// ctxReader прерывает чтение, если контекст отменён.
+type ctxReader struct {
+	ctx context.Context
+	r   io.Reader
+}
+
+func (cr *ctxReader) Read(p []byte) (int, error) {
+	select {
+	case <-cr.ctx.Done():
+		return 0, cr.ctx.Err()
+	default:
+		return cr.r.Read(p)
+	}
+}
+
 // ensureBinaryDataClient гарантирует создание gRPC клиента для BinaryData сервиса
 func (s *AppServices) ensureBinaryDataClient(ctx context.Context) error {
 	conn, err := s.getGRPCConn(ctx)
@@ -175,11 +209,11 @@ func (s *AppServices) DownloadBinaryData(
 		return err
 	}
 
-	stream, err := s.BinaryDataManager.Download(ctx, dataID)
+	src, err := s.BinaryDataManager.Download(ctx, dataID)
 	if err != nil {
 		return err
 	}
-	defer stream.Close()
+	defer src.Close()
 
 	dst, err := os.Create(destPath)
 	if err != nil {
@@ -187,52 +221,18 @@ func (s *AppServices) DownloadBinaryData(
 	}
 	defer dst.Close()
 
-	pr, pw := io.Pipe()
-	done := make(chan error, 1)
+	// Оборачиваем вход и выход: вход — реагирует на cancel контекста,
+	// выход — считает записанные байты и репортит прогресс.
+	in := &ctxReader{ctx: ctx, r: src}
+	out := &progressWriter{w: dst, ch: progressCh}
 
-	// Горутина для дешифровки
-	go func() {
-		defer pw.Close()
-		done <- crypto.DecryptStream(stream, pw, key)
-	}()
-
-	// Чтение из пайпа и запись в файл с отправкой прогресса
-	buf := make([]byte, 32*1024)
-	var totalWritten int64
-	for {
-		select {
-		case <-ctx.Done():
-			_ = pr.CloseWithError(ctx.Err())
-			return ctx.Err()
-		default:
-		}
-
-		n, err := pr.Read(buf)
-		if n > 0 {
-			if _, wErr := dst.Write(buf[:n]); wErr != nil {
-				_ = pr.CloseWithError(wErr)
-				return wErr
-			}
-			totalWritten += int64(n)
-			if progressCh != nil {
-				progressCh <- totalWritten
-			}
-		}
-
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-	}
-
-	// Дожидаемся окончания дешифровки
-	if derr := <-done; derr != nil {
-		return derr
+	// Потоковая дешифровка напрямую в файл без промежуточного буфера/пайпа.
+	if err := crypto.DecryptStream(in, out, key); err != nil {
+		return err
 	}
 
 	return nil
+
 }
 
 // DeleteBinaryData удаляет бинарные данные по ID
