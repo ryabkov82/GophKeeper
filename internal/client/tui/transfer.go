@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
@@ -21,6 +22,9 @@ const (
 	modeUpload transferMode = iota
 	modeDownload
 )
+
+// частота обновления прогресса
+const progressUIRate = 250 * time.Millisecond
 
 // ----- сообщения -----
 type transferProgressMsg struct{ sent int64 }
@@ -39,6 +43,7 @@ type transferVM struct {
 	input textinput.Model
 
 	// прогресс
+	bar      progress.Model
 	inFlight bool
 	err      error
 	total    int64
@@ -49,6 +54,7 @@ type transferVM struct {
 	lastTickAt   time.Time
 	lastTickSent int64
 	speedBps     float64
+	alpha        float64 // 0.25..0.35 — нормально, для сглаживания расчета скорости (EWMA)
 
 	// async
 	ctx    context.Context
@@ -86,6 +92,17 @@ func initTransferForm(m Model, mode transferMode, data *model.BinaryData, dataID
 		m.transfer.err = fmt.Errorf("скачивание недоступно: файл ещё не загружался")
 	}
 
+	bar := progress.New(
+		progress.WithWidth(max(30, m.termWidth-20)),
+		progress.WithScaledGradient("#22c55e", "#60a5fa"), // зелёный → голубой
+		// если не хочешь проценты внутри бара:
+		// progress.WithoutPercentage(),
+	)
+
+	// Настраиваем символы «заполнено/пусто»
+	bar.Full = '█'  // чем «жирнее» символ — тем красивее градиент
+	bar.Empty = '░' // или пробел ' ' / '·' — на вкус
+
 	m.transfer = transferVM{
 		svc:    svc,
 		data:   data,
@@ -94,6 +111,7 @@ func initTransferForm(m Model, mode transferMode, data *model.BinaryData, dataID
 		mode:  mode,
 		input: ti,
 
+		bar:      bar,
 		inFlight: false,
 		err:      nil,
 		total:    0,
@@ -145,7 +163,12 @@ func updateTransfer(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		now := time.Now()
 		dt := now.Sub(t.lastTickAt).Seconds()
 		if dt > 0 {
-			t.speedBps = float64(msg.sent-t.lastTickSent) / dt
+			inst := float64(msg.sent-t.lastTickSent) / dt // bytes/sec за окно троттлинга
+			if t.speedBps == 0 {
+				t.speedBps = inst
+			} else {
+				t.speedBps = t.alpha*inst + (1.0-t.alpha)*t.speedBps // EWMA
+			}
 		}
 		t.lastTickAt = now
 		t.lastTickSent = msg.sent
@@ -154,8 +177,9 @@ func updateTransfer(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		if t.total > 0 && t.sent > t.total {
 			t.sent = t.total
 		}
+
 		m.transfer = t
-		return m, listenTransferProgress(t.progCh)
+		return m, listenTransferProgressThrottle(t.progCh, progressUIRate)
 
 	case transferDoneMsg:
 		t.inFlight = false
@@ -196,6 +220,7 @@ func renderTransfer(m Model) string {
 
 	if t.inFlight {
 		// проценты/бар
+
 		if t.total > 0 {
 			r := float64(t.sent) / float64(t.total)
 			if r < 0 {
@@ -204,24 +229,27 @@ func renderTransfer(m Model) string {
 			if r > 1 {
 				r = 1
 			}
-			b.WriteString(renderAsciiBar(r, max(20, m.termWidth-20)) + "\n")
+			//b.WriteString(renderAsciiBar(r, max(20, m.termWidth-20)) + "\n")
+			barView := t.bar.ViewAs(r)
+			b.WriteString(barView + "\n")
+
 			b.WriteString(fmt.Sprintf("  %s / %s (%.1f%%)",
 				humanBytes(t.sent), humanBytes(t.total), r*100))
 		} else {
-			b.WriteString(renderAsciiBar(0, max(20, m.termWidth-20)) + "\n")
+			//b.WriteString(renderAsciiBar(0, max(20, m.termWidth-20)) + "\n")
+			barView := t.bar.ViewAs(0)
+			b.WriteString(barView + "\n")
 			b.WriteString(fmt.Sprintf("  Передано: %s (размер неизвестен)", humanBytes(t.sent)))
 		}
 
-		/*
-			// скорость/ETA
-			if t.speedBps > 0 && t.total > 0 && t.sent <= t.total {
-				remain := float64(t.total - t.sent)
-				eta := time.Duration(remain/t.speedBps) * time.Second
-				b.WriteString(fmt.Sprintf(" • ~%s/s • ETA %s", humanBytes(int64(t.speedBps)), eta.Truncate(time.Second)))
-			} else if t.speedBps > 0 {
-				b.WriteString(fmt.Sprintf(" • ~%s/s", humanBytes(int64(t.speedBps))))
-			}
-		*/
+		// скорость/ETA
+		if t.speedBps > 0 && t.total > 0 && t.sent <= t.total {
+			remain := float64(t.total - t.sent)
+			eta := time.Duration(remain/t.speedBps) * time.Second
+			b.WriteString(fmt.Sprintf(" • ~%s/s • ETA %s", humanBytes(int64(t.speedBps)), eta.Truncate(time.Second)))
+		} else if t.speedBps > 0 {
+			b.WriteString(fmt.Sprintf(" • ~%s/s", humanBytes(int64(t.speedBps))))
+		}
 
 		b.WriteString("\n\n" + hintStyle.Render("Esc: отменить/назад • Ctrl+U/Ctrl+D: режим Upload/Download"))
 	} else {
@@ -296,6 +324,7 @@ func startTransfer(m Model) (Model, tea.Cmd) {
 	t.lastTickAt = t.startedAt
 	t.lastTickSent = 0
 	t.speedBps = 0
+	t.alpha = 0.3
 
 	go func(tt *transferVM, p string) {
 		var err error
@@ -313,16 +342,7 @@ func startTransfer(m Model) (Model, tea.Cmd) {
 	}(&t, path)
 
 	m.transfer = t
-	return m, tea.Batch(listenTransferProgress(t.progCh), waitTransferDone(t.doneCh))
-}
-
-func listenTransferProgress(ch <-chan int64) tea.Cmd {
-	return func() tea.Msg {
-		if n, ok := <-ch; ok {
-			return transferProgressMsg{sent: n}
-		}
-		return nil
-	}
+	return m, tea.Batch(listenTransferProgressThrottle(t.progCh, progressUIRate), waitTransferDone(t.doneCh))
 }
 
 func waitTransferDone(done <-chan error) tea.Cmd {
@@ -334,15 +354,33 @@ func waitTransferDone(done <-chan error) tea.Cmd {
 	}
 }
 
-func renderAsciiBar(ratio float64, width int) string {
-	if width < 10 {
-		width = 10
+func listenTransferProgressThrottle(ch <-chan int64, maxRate time.Duration) tea.Cmd {
+	return func() tea.Msg {
+		// первое значение (или сразу выходим, если канал закрыт)
+		v, ok := <-ch
+		if !ok {
+			return nil
+		}
+		last := v
+
+		timer := time.NewTimer(maxRate)
+		defer timer.Stop()
+
+		for {
+			select {
+			case x, ok := <-ch:
+				if !ok {
+					// канал закрыт: отдадим последнее накопленное значение
+					return transferProgressMsg{sent: last}
+				}
+				last = x // коалесцируем
+				// остаёмся в этом select до таймаута
+			case <-timer.C:
+				// окно прошло — отдадим одно сообщение в Update
+				return transferProgressMsg{sent: last}
+			}
+		}
 	}
-	filled := int(ratio * float64(width))
-	if filled > width {
-		filled = width
-	}
-	return "[" + strings.Repeat("█", filled) + strings.Repeat("·", width-filled) + "]"
 }
 
 func humanBytes(n int64) string {
@@ -356,13 +394,6 @@ func humanBytes(n int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %ciB", float64(n)/float64(div), "KMGTPE"[exp])
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // upload_download.go — рядом с остальными хелперами

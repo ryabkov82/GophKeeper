@@ -16,6 +16,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type mockServerStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (m *mockServerStream) Context() context.Context        { return m.ctx }
+func (m *mockServerStream) SetHeader(md metadata.MD) error  { return nil }
+func (m *mockServerStream) SendHeader(md metadata.MD) error { return nil }
+func (m *mockServerStream) SetTrailer(md metadata.MD)       {}
+func (m *mockServerStream) SendMsg(msg interface{}) error   { return nil }
+func (m *mockServerStream) RecvMsg(msg interface{}) error   { return nil }
+
 func TestUnaryAuthInterceptor(t *testing.T) {
 	secret := "testsecret"
 	tm := jwtutils.New(secret, 10*time.Minute)
@@ -117,6 +129,110 @@ func TestUnaryAuthInterceptor(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, "public_ok", resp)
+		assert.True(t, handlerCalled)
+	})
+}
+
+func TestStreamAuthInterceptor(t *testing.T) {
+	secret := "testsecret"
+	tm := jwtutils.New(secret, 10*time.Minute)
+
+	userID := "user123"
+	login := "login"
+
+	tokenStr, err := tm.GenerateToken(userID, login)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, tokenStr)
+
+	interceptor := interceptors.StreamAuthInterceptor(tm, zap.NewNop())
+
+	streamWithCtx := func(ctx context.Context) *mockServerStream {
+		return &mockServerStream{ctx: ctx}
+	}
+
+	handlerCalled := false
+	handler := func(srv interface{}, ss grpc.ServerStream) error {
+		handlerCalled = true
+		uid, err := jwtauth.FromContext(ss.Context())
+		assert.NoError(t, err)
+		assert.Equal(t, userID, uid)
+		return nil
+	}
+
+	t.Run("success", func(t *testing.T) {
+		handlerCalled = false
+		md := metadata.Pairs("authorization", "Bearer "+tokenStr)
+		ctx := metadata.NewIncomingContext(context.Background(), md)
+		err := interceptor(nil, streamWithCtx(ctx), &grpc.StreamServerInfo{FullMethod: "/test.Method"}, handler)
+		assert.NoError(t, err)
+		assert.True(t, handlerCalled)
+	})
+
+	t.Run("missing metadata", func(t *testing.T) {
+		handlerCalled = false
+		ctx := context.Background()
+		err := interceptor(nil, streamWithCtx(ctx), &grpc.StreamServerInfo{FullMethod: "/test.Method"}, handler)
+		assert.Error(t, err)
+		st, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, st.Code())
+		assert.False(t, handlerCalled)
+	})
+
+	t.Run("missing authorization header", func(t *testing.T) {
+		handlerCalled = false
+		md := metadata.Pairs("some-header", "value")
+		ctx := metadata.NewIncomingContext(context.Background(), md)
+		err := interceptor(nil, streamWithCtx(ctx), &grpc.StreamServerInfo{FullMethod: "/test.Method"}, handler)
+		assert.Error(t, err)
+		st, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, st.Code())
+		assert.False(t, handlerCalled)
+	})
+
+	t.Run("invalid authorization header format", func(t *testing.T) {
+		handlerCalled = false
+		md := metadata.Pairs("authorization", "InvalidFormat")
+		ctx := metadata.NewIncomingContext(context.Background(), md)
+		err := interceptor(nil, streamWithCtx(ctx), &grpc.StreamServerInfo{FullMethod: "/test.Method"}, handler)
+		assert.Error(t, err)
+		st, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, st.Code())
+		assert.False(t, handlerCalled)
+	})
+
+	t.Run("invalid token", func(t *testing.T) {
+		handlerCalled = false
+		md := metadata.Pairs("authorization", "Bearer invalidtoken")
+		ctx := metadata.NewIncomingContext(context.Background(), md)
+		err := interceptor(nil, streamWithCtx(ctx), &grpc.StreamServerInfo{FullMethod: "/test.Method"}, handler)
+		assert.Error(t, err)
+		st, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, st.Code())
+		assert.False(t, handlerCalled)
+	})
+
+	t.Run("missing userID in token claims", func(t *testing.T) {
+		handlerCalled = false
+		token := jwtutils.New(secret, 0)
+		tokenStr, err := token.GenerateToken("", login)
+		assert.NoError(t, err)
+		md := metadata.Pairs("authorization", "Bearer "+tokenStr)
+		ctx := metadata.NewIncomingContext(context.Background(), md)
+		err = interceptor(nil, streamWithCtx(ctx), &grpc.StreamServerInfo{FullMethod: "/test.Method"}, handler)
+		assert.Error(t, err)
+		st, _ := status.FromError(err)
+		assert.Equal(t, codes.Unauthenticated, st.Code())
+		assert.False(t, handlerCalled)
+	})
+
+	t.Run("public method bypasses auth", func(t *testing.T) {
+		handlerCalled = false
+		ss := streamWithCtx(context.Background())
+		err := interceptor(nil, ss, &grpc.StreamServerInfo{FullMethod: "/gophkeeper.proto.AuthService/Register"}, func(srv interface{}, ss grpc.ServerStream) error {
+			handlerCalled = true
+			return nil
+		})
+		assert.NoError(t, err)
 		assert.True(t, handlerCalled)
 	})
 }

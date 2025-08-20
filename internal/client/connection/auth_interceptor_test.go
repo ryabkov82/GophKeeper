@@ -93,3 +93,81 @@ func (m *mockAuthManager) SetClient(client proto.AuthServiceClient) {
 func (m *mockAuthManager) GetToken() string {
 	return m.token
 }
+
+func TestAuthPerRPCCredentials_GetRequestMetadata(t *testing.T) {
+	logger := zap.NewNop()
+
+	tests := []struct {
+		name       string
+		token      string
+		method     string
+		expectedMD map[string]string
+	}{
+		{
+			name:       "WithToken_NotExcludedMethod",
+			token:      "mock-token",
+			method:     "/pkg.Service/Method",
+			expectedMD: map[string]string{"authorization": "Bearer mock-token"},
+		},
+		{
+			name:       "WithToken_ExcludedLogin",
+			token:      "mock-token",
+			method:     "/pkg.Service/Login",
+			expectedMD: nil,
+		},
+		{
+			name:       "WithToken_ExcludedRegister",
+			token:      "mock-token",
+			method:     "/pkg.Service/Register",
+			expectedMD: nil,
+		},
+		{
+			name:       "NoToken_NotExcludedMethod",
+			token:      "",
+			method:     "/pkg.Service/Method",
+			expectedMD: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			creds := NewAuthPerRPCCredentials(&mockAuthManager{token: tt.token}, logger, false)
+			md, err := creds.GetRequestMetadata(context.Background(), tt.method)
+			require.NoError(t, err)
+			if tt.expectedMD == nil {
+				require.Nil(t, md)
+			} else {
+				require.Equal(t, tt.expectedMD, md)
+			}
+		})
+	}
+}
+
+func TestAuthPerRPCCredentials_RequireTransportSecurity(t *testing.T) {
+	logger := zap.NewNop()
+	credsTLS := NewAuthPerRPCCredentials(&mockAuthManager{}, logger, true)
+	require.True(t, credsTLS.RequireTransportSecurity())
+	credsNoTLS := NewAuthPerRPCCredentials(&mockAuthManager{}, logger, false)
+	require.False(t, credsNoTLS.RequireTransportSecurity())
+}
+
+func TestAuthPerRPCCreds_shouldSkip(t *testing.T) {
+	logger := zap.NewNop()
+	creds := NewAuthPerRPCCredentials(&mockAuthManager{token: "token"}, logger, false).(*authPerRPCCreds)
+
+	cases := []struct {
+		method string
+		want   bool
+	}{
+		{"/pkg.Service/Login", true},
+		{"/pkg.Service/Register", true},
+		{"/pkg.Service/Other", false},
+		{"", false},
+	}
+
+	for _, c := range cases {
+		t.Run(c.method, func(t *testing.T) {
+			require.Equal(t, c.want, creds.shouldSkip(c.method))
+		})
+	}
+}

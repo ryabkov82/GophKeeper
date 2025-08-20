@@ -71,3 +71,33 @@ func TestInitialize_WithLogFile(t *testing.T) {
 		t.Error("expected log file to be non-empty after logging")
 	}
 }
+
+func TestInitializeWithTimestamp(t *testing.T) {
+	tempDir := t.TempDir()
+
+	if err := logger.InitializeWithTimestamp("debug", tempDir); err != nil {
+		t.Fatalf("InitializeWithTimestamp failed: %v", err)
+	}
+	defer func() {
+		if err := logger.Close(); err != nil {
+			t.Errorf("error closing logger: %v", err)
+		}
+	}()
+
+	logger.Log.Info("from timestamped logger")
+
+	entries, err := os.ReadDir(tempDir)
+	if err != nil {
+		t.Fatalf("failed to read log dir: %v", err)
+	}
+	if len(entries) == 0 {
+		t.Fatal("expected log file to be created")
+	}
+}
+
+func TestCloseWithoutInitialize(t *testing.T) {
+	// Ensure closing without prior initialization does not error.
+	if err := logger.Close(); err != nil {
+		t.Fatalf("unexpected error closing logger: %v", err)
+	}
+}
