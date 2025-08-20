@@ -16,7 +16,7 @@ type progressReader struct {
 	reader       io.Reader
 	total        int64
 	sent         int64
-	progressChan chan<- ProgressMsg
+	progressChan chan<- int64
 }
 
 func (r *progressReader) Read(p []byte) (int, error) {
@@ -24,17 +24,11 @@ func (r *progressReader) Read(p []byte) (int, error) {
 	if n > 0 {
 		r.sent += int64(n)
 		select {
-		case r.progressChan <- ProgressMsg{Done: r.sent, Total: r.total}:
+		case r.progressChan <- r.sent:
 		default: // если канал заблокирован, пропускаем
 		}
 	}
 	return n, err
-}
-
-// progressMsg используется для отправки прогресса в Bubble Tea
-type ProgressMsg struct {
-	Done  int64
-	Total int64
 }
 
 // progressWriter считает суммарно записанные байты и шлёт прогресс в канал.
@@ -126,13 +120,14 @@ func (s *AppServices) sendBinaryData(
 	ctx context.Context,
 	data *model.BinaryData,
 	filePath string,
-	progressChan chan<- ProgressMsg,
+	progressChan chan<- int64,
 	method func(ctx context.Context, data *model.BinaryData, content io.Reader) error, // upload или update
 ) error {
 	if err := s.ensureBinaryDataClient(ctx); err != nil {
 		return err
 	}
 
+	data.ClientPath = filePath
 	key, err := s.CryptoKeyManager.LoadKey()
 	if err != nil {
 		return err
@@ -186,12 +181,8 @@ func (s *AppServices) sendBinaryData(
 }
 
 // UploadBinaryData загружает файл на сервер с потоковым шифрованием
-func (s *AppServices) UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- ProgressMsg) error {
+func (s *AppServices) UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- int64) error {
 	return s.sendBinaryData(ctx, data, filePath, progressChan, s.BinaryDataManager.Upload)
-}
-
-func (s *AppServices) UpdateBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- ProgressMsg) error {
-	return s.sendBinaryData(ctx, data, filePath, progressChan, s.BinaryDataManager.Update)
 }
 
 // UpdateBinaryDataInfo обновляет только метаданные бинарных данных без пересылки содержимого
@@ -274,7 +265,7 @@ func (s *AppServices) DownloadBinaryData(
 }
 
 // DeleteBinaryData удаляет бинарные данные по ID
-func (s *AppServices) DeleteBinaryData(ctx context.Context, userID, id string) error {
+func (s *AppServices) DeleteBinaryData(ctx context.Context, id string) error {
 	if err := s.ensureBinaryDataClient(ctx); err != nil {
 		return err
 	}

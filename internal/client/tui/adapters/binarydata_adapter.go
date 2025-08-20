@@ -27,7 +27,7 @@ func (a *BinaryDataAdapter) List(ctx context.Context) ([]contracts.ListItem, err
 	for _, d := range dataList {
 		items = append(items, contracts.ListItem{
 			ID:    d.ID,
-			Title: d.Metadata,
+			Title: d.Title,
 		})
 	}
 	return items, nil
@@ -41,7 +41,7 @@ func (a *BinaryDataAdapter) Get(ctx context.Context, id string) (interface{}, er
 	return data, nil
 }
 
-func (a *BinaryDataAdapter) Create(ctx context.Context, id string, v interface{}) error {
+func (a *BinaryDataAdapter) Create(ctx context.Context, v interface{}) error {
 	data, ok := v.(*model.BinaryData)
 	if !ok {
 		return fmt.Errorf("invalid type for Create: expected *model.BinaryData, got %T", v)
@@ -65,4 +65,12 @@ func (a *BinaryDataAdapter) Update(ctx context.Context, id string, v interface{}
 
 func (a *BinaryDataAdapter) Delete(ctx context.Context, id string) error {
 	return a.svc.DeleteBinaryData(ctx, id)
+}
+
+func (a *BinaryDataAdapter) UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progress chan<- int64) error {
+	return a.svc.UploadBinaryData(ctx, data, filePath, progress)
+}
+
+func (a *BinaryDataAdapter) DownloadBinaryData(ctx context.Context, dataID, destPath string, progress chan<- int64) error {
+	return a.svc.DownloadBinaryData(ctx, dataID, destPath, progress)
 }

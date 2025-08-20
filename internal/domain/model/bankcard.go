@@ -195,12 +195,19 @@ func (b *BankCard) FormFields() []forms.FormField {
 			Fullscreen:  false,
 			Placeholder: "Дополнительная информация о карте",
 		},
+		{
+			Label:       "UpdatedAt",
+			Value:       b.UpdatedAt.String(),
+			InputType:   "text",
+			ReadOnly:    true,
+			Placeholder: "Дата обновления",
+		},
 	}
 }
 
 // UpdateFromFields обновляет BankCard по значениям из формы
 func (b *BankCard) UpdateFromFields(fields []forms.FormField) error {
-	if len(fields) != 6 {
+	if len(fields) != 7 {
 		return errors.New("unexpected number of fields")
 	}
 

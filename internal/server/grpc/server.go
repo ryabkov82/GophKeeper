@@ -30,7 +30,11 @@ func NewGRPCServer(cfg *config.Config, logger *zap.Logger, serviceFactory servic
 		grpc.ChainUnaryInterceptor(
 			interceptors.LoggingInterceptor(logger),
 			interceptors.UnaryAuthInterceptor(jwtManager, logger),
-			// можно добавить другие: AuthInterceptor, RecoveryInterceptor и т.п.
+			// можно добавить другие
+		),
+		grpc.ChainStreamInterceptor(
+			interceptors.StreamAuthInterceptor(jwtManager, logger),
+			// тут можно добавить ещё stream-интерцепторы
 		),
 	)
 

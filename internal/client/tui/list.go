@@ -104,10 +104,8 @@ func newEmptyEntity(dataType contracts.DataType) interface{} {
 		return &model.BankCard{}
 	case contracts.TypeNotes:
 		return &model.TextData{}
-		/*
-			case contracts.TypeFiles:
-				return &model.File{} // и т.д.
-		*/
+	case contracts.TypeFiles:
+		return &model.BinaryData{}
 	default:
 		return nil
 	}

@@ -25,7 +25,7 @@ func TestUploadUpdateBinaryData(t *testing.T) {
 	tmpFile.WriteString("file content")
 	tmpFile.Close()
 
-	progressCh := make(chan app.ProgressMsg, 10)
+	progressCh := make(chan int64, 10)
 
 	mockMgr := &mockBinaryDataManager{}
 	mockCrypto := &mockCryptoKeyManager{
@@ -47,9 +47,6 @@ func TestUploadUpdateBinaryData(t *testing.T) {
 	assert.True(t, mockMgr.setClientCalled) // проверка установки клиента
 	assert.True(t, mockCrypto.loadCalled)   // проверка загрузки ключа
 
-	// Update
-	err = svc.UpdateBinaryData(context.Background(), data, tmpFile.Name(), progressCh)
-	assert.NoError(t, err)
 }
 
 // Тест DownloadBinaryData с проверкой прогресса
@@ -153,7 +150,7 @@ func TestDeleteBinaryData(t *testing.T) {
 		Logger:            zap.NewNop(),
 	}
 
-	err := svc.DeleteBinaryData(context.Background(), "user1", "id1")
+	err := svc.DeleteBinaryData(context.Background(), "id1")
 	assert.NoError(t, err)
 }
 

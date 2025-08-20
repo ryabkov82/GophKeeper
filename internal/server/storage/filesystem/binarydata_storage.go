@@ -99,6 +99,11 @@ func (fs *binaryDataStorage) Load(ctx context.Context, storagePath string) (io.R
 
 // Delete удаляет файл по относительному пути storagePath.
 func (fs *binaryDataStorage) Delete(ctx context.Context, storagePath string) error {
+
+	if storagePath == "" {
+		// удалять нечего
+		return nil
+	}
 	filePath := filepath.Join(fs.basePath, storagePath)
 
 	if err := os.Remove(filePath); err != nil {

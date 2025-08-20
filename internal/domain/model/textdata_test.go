@@ -11,14 +11,15 @@ import (
 
 func TestTextData_FormFields(t *testing.T) {
 	tdata := &model.TextData{
-		Title:    "Notes",
-		Content:  []byte("This is the note content."),
-		Metadata: "Additional info",
+		Title:     "Notes",
+		Content:   []byte("This is the note content."),
+		Metadata:  "Additional info",
+		UpdatedAt: time.Now(),
 	}
 
 	fields := tdata.FormFields()
-	if len(fields) != 3 {
-		t.Fatalf("expected 3 fields, got %d", len(fields))
+	if len(fields) != 4 {
+		t.Fatalf("expected 4 fields, got %d", len(fields))
 	}
 
 	if fields[0].Label != "Title" || fields[0].Value != "Notes" {
@@ -49,6 +50,7 @@ func TestTextData_UpdateFromFields(t *testing.T) {
 		{Value: "New Title"},
 		{Value: "New content"},
 		{Value: "Meta info"},
+		{Value: "UpdatedAt"},
 	}
 
 	err := tdata.UpdateFromFields(fields)
@@ -83,7 +85,7 @@ func TestTextData_UpdateFromFields_Errors(t *testing.T) {
 
 	// Пустой Title
 	fields = []forms.FormField{
-		{Value: " "}, {Value: "content"}, {Value: "meta"},
+		{Value: " "}, {Value: "content"}, {Value: "meta"}, {Value: "UpdatedAt"},
 	}
 	err = tdata.UpdateFromFields(fields)
 	if err == nil || !strings.Contains(err.Error(), "title cannot be empty") {

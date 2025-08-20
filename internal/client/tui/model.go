@@ -16,6 +16,7 @@ type ModelServices struct {
 	Credential contracts.CredentialService // Сервис управления учетными данными
 	Bankcard   contracts.BankCardService   // Сервис управления банковскими картами
 	TextData   contracts.TextDataService   // Сервис управления текстовыми данными
+	BinaryData contracts.BinaryDataService // Сервис управления бинарными данными
 	// Добавляй сюда другие интерфейсы по необходимости
 }
 
@@ -57,6 +58,8 @@ type Model struct {
 
 	termWidth  int // ширина терминала
 	termHeight int // высота терминала
+
+	transfer transferVM //структура для реализации передачи файлов
 }
 
 // Добавляем сообщения для системы
@@ -93,6 +96,7 @@ func NewModel(ctx context.Context, svcs ModelServices) *Model {
 			contracts.TypeCredentials: adapters.NewCredentialAdapter(svcs.Credential),
 			contracts.TypeCards:       adapters.NewBankCardAdapter(svcs.Bankcard),
 			contracts.TypeNotes:       adapters.NewTextDataAdapter(svcs.TextData),
+			contracts.TypeFiles:       adapters.NewBinaryDataAdapter(svcs.BinaryData),
 		},
 	}
 }
@@ -156,6 +160,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return updateEdit(m, msg)
 	case "fullscreen_edit":
 		return updateFullscreenForm(m, msg)
+	case "file_transfer":
+		return updateTransfer(m, msg)
 	default:
 		return m, nil
 	}
@@ -180,6 +186,8 @@ func (m Model) View() string {
 		return renderEditForm(m)
 	case "fullscreen_edit":
 		return renderFullscreenForm(m)
+	case "file_transfer":
+		return renderTransfer(m)
 	default:
 		return ""
 	}

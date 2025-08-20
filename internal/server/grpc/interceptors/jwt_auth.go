@@ -37,50 +37,71 @@ import (
 //	)
 func UnaryAuthInterceptor(tm *jwtutils.TokenManager, logger *zap.Logger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-
-		if isPublicMethod(info.FullMethod) {
-			return handler(ctx, req)
-		}
-
-		logger.Debug("Auth interceptor triggered", zap.String("method", info.FullMethod))
-
-		md, ok := metadata.FromIncomingContext(ctx)
-		if !ok {
-			logger.Warn("Missing metadata in context", zap.String("method", info.FullMethod))
-			return nil, status.Error(codes.Unauthenticated, "missing metadata")
-		}
-
-		authHeaders := md.Get("authorization")
-		if len(authHeaders) == 0 {
-			logger.Warn("Authorization token not provided", zap.String("method", info.FullMethod))
-			return nil, status.Error(codes.Unauthenticated, "authorization token is not provided")
-		}
-
-		authHeader := authHeaders[0]
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "bearer") {
-			logger.Warn("Invalid authorization header format", zap.String("header", authHeader), zap.String("method", info.FullMethod))
-			return nil, status.Error(codes.Unauthenticated, "invalid authorization header")
-		}
-		tokenStr := parts[1]
-
-		claims, err := tm.ParseToken(tokenStr)
+		ctx, err := authenticateCtx(ctx, tm, logger, info.FullMethod)
 		if err != nil {
-			logger.Warn("Failed to parse token", zap.Error(err), zap.String("method", info.FullMethod))
-			return nil, status.Error(codes.Unauthenticated, "invalid token: "+err.Error())
+			return nil, err
 		}
-
-		userID, ok := claims["sub"].(string)
-		if !ok || userID == "" {
-			logger.Warn("UserID not found in token claims", zap.String("method", info.FullMethod))
-			return nil, status.Error(codes.Unauthenticated, "userID not found in token")
-		}
-
-		logger.Debug("Token validated, userID extracted", zap.String("userID", userID), zap.String("method", info.FullMethod))
-
-		newCtx := jwtauth.WithUserID(ctx, userID)
-		return handler(newCtx, req)
+		return handler(ctx, req)
 	}
+}
+
+type ctxStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (s *ctxStream) Context() context.Context { return s.ctx }
+
+func StreamAuthInterceptor(tm *jwtutils.TokenManager, logger *zap.Logger) grpc.StreamServerInterceptor {
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		ctx, err := authenticateCtx(ss.Context(), tm, logger, info.FullMethod)
+		if err != nil {
+			return err
+		}
+		// Подменяем контекст в stream, чтобы handler видел userID в stream.Context()
+		return handler(srv, &ctxStream{ServerStream: ss, ctx: ctx})
+	}
+}
+
+func authenticateCtx(ctx context.Context, tm *jwtutils.TokenManager, logger *zap.Logger, fullMethod string) (context.Context, error) {
+	if isPublicMethod(fullMethod) {
+		return ctx, nil
+	}
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		logger.Warn("Missing metadata", zap.String("method", fullMethod))
+		return nil, status.Error(codes.Unauthenticated, "missing metadata")
+	}
+
+	// Ключи в metadata — lower-case
+	authz := ""
+	if vals := md.Get("authorization"); len(vals) > 0 {
+		authz = vals[0]
+	}
+	parts := strings.SplitN(authz, " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "bearer") {
+		logger.Warn("Invalid authorization header", zap.String("header", authz), zap.String("method", fullMethod))
+		return nil, status.Error(codes.Unauthenticated, "invalid authorization header")
+	}
+	tokenStr := parts[1]
+
+	claims, err := tm.ParseToken(tokenStr)
+	if err != nil {
+		logger.Warn("Failed to parse token", zap.Error(err), zap.String("method", fullMethod))
+		return nil, status.Error(codes.Unauthenticated, "invalid token: "+err.Error())
+	}
+
+	userID, ok := claims["sub"].(string)
+	if !ok || userID == "" {
+		logger.Warn("UserID not found in claims", zap.String("method", fullMethod))
+		return nil, status.Error(codes.Unauthenticated, "userID not found in token")
+	}
+
+	logger.Debug("Token validated", zap.String("userID", userID), zap.String("method", fullMethod))
+
+	ctx = jwtauth.WithUserID(ctx, userID)
+	return ctx, nil
 }
 
 func isPublicMethod(method string) bool {

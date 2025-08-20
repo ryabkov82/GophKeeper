@@ -135,48 +135,6 @@ func TestBinaryDataHandler_UploadBinaryData(t *testing.T) {
 	require.Equal(t, content, mockSvc.Received)
 }
 
-// --- Тест UpdateBinaryData ---
-func TestBinaryDataHandler_UpdateBinaryData(t *testing.T) {
-	mockSvc := &mockBinaryDataService{}
-	logger := zap.NewNop()
-	handler := handlers.NewBinaryDataHandler(mockSvc, logger)
-
-	userID := "user123"
-	dataID := "data123"
-	newTitle := "UpdatedFile"
-	newMeta := "newMeta"
-	clientPath := "/tmp/newfile.txt"
-	content := []byte("new content")
-
-	dataInfo := &pb.BinaryDataInfo{}
-	dataInfo.SetId(dataID)
-	dataInfo.SetTitle(newTitle)
-	dataInfo.SetMetadata(newMeta)
-	dataInfo.SetClientPath(clientPath)
-
-	// Мок stream
-	stream := &mockUpdateStream{
-		ctx: ctxWithUserID(userID),
-		recvMsgs: []*pb.UpdateBinaryDataRequest{
-			func() *pb.UpdateBinaryDataRequest {
-				r := &pb.UpdateBinaryDataRequest{}
-				r.SetInfo(dataInfo)
-				return r
-			}(),
-			func() *pb.UpdateBinaryDataRequest {
-				r := &pb.UpdateBinaryDataRequest{}
-				r.SetChunk(content)
-				return r
-			}(),
-		},
-	}
-
-	err := handler.UpdateBinaryData(stream)
-	assert.NoError(t, err)
-	require.Equal(t, content, mockSvc.Received)
-	require.Equal(t, dataID, stream.sentResp.GetId())
-}
-
 // --- Тест UpdateBinaryDataInfo ---
 func TestBinaryDataHandler_UpdateBinaryDataInfo(t *testing.T) {
 	mockSvc := &mockBinaryDataService{}
@@ -338,33 +296,6 @@ func (m *mockUploadStream) SendAndClose(resp *pb.UploadBinaryDataResponse) error
 }
 
 func (m *mockUploadStream) Context() context.Context {
-	return m.ctx
-}
-
-// --- мок стрима для UpdateBinaryData ---
-type mockUpdateStream struct {
-	pb.BinaryDataService_UpdateBinaryDataServer
-	recvMsgs []*pb.UpdateBinaryDataRequest
-	recvIdx  int
-	sentResp *pb.UpdateBinaryDataResponse
-	ctx      context.Context
-}
-
-func (m *mockUpdateStream) Recv() (*pb.UpdateBinaryDataRequest, error) {
-	if m.recvIdx >= len(m.recvMsgs) {
-		return nil, io.EOF
-	}
-	msg := m.recvMsgs[m.recvIdx]
-	m.recvIdx++
-	return msg, nil
-}
-
-func (m *mockUpdateStream) SendAndClose(resp *pb.UpdateBinaryDataResponse) error {
-	m.sentResp = resp
-	return nil
-}
-
-func (m *mockUpdateStream) Context() context.Context {
 	return m.ctx
 }
 

@@ -17,7 +17,6 @@ type BinaryDataManagerIface interface {
 	List(ctx context.Context) ([]model.BinaryData, error)
 	GetInfo(ctx context.Context, id string) (*model.BinaryData, error)
 	CreateInfo(ctx context.Context, data *model.BinaryData) error
-	Update(ctx context.Context, data *model.BinaryData, r io.Reader) error
 	UpdateInfo(ctx context.Context, data *model.BinaryData) error
 	Delete(ctx context.Context, id string) error
 	SetClient(client pb.BinaryDataServiceClient)
@@ -52,6 +51,7 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 
 	// Отправляем метаданные первым сообщением
 	dataInfo := &pb.BinaryDataInfo{}
+	dataInfo.SetId(data.ID)
 	dataInfo.SetTitle(data.Title)
 	dataInfo.SetMetadata(data.Metadata)
 	dataInfo.SetClientPath(data.ClientPath)
@@ -59,24 +59,34 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 	metaReq := &pb.UploadBinaryDataRequest{}
 	metaReq.SetInfo(dataInfo)
 	if err := stream.Send(metaReq); err != nil {
-		return fmt.Errorf("failed to send metadata: %w", err)
+		// сервер мог сразу закрыть поток — заберём статус
+		if _, recvErr := stream.CloseAndRecv(); recvErr != nil {
+			return fmt.Errorf("server rejected metadata: %w", recvErr)
+		}
+		return fmt.Errorf("server closed stream after metadata: %w", err)
 	}
 
 	buf := make([]byte, 32*1024) // 32 KB чанки
 	for {
-		n, err := r.Read(buf)
+		n, rerr := r.Read(buf)
+
 		if n > 0 {
 			chunkReq := &pb.UploadBinaryDataRequest{}
 			chunkReq.SetChunk(buf[:n])
-			if err := stream.Send(chunkReq); err != nil {
-				return fmt.Errorf("failed to send chunk: %w", err)
+			if serr := stream.Send(chunkReq); serr != nil {
+				// ВАЖНО: получаем причину от сервера
+				if _, recvErr := stream.CloseAndRecv(); recvErr != nil {
+					// здесь будет codes.InvalidArgument / PermissionDenied / ResourceExhausted и т.п.
+					return fmt.Errorf("upload aborted by server: %w", recvErr)
+				}
+				return fmt.Errorf("send failed: %w", serr)
 			}
 		}
-		if err == io.EOF {
-			break
+		if rerr == io.EOF {
+			break // последний кусок отправили — выходим на CloseAndRecv
 		}
-		if err != nil {
-			return fmt.Errorf("failed to read input: %w", err)
+		if rerr != nil {
+			return fmt.Errorf("failed to read input: %w", rerr)
 		}
 	}
 
@@ -194,59 +204,6 @@ func (m *BinaryDataManager) List(ctx context.Context) ([]model.BinaryData, error
 	return result, nil
 }
 
-// Update обновляет бинарные данные на сервере.
-func (m *BinaryDataManager) Update(ctx context.Context, data *model.BinaryData, r io.Reader) error {
-	m.logger.Debug("Update started", zap.String("binaryDataID", data.ID))
-
-	stream, err := m.client.UpdateBinaryData(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create update stream: %w", err)
-	}
-
-	// Отправляем метаданные первым сообщением
-	dataInfo := &pb.BinaryDataInfo{}
-	dataInfo.SetId(data.ID)
-	dataInfo.SetTitle(data.Title)
-	dataInfo.SetMetadata(data.Metadata)
-	dataInfo.SetClientPath(data.ClientPath)
-
-	metaReq := &pb.UpdateBinaryDataRequest{}
-	metaReq.SetInfo(dataInfo)
-
-	if err := stream.Send(metaReq); err != nil {
-		return fmt.Errorf("failed to send metadata: %w", err)
-	}
-
-	if r != nil {
-		buf := make([]byte, 32*1024)
-		for {
-			n, err := r.Read(buf)
-			if n > 0 {
-				chunkReq := &pb.UpdateBinaryDataRequest{}
-				chunkReq.SetChunk(buf[:n])
-				if err := stream.Send(chunkReq); err != nil {
-					return fmt.Errorf("failed to send chunk: %w", err)
-				}
-			}
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				return fmt.Errorf("failed to read input: %w", err)
-			}
-		}
-	}
-
-	resp, err := stream.CloseAndRecv()
-	if err != nil {
-		return fmt.Errorf("failed to receive update response: %w", err)
-	}
-
-	data.ID = resp.GetId()
-	m.logger.Info("Update succeeded", zap.String("binaryDataID", data.ID))
-	return nil
-}
-
 // Delete удаляет бинарные данные по ID.
 func (m *BinaryDataManager) Delete(ctx context.Context, id string) error {
 	m.logger.Debug("Delete started", zap.String("binaryDataID", id))
@@ -281,10 +238,12 @@ func (m *BinaryDataManager) GetInfo(ctx context.Context, id string) (*model.Bina
 	}
 
 	data := &model.BinaryData{
-		ID:       info.GetId(),
-		Title:    info.GetTitle(),
-		Metadata: info.GetMetadata(),
-		Size:     info.GetSize(),
+		ID:         info.GetId(),
+		Title:      info.GetTitle(),
+		Metadata:   info.GetMetadata(),
+		Size:       info.GetSize(),
+		ClientPath: info.GetClientPath(),
+		UpdatedAt:  info.GetUpdatedAt().AsTime(),
 	}
 
 	m.logger.Info("GetInfo succeeded", zap.String("binaryDataID", data.ID))

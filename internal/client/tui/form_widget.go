@@ -18,11 +18,15 @@ type formWidget struct {
 	field       forms.FormField // исходное описание поля формы
 	maskedInput *MaskedInput    // объект для работы с маской, nil если маски нет
 	fullscreen  bool            // поле редактируется в полноэкранном режиме
+	readonly    bool            // поле доступно только для чтения
 }
 
 // setFocus устанавливает фокус на виджет или снимает его.
 // При установке фокуса активируется соответствующий курсор и визуальный стиль.
 func (w *formWidget) setFocus(focused bool) {
+	if w.readonly {
+		focused = false
+	}
 	if w.isTextarea {
 		if focused {
 			w.textarea.Focus()
@@ -44,11 +48,12 @@ func (w *formWidget) setFocus(focused bool) {
 // - "password" — создаётся текстовое поле с EchoPassword.
 // - обычный ввод — создаётся textinput с ограничением длины из field.MaxLength.
 // Если задано поле Mask, создаётся maskedInput и отображается сразу с подчеркиваниями.
-func initFormInputsFromFields(fields []forms.FormField, termWidth int) []formWidget {
+func initFormInputsFromFields(fields []forms.FormField, termWidth int) ([]formWidget, int) {
 	widgets := make([]formWidget, len(fields))
+	focusIndex := -1
 
 	for i, field := range fields {
-		w := formWidget{field: field}
+		w := formWidget{field: field, readonly: field.ReadOnly}
 
 		switch strings.ToLower(field.InputType) {
 		case "multiline":
@@ -99,9 +104,19 @@ func initFormInputsFromFields(fields []forms.FormField, termWidth int) []formWid
 
 		}
 
-		w.setFocus(i == 0)
+		//w.setFocus(i == 0)
 		widgets[i] = w
+		if focusIndex == -1 && !w.readonly {
+			focusIndex = i
+		}
 	}
 
-	return widgets
+	if focusIndex == -1 {
+		focusIndex = 0
+	}
+	for i := range widgets {
+		widgets[i].setFocus(i == focusIndex && !widgets[i].readonly)
+	}
+
+	return widgets, focusIndex
 }

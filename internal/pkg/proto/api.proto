@@ -222,6 +222,8 @@ message BinaryDataInfo {
     string metadata = 3;
     int64 size = 4;
     string client_path = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
 }
 
 message DeleteBinaryDataRequest {
@@ -242,7 +244,6 @@ message GetBinaryDataInfoResponse {
 
 // Запрос для обновления бинарных данных (поток)
 message UpdateBinaryDataRequest {
-    bytes chunk = 1;       // фрагмент файла
     BinaryDataInfo info = 2; // информация о файле (передается в первом пакете)
 }
 
@@ -294,6 +295,5 @@ service BinaryDataService {
     rpc UpdateBinaryDataInfo(UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);    
     rpc DeleteBinaryData(DeleteBinaryDataRequest) returns (DeleteBinaryDataResponse);    
     rpc UploadBinaryData(stream UploadBinaryDataRequest) returns (UploadBinaryDataResponse);
-    rpc UpdateBinaryData(stream UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);        
     rpc DownloadBinaryData(DownloadBinaryDataRequest) returns (stream DownloadBinaryDataResponse);
 }

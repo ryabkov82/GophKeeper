@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // BinaryDataHandler реализует gRPC сервер для BinaryDataService
@@ -44,10 +45,12 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 	}
 
 	title := req.GetInfo().GetTitle()
+	id := req.GetInfo().GetId()
 	metadata := req.GetInfo().GetMetadata()
 	clientPath := req.GetInfo().GetClientPath()
 
 	data := &model.BinaryData{
+		ID:         id,
 		UserID:     userID,
 		Title:      title,
 		Metadata:   metadata,
@@ -83,8 +86,13 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 		}
 	}()
 
-	// Создаем запись в сервисе
-	data, err = h.binarySvc.Create(stream.Context(), data, pr)
+	if data.ID == "" {
+		// Создаем запись в сервисе
+		data, err = h.binarySvc.Create(stream.Context(), data, pr)
+	} else {
+		// обновляем запись в сервисе
+		data, err = h.binarySvc.Update(stream.Context(), data, pr)
+	}
 	if err != nil {
 		h.logger.Warn("UploadBinaryData failed", zap.String("userID", userID), zap.String("title", title), zap.Error(err))
 		return err
@@ -93,83 +101,6 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 	h.logger.Info("UploadBinaryData succeeded", zap.String("userID", userID), zap.String("binaryDataID", data.ID))
 
 	resp := &pb.UploadBinaryDataResponse{}
-	resp.SetId(data.ID)
-	return stream.SendAndClose(resp)
-}
-
-// UpdateBinaryData обновляет существующую запись бинарных данных через поток
-func (h *BinaryDataHandler) UpdateBinaryData(stream pb.BinaryDataService_UpdateBinaryDataServer) error {
-	// Получаем userID из контекста JWT
-	userID, err := jwtauth.FromContext(stream.Context())
-	if err != nil {
-		return status.Error(codes.Unauthenticated, "userID not found in context")
-	}
-
-	// Читаем первый пакет, который должен содержать ID записи и новые метаданные
-	req, err := stream.Recv()
-	if err != nil {
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("failed to receive initial message: %v", err))
-	}
-
-	id := req.GetInfo().GetId()
-	title := req.GetInfo().GetTitle()
-	metadata := req.GetInfo().GetMetadata()
-	clientPath := req.GetInfo().GetClientPath()
-
-	data := &model.BinaryData{
-		ID:         id,
-		UserID:     userID,
-		Title:      title,
-		Metadata:   metadata,
-		ClientPath: clientPath,
-	}
-
-	h.logger.Debug("UpdateBinaryData started",
-		zap.String("userID", userID),
-		zap.String("title", title),
-	)
-
-	pr, pw := io.Pipe()
-
-	// Горрутина для асинхронного чтения чанков
-	go func() {
-		defer pw.Close()
-		for {
-			req, err := stream.Recv()
-			if err == io.EOF {
-				return
-			}
-			if err != nil {
-				_ = pw.CloseWithError(err)
-				return
-			}
-			chunk := req.GetChunk()
-			if len(chunk) > 0 {
-				if _, err := pw.Write(chunk); err != nil {
-					_ = pw.CloseWithError(err)
-					return
-				}
-			}
-		}
-	}()
-
-	// Вызываем сервис для обновления записи
-	data, err = h.binarySvc.Update(stream.Context(), data, pr)
-	if err != nil {
-		h.logger.Warn("UpdateBinaryData failed",
-			zap.String("userID", userID),
-			zap.String("title", title),
-			zap.Error(err),
-		)
-		return err
-	}
-
-	h.logger.Info("UpdateBinaryData succeeded",
-		zap.String("userID", userID),
-		zap.String("binaryDataID", data.ID),
-	)
-
-	resp := &pb.UpdateBinaryDataResponse{}
 	resp.SetId(data.ID)
 	return stream.SendAndClose(resp)
 }
@@ -303,6 +234,7 @@ func (h *BinaryDataHandler) GetBinaryDataInfo(ctx context.Context, req *pb.GetBi
 	info.SetMetadata(data.Metadata)
 	info.SetSize(data.Size)
 	info.SetClientPath(data.ClientPath)
+	info.SetUpdatedAt(timestamppb.New(data.UpdatedAt))
 
 	resp := &pb.GetBinaryDataInfoResponse{}
 	resp.SetBinaryInfo(info)

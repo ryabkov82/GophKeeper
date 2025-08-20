@@ -3,7 +3,6 @@ package contracts
 import (
 	"context"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/app"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 )
 
@@ -70,10 +69,7 @@ type TextDataService interface {
 
 type BinaryDataService interface {
 	// UploadBinaryData загружает бинарный объект на сервер с шифрованием содержимого и прогрессом
-	UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- app.ProgressMsg) error
-
-	// UpdateBinaryData обновляет бинарный объект на сервере с шифрованием содержимого и прогрессом
-	UpdateBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- app.ProgressMsg) error
+	UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- int64) error
 
 	// DownloadBinaryData скачивает бинарный объект с сервера, расшифровывает и отправляет прогресс через канал
 	DownloadBinaryData(ctx context.Context, dataID, destPath string, progressCh chan<- int64) error

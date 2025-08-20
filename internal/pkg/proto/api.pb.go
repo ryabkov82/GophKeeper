@@ -3780,6 +3780,8 @@ type BinaryDataInfo struct {
 	xxx_hidden_Metadata    *string                `protobuf:"bytes,3,opt,name=metadata"`
 	xxx_hidden_Size        int64                  `protobuf:"varint,4,opt,name=size"`
 	xxx_hidden_ClientPath  *string                `protobuf:"bytes,5,opt,name=client_path,json=clientPath"`
+	xxx_hidden_CreatedAt   *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt"`
+	xxx_hidden_UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -3858,29 +3860,51 @@ func (x *BinaryDataInfo) GetClientPath() string {
 	return ""
 }
 
+func (x *BinaryDataInfo) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_CreatedAt
+	}
+	return nil
+}
+
+func (x *BinaryDataInfo) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdatedAt
+	}
+	return nil
+}
+
 func (x *BinaryDataInfo) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
 }
 
 func (x *BinaryDataInfo) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
 }
 
 func (x *BinaryDataInfo) SetMetadata(v string) {
 	x.xxx_hidden_Metadata = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
 }
 
 func (x *BinaryDataInfo) SetSize(v int64) {
 	x.xxx_hidden_Size = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
 }
 
 func (x *BinaryDataInfo) SetClientPath(v string) {
 	x.xxx_hidden_ClientPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+}
+
+func (x *BinaryDataInfo) SetCreatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_CreatedAt = v
+}
+
+func (x *BinaryDataInfo) SetUpdatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdatedAt = v
 }
 
 func (x *BinaryDataInfo) HasId() bool {
@@ -3918,6 +3942,20 @@ func (x *BinaryDataInfo) HasClientPath() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
+func (x *BinaryDataInfo) HasCreatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_CreatedAt != nil
+}
+
+func (x *BinaryDataInfo) HasUpdatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdatedAt != nil
+}
+
 func (x *BinaryDataInfo) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -3943,6 +3981,14 @@ func (x *BinaryDataInfo) ClearClientPath() {
 	x.xxx_hidden_ClientPath = nil
 }
 
+func (x *BinaryDataInfo) ClearCreatedAt() {
+	x.xxx_hidden_CreatedAt = nil
+}
+
+func (x *BinaryDataInfo) ClearUpdatedAt() {
+	x.xxx_hidden_UpdatedAt = nil
+}
+
 type BinaryDataInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3951,6 +3997,8 @@ type BinaryDataInfo_builder struct {
 	Metadata   *string
 	Size       *int64
 	ClientPath *string
+	CreatedAt  *timestamppb.Timestamp
+	UpdatedAt  *timestamppb.Timestamp
 }
 
 func (b0 BinaryDataInfo_builder) Build() *BinaryDataInfo {
@@ -3958,25 +4006,27 @@ func (b0 BinaryDataInfo_builder) Build() *BinaryDataInfo {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.Metadata != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
 		x.xxx_hidden_Metadata = b.Metadata
 	}
 	if b.Size != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
 		x.xxx_hidden_Size = *b.Size
 	}
 	if b.ClientPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
 		x.xxx_hidden_ClientPath = b.ClientPath
 	}
+	x.xxx_hidden_CreatedAt = b.CreatedAt
+	x.xxx_hidden_UpdatedAt = b.UpdatedAt
 	return m0
 }
 
@@ -4251,13 +4301,10 @@ func (b0 GetBinaryDataInfoResponse_builder) Build() *GetBinaryDataInfoResponse {
 
 // Запрос для обновления бинарных данных (поток)
 type UpdateBinaryDataRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Chunk       []byte                 `protobuf:"bytes,1,opt,name=chunk"`
-	xxx_hidden_Info        *BinaryDataInfo        `protobuf:"bytes,2,opt,name=info"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Info *BinaryDataInfo        `protobuf:"bytes,2,opt,name=info"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *UpdateBinaryDataRequest) Reset() {
@@ -4285,13 +4332,6 @@ func (x *UpdateBinaryDataRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *UpdateBinaryDataRequest) GetChunk() []byte {
-	if x != nil {
-		return x.xxx_hidden_Chunk
-	}
-	return nil
-}
-
 func (x *UpdateBinaryDataRequest) GetInfo() *BinaryDataInfo {
 	if x != nil {
 		return x.xxx_hidden_Info
@@ -4299,23 +4339,8 @@ func (x *UpdateBinaryDataRequest) GetInfo() *BinaryDataInfo {
 	return nil
 }
 
-func (x *UpdateBinaryDataRequest) SetChunk(v []byte) {
-	if v == nil {
-		v = []byte{}
-	}
-	x.xxx_hidden_Chunk = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
-}
-
 func (x *UpdateBinaryDataRequest) SetInfo(v *BinaryDataInfo) {
 	x.xxx_hidden_Info = v
-}
-
-func (x *UpdateBinaryDataRequest) HasChunk() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
 func (x *UpdateBinaryDataRequest) HasInfo() bool {
@@ -4325,11 +4350,6 @@ func (x *UpdateBinaryDataRequest) HasInfo() bool {
 	return x.xxx_hidden_Info != nil
 }
 
-func (x *UpdateBinaryDataRequest) ClearChunk() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Chunk = nil
-}
-
 func (x *UpdateBinaryDataRequest) ClearInfo() {
 	x.xxx_hidden_Info = nil
 }
@@ -4337,18 +4357,13 @@ func (x *UpdateBinaryDataRequest) ClearInfo() {
 type UpdateBinaryDataRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Chunk []byte
-	Info  *BinaryDataInfo
+	Info *BinaryDataInfo
 }
 
 func (b0 UpdateBinaryDataRequest_builder) Build() *UpdateBinaryDataRequest {
 	m0 := &UpdateBinaryDataRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Chunk != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
-		x.xxx_hidden_Chunk = b.Chunk
-	}
 	x.xxx_hidden_Info = b.Info
 	return m0
 }
@@ -4710,14 +4725,18 @@ const file_api_proto_rawDesc = "" +
 	"\x05chunk\x18\x01 \x01(\fR\x05chunk\"\x17\n" +
 	"\x15ListBinaryDataRequest\"P\n" +
 	"\x16ListBinaryDataResponse\x126\n" +
-	"\x05items\x18\x01 \x03(\v2 .gophkeeper.proto.BinaryDataInfoR\x05items\"\x87\x01\n" +
+	"\x05items\x18\x01 \x03(\v2 .gophkeeper.proto.BinaryDataInfoR\x05items\"\xfd\x01\n" +
 	"\x0eBinaryDataInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1a\n" +
 	"\bmetadata\x18\x03 \x01(\tR\bmetadata\x12\x12\n" +
 	"\x04size\x18\x04 \x01(\x03R\x04size\x12\x1f\n" +
 	"\vclient_path\x18\x05 \x01(\tR\n" +
-	"clientPath\")\n" +
+	"clientPath\x129\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\")\n" +
 	"\x17DeleteBinaryDataRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x1a\n" +
 	"\x18DeleteBinaryDataResponse\"*\n" +
@@ -4725,9 +4744,8 @@ const file_api_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"^\n" +
 	"\x19GetBinaryDataInfoResponse\x12A\n" +
 	"\vbinary_info\x18\x01 \x01(\v2 .gophkeeper.proto.BinaryDataInfoR\n" +
-	"binaryInfo\"e\n" +
-	"\x17UpdateBinaryDataRequest\x12\x14\n" +
-	"\x05chunk\x18\x01 \x01(\fR\x05chunk\x124\n" +
+	"binaryInfo\"O\n" +
+	"\x17UpdateBinaryDataRequest\x124\n" +
 	"\x04info\x18\x02 \x01(\v2 .gophkeeper.proto.BinaryDataInfoR\x04info\"*\n" +
 	"\x18UpdateBinaryDataResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"Q\n" +
@@ -4755,15 +4773,14 @@ const file_api_proto_rawDesc = "" +
 	"\x0fGetTextDataByID\x12(.gophkeeper.proto.GetTextDataByIDRequest\x1a).gophkeeper.proto.GetTextDataByIDResponse\x12l\n" +
 	"\x11GetTextDataTitles\x12*.gophkeeper.proto.GetTextDataTitlesRequest\x1a+.gophkeeper.proto.GetTextDataTitlesResponse\x12c\n" +
 	"\x0eUpdateTextData\x12'.gophkeeper.proto.UpdateTextDataRequest\x1a(.gophkeeper.proto.UpdateTextDataResponse\x12c\n" +
-	"\x0eDeleteTextData\x12'.gophkeeper.proto.DeleteTextDataRequest\x1a(.gophkeeper.proto.DeleteTextDataResponse2\xfe\x06\n" +
+	"\x0eDeleteTextData\x12'.gophkeeper.proto.DeleteTextDataRequest\x1a(.gophkeeper.proto.DeleteTextDataResponse2\x91\x06\n" +
 	"\x11BinaryDataService\x12o\n" +
 	"\x12SaveBinaryDataInfo\x12+.gophkeeper.proto.SaveBinaryDataInfoRequest\x1a,.gophkeeper.proto.SaveBinaryDataInfoResponse\x12l\n" +
 	"\x11GetBinaryDataInfo\x12*.gophkeeper.proto.GetBinaryDataInfoRequest\x1a+.gophkeeper.proto.GetBinaryDataInfoResponse\x12c\n" +
 	"\x0eListBinaryData\x12'.gophkeeper.proto.ListBinaryDataRequest\x1a(.gophkeeper.proto.ListBinaryDataResponse\x12m\n" +
 	"\x14UpdateBinaryDataInfo\x12).gophkeeper.proto.UpdateBinaryDataRequest\x1a*.gophkeeper.proto.UpdateBinaryDataResponse\x12i\n" +
 	"\x10DeleteBinaryData\x12).gophkeeper.proto.DeleteBinaryDataRequest\x1a*.gophkeeper.proto.DeleteBinaryDataResponse\x12k\n" +
-	"\x10UploadBinaryData\x12).gophkeeper.proto.UploadBinaryDataRequest\x1a*.gophkeeper.proto.UploadBinaryDataResponse(\x01\x12k\n" +
-	"\x10UpdateBinaryData\x12).gophkeeper.proto.UpdateBinaryDataRequest\x1a*.gophkeeper.proto.UpdateBinaryDataResponse(\x01\x12q\n" +
+	"\x10UploadBinaryData\x12).gophkeeper.proto.UploadBinaryDataRequest\x1a*.gophkeeper.proto.UploadBinaryDataResponse(\x01\x12q\n" +
 	"\x12DownloadBinaryData\x12+.gophkeeper.proto.DownloadBinaryDataRequest\x1a,.gophkeeper.proto.DownloadBinaryDataResponse0\x01B<Z2github.com/ryabkov82/gophkeeper/internal/pkg/proto\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe8\a"
 
 var file_api_proto_msgTypes = make([]protoimpl.MessageInfo, 50)
@@ -4847,64 +4864,64 @@ var file_api_proto_depIdxs = []int32{
 	24, // 22: gophkeeper.proto.UpdateTextDataRequest.text_data:type_name -> gophkeeper.proto.TextData
 	41, // 23: gophkeeper.proto.UploadBinaryDataRequest.info:type_name -> gophkeeper.proto.BinaryDataInfo
 	41, // 24: gophkeeper.proto.ListBinaryDataResponse.items:type_name -> gophkeeper.proto.BinaryDataInfo
-	41, // 25: gophkeeper.proto.GetBinaryDataInfoResponse.binary_info:type_name -> gophkeeper.proto.BinaryDataInfo
-	41, // 26: gophkeeper.proto.UpdateBinaryDataRequest.info:type_name -> gophkeeper.proto.BinaryDataInfo
-	41, // 27: gophkeeper.proto.SaveBinaryDataInfoRequest.info:type_name -> gophkeeper.proto.BinaryDataInfo
-	0,  // 28: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
-	2,  // 29: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
-	5,  // 30: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
-	7,  // 31: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
-	51, // 32: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
-	10, // 33: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
-	12, // 34: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
-	15, // 35: gophkeeper.proto.BankCardService.CreateBankCard:input_type -> gophkeeper.proto.CreateBankCardRequest
-	17, // 36: gophkeeper.proto.BankCardService.GetBankCardByID:input_type -> gophkeeper.proto.GetBankCardByIDRequest
-	51, // 37: gophkeeper.proto.BankCardService.GetBankCards:input_type -> google.protobuf.Empty
-	20, // 38: gophkeeper.proto.BankCardService.UpdateBankCard:input_type -> gophkeeper.proto.UpdateBankCardRequest
-	22, // 39: gophkeeper.proto.BankCardService.DeleteBankCard:input_type -> gophkeeper.proto.DeleteBankCardRequest
-	25, // 40: gophkeeper.proto.TextDataService.CreateTextData:input_type -> gophkeeper.proto.CreateTextDataRequest
-	27, // 41: gophkeeper.proto.TextDataService.GetTextDataByID:input_type -> gophkeeper.proto.GetTextDataByIDRequest
-	29, // 42: gophkeeper.proto.TextDataService.GetTextDataTitles:input_type -> gophkeeper.proto.GetTextDataTitlesRequest
-	31, // 43: gophkeeper.proto.TextDataService.UpdateTextData:input_type -> gophkeeper.proto.UpdateTextDataRequest
-	33, // 44: gophkeeper.proto.TextDataService.DeleteTextData:input_type -> gophkeeper.proto.DeleteTextDataRequest
-	48, // 45: gophkeeper.proto.BinaryDataService.SaveBinaryDataInfo:input_type -> gophkeeper.proto.SaveBinaryDataInfoRequest
-	44, // 46: gophkeeper.proto.BinaryDataService.GetBinaryDataInfo:input_type -> gophkeeper.proto.GetBinaryDataInfoRequest
-	39, // 47: gophkeeper.proto.BinaryDataService.ListBinaryData:input_type -> gophkeeper.proto.ListBinaryDataRequest
-	46, // 48: gophkeeper.proto.BinaryDataService.UpdateBinaryDataInfo:input_type -> gophkeeper.proto.UpdateBinaryDataRequest
-	42, // 49: gophkeeper.proto.BinaryDataService.DeleteBinaryData:input_type -> gophkeeper.proto.DeleteBinaryDataRequest
-	35, // 50: gophkeeper.proto.BinaryDataService.UploadBinaryData:input_type -> gophkeeper.proto.UploadBinaryDataRequest
-	46, // 51: gophkeeper.proto.BinaryDataService.UpdateBinaryData:input_type -> gophkeeper.proto.UpdateBinaryDataRequest
-	37, // 52: gophkeeper.proto.BinaryDataService.DownloadBinaryData:input_type -> gophkeeper.proto.DownloadBinaryDataRequest
-	1,  // 53: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
-	3,  // 54: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
-	6,  // 55: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
-	8,  // 56: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
-	9,  // 57: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
-	11, // 58: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
-	13, // 59: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
-	16, // 60: gophkeeper.proto.BankCardService.CreateBankCard:output_type -> gophkeeper.proto.CreateBankCardResponse
-	18, // 61: gophkeeper.proto.BankCardService.GetBankCardByID:output_type -> gophkeeper.proto.GetBankCardByIDResponse
-	19, // 62: gophkeeper.proto.BankCardService.GetBankCards:output_type -> gophkeeper.proto.GetBankCardsResponse
-	21, // 63: gophkeeper.proto.BankCardService.UpdateBankCard:output_type -> gophkeeper.proto.UpdateBankCardResponse
-	23, // 64: gophkeeper.proto.BankCardService.DeleteBankCard:output_type -> gophkeeper.proto.DeleteBankCardResponse
-	26, // 65: gophkeeper.proto.TextDataService.CreateTextData:output_type -> gophkeeper.proto.CreateTextDataResponse
-	28, // 66: gophkeeper.proto.TextDataService.GetTextDataByID:output_type -> gophkeeper.proto.GetTextDataByIDResponse
-	30, // 67: gophkeeper.proto.TextDataService.GetTextDataTitles:output_type -> gophkeeper.proto.GetTextDataTitlesResponse
-	32, // 68: gophkeeper.proto.TextDataService.UpdateTextData:output_type -> gophkeeper.proto.UpdateTextDataResponse
-	34, // 69: gophkeeper.proto.TextDataService.DeleteTextData:output_type -> gophkeeper.proto.DeleteTextDataResponse
-	49, // 70: gophkeeper.proto.BinaryDataService.SaveBinaryDataInfo:output_type -> gophkeeper.proto.SaveBinaryDataInfoResponse
-	45, // 71: gophkeeper.proto.BinaryDataService.GetBinaryDataInfo:output_type -> gophkeeper.proto.GetBinaryDataInfoResponse
-	40, // 72: gophkeeper.proto.BinaryDataService.ListBinaryData:output_type -> gophkeeper.proto.ListBinaryDataResponse
-	47, // 73: gophkeeper.proto.BinaryDataService.UpdateBinaryDataInfo:output_type -> gophkeeper.proto.UpdateBinaryDataResponse
-	43, // 74: gophkeeper.proto.BinaryDataService.DeleteBinaryData:output_type -> gophkeeper.proto.DeleteBinaryDataResponse
-	36, // 75: gophkeeper.proto.BinaryDataService.UploadBinaryData:output_type -> gophkeeper.proto.UploadBinaryDataResponse
-	47, // 76: gophkeeper.proto.BinaryDataService.UpdateBinaryData:output_type -> gophkeeper.proto.UpdateBinaryDataResponse
+	50, // 25: gophkeeper.proto.BinaryDataInfo.created_at:type_name -> google.protobuf.Timestamp
+	50, // 26: gophkeeper.proto.BinaryDataInfo.updated_at:type_name -> google.protobuf.Timestamp
+	41, // 27: gophkeeper.proto.GetBinaryDataInfoResponse.binary_info:type_name -> gophkeeper.proto.BinaryDataInfo
+	41, // 28: gophkeeper.proto.UpdateBinaryDataRequest.info:type_name -> gophkeeper.proto.BinaryDataInfo
+	41, // 29: gophkeeper.proto.SaveBinaryDataInfoRequest.info:type_name -> gophkeeper.proto.BinaryDataInfo
+	0,  // 30: gophkeeper.proto.AuthService.Register:input_type -> gophkeeper.proto.RegisterRequest
+	2,  // 31: gophkeeper.proto.AuthService.Login:input_type -> gophkeeper.proto.LoginRequest
+	5,  // 32: gophkeeper.proto.CredentialService.CreateCredential:input_type -> gophkeeper.proto.CreateCredentialRequest
+	7,  // 33: gophkeeper.proto.CredentialService.GetCredentialByID:input_type -> gophkeeper.proto.GetCredentialByIDRequest
+	51, // 34: gophkeeper.proto.CredentialService.GetCredentials:input_type -> google.protobuf.Empty
+	10, // 35: gophkeeper.proto.CredentialService.UpdateCredential:input_type -> gophkeeper.proto.UpdateCredentialRequest
+	12, // 36: gophkeeper.proto.CredentialService.DeleteCredential:input_type -> gophkeeper.proto.DeleteCredentialRequest
+	15, // 37: gophkeeper.proto.BankCardService.CreateBankCard:input_type -> gophkeeper.proto.CreateBankCardRequest
+	17, // 38: gophkeeper.proto.BankCardService.GetBankCardByID:input_type -> gophkeeper.proto.GetBankCardByIDRequest
+	51, // 39: gophkeeper.proto.BankCardService.GetBankCards:input_type -> google.protobuf.Empty
+	20, // 40: gophkeeper.proto.BankCardService.UpdateBankCard:input_type -> gophkeeper.proto.UpdateBankCardRequest
+	22, // 41: gophkeeper.proto.BankCardService.DeleteBankCard:input_type -> gophkeeper.proto.DeleteBankCardRequest
+	25, // 42: gophkeeper.proto.TextDataService.CreateTextData:input_type -> gophkeeper.proto.CreateTextDataRequest
+	27, // 43: gophkeeper.proto.TextDataService.GetTextDataByID:input_type -> gophkeeper.proto.GetTextDataByIDRequest
+	29, // 44: gophkeeper.proto.TextDataService.GetTextDataTitles:input_type -> gophkeeper.proto.GetTextDataTitlesRequest
+	31, // 45: gophkeeper.proto.TextDataService.UpdateTextData:input_type -> gophkeeper.proto.UpdateTextDataRequest
+	33, // 46: gophkeeper.proto.TextDataService.DeleteTextData:input_type -> gophkeeper.proto.DeleteTextDataRequest
+	48, // 47: gophkeeper.proto.BinaryDataService.SaveBinaryDataInfo:input_type -> gophkeeper.proto.SaveBinaryDataInfoRequest
+	44, // 48: gophkeeper.proto.BinaryDataService.GetBinaryDataInfo:input_type -> gophkeeper.proto.GetBinaryDataInfoRequest
+	39, // 49: gophkeeper.proto.BinaryDataService.ListBinaryData:input_type -> gophkeeper.proto.ListBinaryDataRequest
+	46, // 50: gophkeeper.proto.BinaryDataService.UpdateBinaryDataInfo:input_type -> gophkeeper.proto.UpdateBinaryDataRequest
+	42, // 51: gophkeeper.proto.BinaryDataService.DeleteBinaryData:input_type -> gophkeeper.proto.DeleteBinaryDataRequest
+	35, // 52: gophkeeper.proto.BinaryDataService.UploadBinaryData:input_type -> gophkeeper.proto.UploadBinaryDataRequest
+	37, // 53: gophkeeper.proto.BinaryDataService.DownloadBinaryData:input_type -> gophkeeper.proto.DownloadBinaryDataRequest
+	1,  // 54: gophkeeper.proto.AuthService.Register:output_type -> gophkeeper.proto.RegisterResponse
+	3,  // 55: gophkeeper.proto.AuthService.Login:output_type -> gophkeeper.proto.LoginResponse
+	6,  // 56: gophkeeper.proto.CredentialService.CreateCredential:output_type -> gophkeeper.proto.CreateCredentialResponse
+	8,  // 57: gophkeeper.proto.CredentialService.GetCredentialByID:output_type -> gophkeeper.proto.GetCredentialByIDResponse
+	9,  // 58: gophkeeper.proto.CredentialService.GetCredentials:output_type -> gophkeeper.proto.GetCredentialsResponse
+	11, // 59: gophkeeper.proto.CredentialService.UpdateCredential:output_type -> gophkeeper.proto.UpdateCredentialResponse
+	13, // 60: gophkeeper.proto.CredentialService.DeleteCredential:output_type -> gophkeeper.proto.DeleteCredentialResponse
+	16, // 61: gophkeeper.proto.BankCardService.CreateBankCard:output_type -> gophkeeper.proto.CreateBankCardResponse
+	18, // 62: gophkeeper.proto.BankCardService.GetBankCardByID:output_type -> gophkeeper.proto.GetBankCardByIDResponse
+	19, // 63: gophkeeper.proto.BankCardService.GetBankCards:output_type -> gophkeeper.proto.GetBankCardsResponse
+	21, // 64: gophkeeper.proto.BankCardService.UpdateBankCard:output_type -> gophkeeper.proto.UpdateBankCardResponse
+	23, // 65: gophkeeper.proto.BankCardService.DeleteBankCard:output_type -> gophkeeper.proto.DeleteBankCardResponse
+	26, // 66: gophkeeper.proto.TextDataService.CreateTextData:output_type -> gophkeeper.proto.CreateTextDataResponse
+	28, // 67: gophkeeper.proto.TextDataService.GetTextDataByID:output_type -> gophkeeper.proto.GetTextDataByIDResponse
+	30, // 68: gophkeeper.proto.TextDataService.GetTextDataTitles:output_type -> gophkeeper.proto.GetTextDataTitlesResponse
+	32, // 69: gophkeeper.proto.TextDataService.UpdateTextData:output_type -> gophkeeper.proto.UpdateTextDataResponse
+	34, // 70: gophkeeper.proto.TextDataService.DeleteTextData:output_type -> gophkeeper.proto.DeleteTextDataResponse
+	49, // 71: gophkeeper.proto.BinaryDataService.SaveBinaryDataInfo:output_type -> gophkeeper.proto.SaveBinaryDataInfoResponse
+	45, // 72: gophkeeper.proto.BinaryDataService.GetBinaryDataInfo:output_type -> gophkeeper.proto.GetBinaryDataInfoResponse
+	40, // 73: gophkeeper.proto.BinaryDataService.ListBinaryData:output_type -> gophkeeper.proto.ListBinaryDataResponse
+	47, // 74: gophkeeper.proto.BinaryDataService.UpdateBinaryDataInfo:output_type -> gophkeeper.proto.UpdateBinaryDataResponse
+	43, // 75: gophkeeper.proto.BinaryDataService.DeleteBinaryData:output_type -> gophkeeper.proto.DeleteBinaryDataResponse
+	36, // 76: gophkeeper.proto.BinaryDataService.UploadBinaryData:output_type -> gophkeeper.proto.UploadBinaryDataResponse
 	38, // 77: gophkeeper.proto.BinaryDataService.DownloadBinaryData:output_type -> gophkeeper.proto.DownloadBinaryDataResponse
-	53, // [53:78] is the sub-list for method output_type
-	28, // [28:53] is the sub-list for method input_type
-	28, // [28:28] is the sub-list for extension type_name
-	28, // [28:28] is the sub-list for extension extendee
-	0,  // [0:28] is the sub-list for field type_name
+	54, // [54:78] is the sub-list for method output_type
+	30, // [30:54] is the sub-list for method input_type
+	30, // [30:30] is the sub-list for extension type_name
+	30, // [30:30] is the sub-list for extension extendee
+	0,  // [0:30] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_init() }

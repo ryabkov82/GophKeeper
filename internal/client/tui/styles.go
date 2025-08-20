@@ -12,7 +12,7 @@ var (
 	hintStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
 	activeFieldStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	inactiveFieldStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	readonlyStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	readonlyStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("244")).Italic(true)
 	// Стиль для блока с полем формы
 	formBlockStyle = lipgloss.NewStyle().
 			Background(lipgloss.Color("236")).

@@ -11,15 +11,16 @@ import (
 
 func TestCredential_FormFields(t *testing.T) {
 	cred := &model.Credential{
-		Title:    "Gmail",
-		Login:    "user@gmail.com",
-		Password: "secret",
-		Metadata: "notes",
+		Title:     "Gmail",
+		Login:     "user@gmail.com",
+		Password:  "secret",
+		Metadata:  "notes",
+		UpdatedAt: time.Now(),
 	}
 
 	fields := cred.FormFields()
-	if len(fields) != 4 {
-		t.Fatalf("expected 4 fields, got %d", len(fields))
+	if len(fields) != 5 {
+		t.Fatalf("expected 5 fields, got %d", len(fields))
 	}
 
 	if fields[0].Label != "Title" || fields[0].Value != "Gmail" {
@@ -41,6 +42,7 @@ func TestCredential_UpdateFromFields(t *testing.T) {
 		{Value: "newlogin"},
 		{Value: "newpass"},
 		{Value: "metadata text"},
+		{Value: "UpdatedAt"},
 	}
 
 	err := cred.UpdateFromFields(fields)
@@ -69,7 +71,7 @@ func TestCredential_UpdateFromFields_Errors(t *testing.T) {
 
 	// Пустой Title
 	fields = []forms.FormField{
-		{Value: " "}, {Value: "login"}, {Value: "pass"}, {Value: "meta"},
+		{Value: " "}, {Value: "login"}, {Value: "pass"}, {Value: "meta"}, {Value: "UpdatedAt"},
 	}
 	err = cred.UpdateFromFields(fields)
 	if err == nil || !strings.Contains(err.Error(), "title cannot be empty") {

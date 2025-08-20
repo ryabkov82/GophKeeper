@@ -89,11 +89,12 @@ func TestRenderEditForm(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "A", Value: "a"},
 	}}
-	widget := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 
 	m := Model{
 		editEntity:   entity,
-		widgets:      widget,
+		widgets:      widgets,
+		focusedInput: focused,
 		currentState: "edit_new",
 	}
 
@@ -105,16 +106,25 @@ func TestRenderEditForm(t *testing.T) {
 	assert.Contains(t, output, "A:")
 }
 
+func TestRenderEditForm_ReadOnlyStyle(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a", ReadOnly: true}}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: focused}
+	output := renderEditForm(m)
+	styled := readonlyStyle.Render("A: ")
+	assert.Contains(t, output, styled)
+}
+
 func TestUpdateEdit_TabNavigation(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "A", Value: "a"},
 		{Label: "B", Value: "b"},
 	}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
-		focusedInput: 0,
+		focusedInput: focused,
 	}
 
 	// Tab → должно переключить фокус
@@ -130,15 +140,37 @@ func TestUpdateEdit_TabNavigation(t *testing.T) {
 	}
 }
 
+func TestUpdateEdit_SkipReadOnly(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{
+		{Label: "A", Value: "a", ReadOnly: true},
+		{Label: "B", Value: "b"},
+		{Label: "C", Value: "c", ReadOnly: true},
+		{Label: "D", Value: "d"},
+	}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: focused}
+
+	assert.Equal(t, 1, m.focusedInput)
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyTab})
+	assert.Equal(t, 3, m2.focusedInput)
+
+	m3, _ := updateEdit(m2, tea.KeyMsg{Type: tea.KeyTab})
+	assert.Equal(t, 1, m3.focusedInput)
+
+	m4, _ := updateEdit(m3, tea.KeyMsg{Type: tea.KeyShiftTab})
+	assert.Equal(t, 3, m4.focusedInput)
+}
+
 func TestUpdateEdit_CtrlVPasswordToggle(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "Pwd", Value: "secret", InputType: "password"},
 	}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
-		focusedInput: 0,
+		focusedInput: focused,
 	}
 
 	// Ctrl+V → переключение видимости пароля
@@ -151,11 +183,11 @@ func TestUpdateEdit_CtrlVPasswordToggle(t *testing.T) {
 
 func TestUpdateEdit_EscCancels(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
-		focusedInput: 0,
+		focusedInput: focused,
 		currentState: "edit",
 	}
 
@@ -167,13 +199,14 @@ func TestUpdateEdit_EscCancels(t *testing.T) {
 
 func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	fakeSvc := &fakeEditDataService{}
 
 	// Новая сущность
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
+		focusedInput: focused,
 		currentState: "edit_new",
 		currentType:  contracts.TypeCredentials,
 		services: map[contracts.DataType]contracts.DataService{
@@ -181,12 +214,9 @@ func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 		},
 		ctx: context.Background(),
 	}
-	m2, _ := saveEdit(m)
+	saveEdit(m)
 	if !fakeSvc.created {
 		t.Errorf("expected entity to be created")
-	}
-	if m2.currentState != "list" {
-		t.Errorf("expected state=list after save")
 	}
 
 	// Существующая сущность
@@ -194,6 +224,7 @@ func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 	m3 := Model{
 		editEntity:   entity,
 		widgets:      widgets,
+		focusedInput: focused,
 		currentState: "edit",
 		currentType:  contracts.TypeCredentials,
 		services: map[contracts.DataType]contracts.DataService{

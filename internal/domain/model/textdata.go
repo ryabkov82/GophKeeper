@@ -45,12 +45,19 @@ func (t *TextData) FormFields() []forms.FormField {
 			InputType:   "multiline",
 			Placeholder: "Дополнительная информация",
 		},
+		{
+			Label:       "UpdatedAt",
+			Value:       t.UpdatedAt.String(),
+			InputType:   "text",
+			ReadOnly:    true,
+			Placeholder: "Дата обновления",
+		},
 	}
 }
 
 // UpdateFromFields обновляет TextData по значениям из формы
 func (t *TextData) UpdateFromFields(fields []forms.FormField) error {
-	if len(fields) != 3 {
+	if len(fields) != 4 {
 		return errors.New("unexpected number of fields")
 	}
 

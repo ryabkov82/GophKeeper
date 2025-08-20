@@ -1122,26 +1122,6 @@ func (mr *MockBinaryDataServiceClientMockRecorder) SaveBinaryDataInfo(ctx, in an
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveBinaryDataInfo", reflect.TypeOf((*MockBinaryDataServiceClient)(nil).SaveBinaryDataInfo), varargs...)
 }
 
-// UpdateBinaryData mocks base method.
-func (m *MockBinaryDataServiceClient) UpdateBinaryData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[proto.UpdateBinaryDataRequest, proto.UpdateBinaryDataResponse], error) {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateBinaryData", varargs...)
-	ret0, _ := ret[0].(grpc.ClientStreamingClient[proto.UpdateBinaryDataRequest, proto.UpdateBinaryDataResponse])
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateBinaryData indicates an expected call of UpdateBinaryData.
-func (mr *MockBinaryDataServiceClientMockRecorder) UpdateBinaryData(ctx any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBinaryData", reflect.TypeOf((*MockBinaryDataServiceClient)(nil).UpdateBinaryData), varargs...)
-}
-
 // UpdateBinaryDataInfo mocks base method.
 func (m *MockBinaryDataServiceClient) UpdateBinaryDataInfo(ctx context.Context, in *proto.UpdateBinaryDataRequest, opts ...grpc.CallOption) (*proto.UpdateBinaryDataResponse, error) {
 	m.ctrl.T.Helper()
@@ -1278,20 +1258,6 @@ func (m *MockBinaryDataServiceServer) SaveBinaryDataInfo(arg0 context.Context, a
 func (mr *MockBinaryDataServiceServerMockRecorder) SaveBinaryDataInfo(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveBinaryDataInfo", reflect.TypeOf((*MockBinaryDataServiceServer)(nil).SaveBinaryDataInfo), arg0, arg1)
-}
-
-// UpdateBinaryData mocks base method.
-func (m *MockBinaryDataServiceServer) UpdateBinaryData(arg0 grpc.ClientStreamingServer[proto.UpdateBinaryDataRequest, proto.UpdateBinaryDataResponse]) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateBinaryData", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateBinaryData indicates an expected call of UpdateBinaryData.
-func (mr *MockBinaryDataServiceServerMockRecorder) UpdateBinaryData(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBinaryData", reflect.TypeOf((*MockBinaryDataServiceServer)(nil).UpdateBinaryData), arg0)
 }
 
 // UpdateBinaryDataInfo mocks base method.
