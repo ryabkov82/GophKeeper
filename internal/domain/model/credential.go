@@ -62,12 +62,19 @@ func (c *Credential) FormFields() []forms.FormField {
 			InputType:   "multiline",
 			Placeholder: "Дополнительные заметки",
 		},
+		{
+			Label:       "UpdatedAt",
+			Value:       c.UpdatedAt.String(),
+			InputType:   "text",
+			ReadOnly:    true,
+			Placeholder: "Дата обновления",
+		},
 	}
 }
 
 // UpdateFromFields обновляет Credential по значениям из формы
 func (c *Credential) UpdateFromFields(fields []forms.FormField) error {
-	if len(fields) != 4 {
+	if len(fields) != 5 {
 		return errors.New("unexpected number of fields")
 	}
 

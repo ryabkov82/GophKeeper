@@ -140,7 +140,7 @@ func TestBankCard_FormFields(t *testing.T) {
 
 	fields := card.FormFields()
 
-	assert.Len(t, fields, 6)
+	assert.Len(t, fields, 7)
 	assert.Equal(t, "Title", fields[0].Label)
 	assert.Equal(t, "Test Card", fields[0].Value)
 	assert.Equal(t, "Cardholder Name", fields[1].Label)
@@ -173,6 +173,7 @@ func TestBankCard_UpdateFromFields(t *testing.T) {
 				{Value: "06/26"},
 				{Value: "456"},
 				{Value: "updated metadata"},
+				{Value: "updated at"},
 			},
 			checkCard: func(t *testing.T, card *BankCard) {
 				assert.Equal(t, "Updated Card", card.Title)
@@ -193,6 +194,7 @@ func TestBankCard_UpdateFromFields(t *testing.T) {
 				{Value: "06/26"},
 				{Value: "456"},
 				{Value: "updated metadata"},
+				{Value: "updated at"},
 			},
 			wantErr: true,
 			errText: "title cannot be empty",
@@ -206,6 +208,7 @@ func TestBankCard_UpdateFromFields(t *testing.T) {
 				{Value: "06/26"},
 				{Value: "456"},
 				{Value: "updated metadata"},
+				{Value: "updated at"},
 			},
 			wantErr: true,
 			errText: "invalid card number (Luhn check failed)",
@@ -219,6 +222,7 @@ func TestBankCard_UpdateFromFields(t *testing.T) {
 				{Value: "0626"}, // missing slash
 				{Value: "456"},
 				{Value: "updated metadata"},
+				{Value: "updated at"},
 			},
 			wantErr: true,
 			errText: "invalid expiry date format, use MM/YY",
@@ -232,6 +236,7 @@ func TestBankCard_UpdateFromFields(t *testing.T) {
 				{Value: "06/26"},
 				{Value: "45"}, // too short
 				{Value: "updated metadata"},
+				{Value: "updated at"},
 			},
 			wantErr: true,
 			errText: "CVV must be 3 digits",

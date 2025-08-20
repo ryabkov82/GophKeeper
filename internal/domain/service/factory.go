@@ -7,4 +7,7 @@ type ServiceFactory interface {
 	Credential() CredentialService
 	BankCard() BankCardService
 	TextData() TextDataService
+	BinaryData() BinaryDataService
+	// Close освобождает ресурсы сервисов и нижележащих слоёв.
+	Close()
 }

@@ -183,8 +183,8 @@ func (m *Manager) createConnection(ctx context.Context) (GrpcConn, error) {
 		m.logger.Debug("Using insecure gRPC connection")
 	}
 
-	dialOpts = append(dialOpts, grpc.WithUnaryInterceptor(
-		AuthUnaryInterceptor(m.authManager, m.logger),
+	dialOpts = append(dialOpts, grpc.WithPerRPCCredentials(
+		NewAuthPerRPCCredentials(m.authManager, m.logger, m.config.UseTLS),
 	))
 
 	m.logger.Debug("Dialing gRPC server", zap.String("address", m.config.ServerAddress))

@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -147,6 +148,7 @@ func TestTextDataService_Update_NotFound(t *testing.T) {
 
 	data := &model.TextData{ID: uuid.NewString(), UserID: uuid.NewString()}
 	mockRepo.On("GetByID", mock.Anything, data.UserID, data.ID).Return(nil, nil)
+	mockRepo.On("Update", mock.Anything, data).Return(fmt.Errorf("text data not found"))
 
 	err := svc.Update(context.Background(), data)
 	assert.Error(t, err)

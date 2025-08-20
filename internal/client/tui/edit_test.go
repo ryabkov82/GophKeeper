@@ -3,12 +3,14 @@ package tui
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
+	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,11 +91,12 @@ func TestRenderEditForm(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "A", Value: "a"},
 	}}
-	widget := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 
 	m := Model{
 		editEntity:   entity,
-		widgets:      widget,
+		widgets:      widgets,
+		focusedInput: focused,
 		currentState: "edit_new",
 	}
 
@@ -105,16 +108,25 @@ func TestRenderEditForm(t *testing.T) {
 	assert.Contains(t, output, "A:")
 }
 
+func TestRenderEditForm_ReadOnlyStyle(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a", ReadOnly: true}}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: focused}
+	output := renderEditForm(m)
+	styled := readonlyStyle.Render("A: ")
+	assert.Contains(t, output, styled)
+}
+
 func TestUpdateEdit_TabNavigation(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
 		{Label: "A", Value: "a"},
 		{Label: "B", Value: "b"},
 	}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
-		focusedInput: 0,
+		focusedInput: focused,
 	}
 
 	// Tab → должно переключить фокус
@@ -130,32 +142,35 @@ func TestUpdateEdit_TabNavigation(t *testing.T) {
 	}
 }
 
-func TestUpdateEdit_CtrlVPasswordToggle(t *testing.T) {
+func TestUpdateEdit_SkipReadOnly(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{
-		{Label: "Pwd", Value: "secret", InputType: "password"},
+		{Label: "A", Value: "a", ReadOnly: true},
+		{Label: "B", Value: "b"},
+		{Label: "C", Value: "c", ReadOnly: true},
+		{Label: "D", Value: "d"},
 	}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
-	m := Model{
-		editEntity:   entity,
-		widgets:      widgets,
-		focusedInput: 0,
-	}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: focused}
 
-	// Ctrl+V → переключение видимости пароля
-	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlV})
-	w := m2.widgets[0]
-	if w.input.EchoMode != textinput.EchoNormal && w.input.EchoMode != textinput.EchoPassword {
-		t.Errorf("unexpected EchoMode after Ctrl+V")
-	}
+	assert.Equal(t, 1, m.focusedInput)
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyTab})
+	assert.Equal(t, 3, m2.focusedInput)
+
+	m3, _ := updateEdit(m2, tea.KeyMsg{Type: tea.KeyTab})
+	assert.Equal(t, 1, m3.focusedInput)
+
+	m4, _ := updateEdit(m3, tea.KeyMsg{Type: tea.KeyShiftTab})
+	assert.Equal(t, 3, m4.focusedInput)
 }
 
 func TestUpdateEdit_EscCancels(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
-		focusedInput: 0,
+		focusedInput: focused,
 		currentState: "edit",
 	}
 
@@ -165,15 +180,161 @@ func TestUpdateEdit_EscCancels(t *testing.T) {
 	}
 }
 
+func TestUpdateEdit_EnterMovesNextAndEditsTextarea(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{
+		{Label: "A", Value: "a"},                 // обычное поле
+		{Label: "Notes", InputType: "multiline"}, // textarea
+	}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 20)
+	m := Model{
+		editEntity:   entity,
+		widgets:      widgets,
+		focusedInput: focused,
+	}
+
+	// Enter на обычном поле -> фокус смещается на следующее
+	m1, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyEnter})
+	if m1.focusedInput != 1 {
+		t.Fatalf("expected focus=1 after Enter on input, got %d", m1.focusedInput)
+	}
+
+	// Enter на textarea -> остаёмся на том же поле, внутри textarea добавляется перенос
+	before := m1.widgets[1].textarea.Value()
+	m2, _ := updateEdit(m1, tea.KeyMsg{Type: tea.KeyEnter})
+	after := m2.widgets[1].textarea.Value()
+	if m2.focusedInput != 1 {
+		t.Fatalf("expected focus stay on textarea, got %d", m2.focusedInput)
+	}
+	if len(after) != len(before)+1 {
+		t.Fatalf("expected textarea to receive newline on Enter (len+1), got before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestUpdateEdit_UpDownNavigation_WrapAndTextareaStay(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{
+		{Label: "A"}, {Label: "B"}, {Label: "C"},
+	}}
+	widgets, _ := initFormInputsFromFields(entity.FormFields(), 20)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: 1}
+
+	// Down -> 2
+	m1, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyDown})
+	if m1.focusedInput != 2 {
+		t.Fatalf("down expected 2, got %d", m1.focusedInput)
+	}
+	// Down (wrap) -> 0
+	m2, _ := updateEdit(m1, tea.KeyMsg{Type: tea.KeyDown})
+	if m2.focusedInput != 0 {
+		t.Fatalf("down wrap expected 0, got %d", m2.focusedInput)
+	}
+	// Up (wrap) -> 2
+	m3, _ := updateEdit(m2, tea.KeyMsg{Type: tea.KeyUp})
+	if m3.focusedInput != 2 {
+		t.Fatalf("up wrap expected 2, got %d", m3.focusedInput)
+	}
+
+	// Теперь проверим textarea: up/down НЕ двигают фокус, а отдаются самой textarea
+	entityTA := &fakeForm{fields: []forms.FormField{
+		{Label: "Notes", InputType: "multiline", Value: "l1\nl2"},
+	}}
+	wTA, focused := initFormInputsFromFields(entityTA.FormFields(), 20)
+	mTA := Model{editEntity: entityTA, widgets: wTA, focusedInput: focused}
+
+	mTA1, _ := updateEdit(mTA, tea.KeyMsg{Type: tea.KeyDown})
+	if mTA1.focusedInput != 0 {
+		t.Fatalf("textarea: expected focus stay=0 on down, got %d", mTA1.focusedInput)
+	}
+	mTA2, _ := updateEdit(mTA1, tea.KeyMsg{Type: tea.KeyUp})
+	if mTA2.focusedInput != 0 {
+		t.Fatalf("textarea: expected focus stay=0 on up, got %d", mTA2.focusedInput)
+	}
+}
+
+func TestUpdateEdit_CtrlBPasswordToggle_FirstOnly(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{
+		{Label: "Pwd1", Value: "s1", InputType: "password"},
+		{Label: "Pwd2", Value: "s2", InputType: "password"},
+		{Label: "User", Value: "u"},
+	}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 20)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: focused}
+
+	// До переключения: оба пароля скрыты
+	if widgets[0].input.EchoMode != textinput.EchoPassword || widgets[1].input.EchoMode != textinput.EchoPassword {
+		t.Fatalf("expected both passwords to start hidden")
+	}
+
+	// Ctrl+B -> переключается ТОЛЬКО первый встретившийся пароль
+	m1, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlB})
+	if m1.widgets[0].input.EchoMode != textinput.EchoNormal {
+		t.Fatalf("first password should be visible after Ctrl+B")
+	}
+	if m1.widgets[1].input.EchoMode != textinput.EchoPassword {
+		t.Fatalf("second password should remain hidden")
+	}
+
+	// Повторный Ctrl+B -> возвращаем первый к EchoPassword
+	m2, _ := updateEdit(m1, tea.KeyMsg{Type: tea.KeyCtrlB})
+	if m2.widgets[0].input.EchoMode != textinput.EchoPassword {
+		t.Fatalf("first password should toggle back to hidden")
+	}
+}
+
+func TestUpdateEdit_F2OpensFullscreen_WhenAllowed(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{
+		{Label: "Notes", InputType: "multiline", Fullscreen: true, Value: "abc"},
+	}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 60)
+	m := Model{
+		editEntity:   entity,
+		widgets:      widgets,
+		focusedInput: focused,
+		currentState: "edit",
+	}
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyF2})
+	if m2.currentState != "fullscreen_edit" {
+		t.Fatalf("expected fullscreen_edit state after F2, got %q", m2.currentState)
+	}
+	if m2.prevState != "edit" {
+		t.Fatalf("expected prevState=edit, got %q", m2.prevState)
+	}
+	if m2.fullscreenWidget == nil {
+		t.Fatalf("expected fullscreenWidget to be set")
+	}
+}
+
+func TestUpdateEdit_F2Ignored_OnSimpleInput(t *testing.T) {
+	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 20)
+	m := Model{editEntity: entity, widgets: widgets, focusedInput: focused, currentState: "edit"}
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyF2})
+	if m2.currentState != "edit" {
+		t.Fatalf("expected state to remain 'edit' for non-textarea on F2, got %q", m2.currentState)
+	}
+}
+
+func TestUpdateEdit_NoWidgets_NoCrash(t *testing.T) {
+	m := Model{widgets: nil, focusedInput: 0, currentState: "edit"}
+	if _, cmd := updateEdit(m, tea.KeyMsg{Type: tea.KeyEnter}); cmd != nil {
+		t.Fatalf("expected no cmd when no widgets on Enter")
+	}
+	if m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyDown}); m2.focusedInput != 0 {
+		t.Fatalf("expected focus unchanged when no widgets on Down")
+	}
+}
+
 func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 	entity := &fakeForm{fields: []forms.FormField{{Label: "A", Value: "a"}}}
-	widgets := initFormInputsFromFields(entity.FormFields(), 10)
+	widgets, focused := initFormInputsFromFields(entity.FormFields(), 10)
 	fakeSvc := &fakeEditDataService{}
 
 	// Новая сущность
 	m := Model{
 		editEntity:   entity,
 		widgets:      widgets,
+		focusedInput: focused,
 		currentState: "edit_new",
 		currentType:  contracts.TypeCredentials,
 		services: map[contracts.DataType]contracts.DataService{
@@ -181,12 +342,9 @@ func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 		},
 		ctx: context.Background(),
 	}
-	m2, _ := saveEdit(m)
+	saveEdit(m)
 	if !fakeSvc.created {
 		t.Errorf("expected entity to be created")
-	}
-	if m2.currentState != "list" {
-		t.Errorf("expected state=list after save")
 	}
 
 	// Существующая сущность
@@ -194,6 +352,7 @@ func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 	m3 := Model{
 		editEntity:   entity,
 		widgets:      widgets,
+		focusedInput: focused,
 		currentState: "edit",
 		currentType:  contracts.TypeCredentials,
 		services: map[contracts.DataType]contracts.DataService{
@@ -204,5 +363,124 @@ func TestSaveEdit_CreateAndUpdate(t *testing.T) {
 	saveEdit(m3)
 	if !fakeSvc2.updated {
 		t.Errorf("expected entity to be updated")
+	}
+}
+
+func TestUpdateEdit_CtrlU_OpensUpload_ForFiles(t *testing.T) {
+	bd := &model.BinaryData{Title: "old", ClientPath: "/tmp/file.bin"} // entity
+	m := Model{
+		currentState: "edit",
+		currentType:  contracts.TypeFiles,
+		editEntity:   bd,
+		widgets:      nil,
+		focusedInput: 0,
+	}
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlU})
+	if m2.currentState != "file_transfer" {
+		t.Fatalf("expected to enter file_transfer on Ctrl+U, got %q", m2.currentState)
+	}
+	if m2.transfer.mode != modeUpload {
+		t.Fatalf("expected modeUpload, got %v", m2.transfer.mode)
+	}
+	if m2.transfer.data == nil {
+		t.Fatalf("expected transfer.data to be set")
+	}
+}
+
+func TestUpdateEdit_CtrlU_Ignored_ForNonFiles(t *testing.T) {
+	m := Model{
+		currentState: "edit",
+		currentType:  contracts.TypeCards, // не файлы
+		editEntity:   &fakeForm{},         // любая сущность
+		widgets:      nil,
+		focusedInput: 0,
+	}
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlU})
+	if m2.currentState != "edit" {
+		t.Fatalf("expected state stay 'edit' for non-files Ctrl+U, got %q", m2.currentState)
+	}
+}
+
+func TestUpdateEdit_CtrlD_Download_ErrWhenClientPathEmpty(t *testing.T) {
+	// ClientPath пуст → нельзя в download
+	bd := &model.BinaryData{ID: "id-1", ClientPath: ""}
+	m := Model{
+		currentState: "edit",
+		currentType:  contracts.TypeFiles,
+		editEntity:   bd,
+		widgets:      nil,
+		focusedInput: 0,
+	}
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlD})
+	if m2.currentState != "edit" {
+		t.Fatalf("expected stay in 'edit' when ClientPath is empty, got %q", m2.currentState)
+	}
+	if m2.editErr == nil {
+		t.Fatalf("expected editErr when ClientPath is empty")
+	}
+	if got := m2.editErr.Error(); !strings.Contains(strings.ToLower(got), "скачив") {
+		t.Fatalf("unexpected error message: %v", got)
+	}
+}
+
+func TestUpdateEdit_CtrlD_Download_ErrWhenIDEmpty(t *testing.T) {
+	// ClientPath задан, но ID пуст → нельзя в download
+	bd := &model.BinaryData{ID: "", ClientPath: "/tmp/file.bin"}
+	m := Model{
+		currentState: "edit",
+		currentType:  contracts.TypeFiles,
+		editEntity:   bd,
+		widgets:      nil,
+		focusedInput: 0,
+	}
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlD})
+	if m2.currentState != "edit" {
+		t.Fatalf("expected stay in 'edit' when ID is empty, got %q", m2.currentState)
+	}
+	if m2.editErr == nil {
+		t.Fatalf("expected editErr when ID is empty")
+	}
+	if got := m2.editErr.Error(); !strings.Contains(strings.ToLower(got), "сначала сохраните") {
+		t.Fatalf("unexpected error message: %v", got)
+	}
+}
+
+func TestUpdateEdit_CtrlD_OpensDownload_ForFiles(t *testing.T) {
+	// Валидный кейс: и ClientPath, и ID заданы → входим в download
+	bd := &model.BinaryData{ID: "id-123", ClientPath: "/tmp/file.bin"}
+	m := Model{
+		currentState: "edit",
+		currentType:  contracts.TypeFiles,
+		editEntity:   bd,
+		widgets:      nil,
+		focusedInput: 0,
+	}
+
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlD})
+	if m2.currentState != "file_transfer" {
+		t.Fatalf("expected to enter file_transfer on Ctrl+D, got %q", m2.currentState)
+	}
+	if m2.transfer.mode != modeDownload {
+		t.Fatalf("expected modeDownload, got %v", m2.transfer.mode)
+	}
+	if m2.transfer.data == nil || m2.transfer.data.ID != "id-123" {
+		t.Fatalf("expected transfer.data.ID to be 'id-123'")
+	}
+}
+
+func TestUpdateEdit_CtrlD_Ignored_ForNonFiles(t *testing.T) {
+	m := Model{
+		currentState: "edit",
+		currentType:  contracts.TypeNotes, // любой тип кроме файлов
+		editEntity:   &fakeForm{},
+		widgets:      nil,
+		focusedInput: 0,
+	}
+	m2, _ := updateEdit(m, tea.KeyMsg{Type: tea.KeyCtrlD})
+	if m2.currentState != "edit" {
+		t.Fatalf("expected state stay 'edit' for non-files Ctrl+D, got %q", m2.currentState)
 	}
 }

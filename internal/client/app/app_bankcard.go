@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/app/cryptowrap"
+	"github.com/ryabkov82/gophkeeper/internal/client/cryptowrap"
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 )

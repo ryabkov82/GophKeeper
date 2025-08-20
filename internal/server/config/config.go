@@ -26,14 +26,16 @@ import (
 //	SSLKeyFile     — путь к приватному ключу TLS, соответствующему сертификату из SSLCertFile.
 //	EnableTLS      — флаг включения TLS (true — использовать HTTPS/gRPC-TLS, false — без шифрования).
 //	LogLevel       — уровень логирования. Возможные значения: debug, info, warn, error.
+//	BinaryDataStorePath — путь к директории хранения бинарных данных на локальной файловой системе.
 type Config struct {
-	GRPCServerAddr string `json:"grpc_server_address"` // host:port
-	DBConnect      string `json:"database_dsn"`        // PostgreSQL DSN
-	JwtKey         string `json:"jwt_secret"`          // секрет для JWT
-	SSLCertFile    string `json:"ssl_cert_file"`       // путь к TLS сертификату
-	SSLKeyFile     string `json:"ssl_key_file"`        // путь к TLS ключу
-	EnableTLS      bool   `json:"enable_tls"`          // включить TLS
-	LogLevel       string `json:"log_level"`           // Уровень логирования (debug, info, warn, error)
+	GRPCServerAddr      string `json:"grpc_server_address"`    // host:port
+	DBConnect           string `json:"database_dsn"`           // PostgreSQL DSN
+	JwtKey              string `json:"jwt_secret"`             // секрет для JWT
+	SSLCertFile         string `json:"ssl_cert_file"`          // путь к TLS сертификату
+	SSLKeyFile          string `json:"ssl_key_file"`           // путь к TLS ключу
+	EnableTLS           bool   `json:"enable_tls"`             // включить TLS
+	LogLevel            string `json:"log_level"`              // Уровень логирования (debug, info, warn, error)
+	BinaryDataStorePath string `json:"binary_data_store_path"` // путь к директории для бинарных файлов
 }
 
 const (
@@ -79,13 +81,14 @@ func validateCertFiles(certFile, keyFile string) error {
 // 4) переменные окружения.
 func Load() (*Config, error) {
 	cfg := &Config{
-		GRPCServerAddr: "localhost:50051",
-		DBConnect:      "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable",
-		LogLevel:       "info",
-		JwtKey:         "your_strong_secret_here",
-		EnableTLS:      false,
-		SSLCertFile:    "certs/server.crt",
-		SSLKeyFile:     "certs/server.key",
+		GRPCServerAddr:      "localhost:50051",
+		DBConnect:           "postgres://gophkeeper:gophkeeper@localhost:5432/gophkeeper?sslmode=disable",
+		LogLevel:            "info",
+		JwtKey:              "your_strong_secret_here",
+		EnableTLS:           false,
+		SSLCertFile:         "certs/server.crt",
+		SSLKeyFile:          "certs/server.key",
+		BinaryDataStorePath: "/var/gophkeeper/binary_data",
 	}
 
 	// 1. Сначала загрузка из JSON-файла (если указан)
@@ -116,6 +119,13 @@ func Load() (*Config, error) {
 	if cfg.EnableTLS {
 		if err := validateCertFiles(cfg.SSLCertFile, cfg.SSLKeyFile); err != nil {
 			return nil, fmt.Errorf("TLS configuration invalid: %w", err)
+		}
+	}
+
+	// Проверка директории для хранения бинарных данных
+	if cfg.BinaryDataStorePath != "" {
+		if err := os.MkdirAll(cfg.BinaryDataStorePath, 0o755); err != nil {
+			return nil, fmt.Errorf("cannot create binary data directory: %w", err)
 		}
 	}
 
@@ -181,7 +191,9 @@ func mergeConfigs(dst, src *Config) {
 	if src.LogLevel != "" {
 		dst.LogLevel = src.LogLevel
 	}
-
+	if src.BinaryDataStorePath != "" {
+		dst.BinaryDataStorePath = src.BinaryDataStorePath
+	}
 }
 
 // loadFromFlags читает конфиг из аргументов командной строки
@@ -200,6 +212,7 @@ func loadFromFlags(cfg *Config) error {
 	flag.StringVar(&cfg.LogLevel, "l", cfg.LogLevel, "Log level (debug, info, warn, error)")
 	flag.StringVar(&cfg.DBConnect, "db", cfg.DBConnect, "Database connection string")
 	flag.BoolVar(&cfg.EnableTLS, "s", cfg.EnableTLS, "Enable TLS server")
+	flag.StringVar(&cfg.BinaryDataStorePath, "binary-path", cfg.BinaryDataStorePath, "Path for storing binary data files")
 
 	flag.Parse()
 
@@ -227,6 +240,9 @@ func loadFromEnv(cfg *Config) error {
 
 	if envLogLevel := os.Getenv("LOG_LEVEL"); envLogLevel != "" {
 		cfg.LogLevel = envLogLevel
+	}
+	if envBinaryPath := os.Getenv("BINARY_DATA_PATH"); envBinaryPath != "" {
+		cfg.BinaryDataStorePath = envBinaryPath
 	}
 
 	// Обработка HTTPS настроек

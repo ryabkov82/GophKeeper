@@ -18,6 +18,7 @@ type FormField struct {
 	Mask        string
 	MaxLength   int  // для ограничения длины ввода
 	Fullscreen  bool // если true — поле может редактироваться в полноэкранном режиме
+	ReadOnly    bool // если true — поле доступно только для чтения
 }
 
 // FormEntity интерфейс, который должна реализовывать любая сущность,

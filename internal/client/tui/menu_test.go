@@ -101,6 +101,13 @@ func TestUpdateMenu_KeyHandling(t *testing.T) {
 			expectedState:  "list",
 		},
 		{
+			name:           "Enter on Files sets state list",
+			initialCursor:  4,
+			keyMsg:         tea.KeyMsg{Type: tea.KeyEnter},
+			expectedCursor: 4,
+			expectedState:  "list",
+		},
+		{
 			name:           "Enter on Exit returns quit command",
 			initialCursor:  6,
 			keyMsg:         tea.KeyMsg{Type: tea.KeyEnter},
@@ -157,6 +164,12 @@ func TestUpdateMenu_EnterSelection(t *testing.T) {
 
 	// выбрать Credentials — смена currentState на "list"
 	m.menuCursor = 2
+	m, cmd = updateMenu(m, tea.KeyMsg{Type: tea.KeyEnter})
+	assert.Equal(t, "list", m.currentState)
+	assert.NotNil(t, cmd)
+
+	// выбрать Files — смена currentState на "list"
+	m.menuCursor = 4
 	m, cmd = updateMenu(m, tea.KeyMsg{Type: tea.KeyEnter})
 	assert.Equal(t, "list", m.currentState)
 	assert.NotNil(t, cmd)

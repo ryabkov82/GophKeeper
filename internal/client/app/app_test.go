@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"context"
+	"io"
 	"os"
 	"testing"
 	"time"
@@ -224,6 +225,65 @@ func (m *mockTextDataManager) DeleteTextData(ctx context.Context, id string) err
 
 func (m *mockTextDataManager) SetClient(client proto.TextDataServiceClient) {
 	m.setClientCalled = true
+}
+
+// mockBinaryDataManager - мок BinaryDataManagerIface
+type mockBinaryDataManager struct {
+	setClientCalled bool
+	client          proto.BinaryDataServiceClient
+
+	uploadErr     error
+	updateErr     error
+	updateInfoErr error
+	createInfoErr error
+	downloadFn    func(ctx context.Context, id string) (io.ReadCloser, error)
+	deleteErr     error
+	listResult    []model.BinaryData
+	listErr       error
+	getInfoFn     func(ctx context.Context, id string) (*model.BinaryData, error)
+}
+
+func (m *mockBinaryDataManager) SetClient(client proto.BinaryDataServiceClient) {
+	m.setClientCalled = true
+	m.client = client
+}
+
+func (m *mockBinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, content io.Reader) error {
+	return m.uploadErr
+}
+
+func (m *mockBinaryDataManager) Update(ctx context.Context, data *model.BinaryData, content io.Reader) error {
+	return m.updateErr
+}
+
+func (m *mockBinaryDataManager) UpdateInfo(ctx context.Context, data *model.BinaryData) error {
+	return m.updateInfoErr
+}
+
+func (m *mockBinaryDataManager) CreateInfo(ctx context.Context, data *model.BinaryData) error {
+	return m.createInfoErr
+}
+
+func (m *mockBinaryDataManager) Download(ctx context.Context, id string) (io.ReadCloser, error) {
+	if m.downloadFn != nil {
+		return m.downloadFn(ctx, id)
+	}
+	return nil, nil
+}
+
+func (m *mockBinaryDataManager) Delete(ctx context.Context, id string) error {
+	return m.deleteErr
+}
+
+func (m *mockBinaryDataManager) List(ctx context.Context) ([]model.BinaryData, error) {
+	return m.listResult, m.listErr
+}
+
+func (m *mockBinaryDataManager) GetInfo(ctx context.Context, id string) (*model.BinaryData, error) {
+	if m.getInfoFn != nil {
+		return m.getInfoFn(ctx, id)
+	}
+	return nil, nil
 }
 
 func TestNewAppServices_Success(t *testing.T) {

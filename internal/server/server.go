@@ -41,8 +41,11 @@ func StartServer(log *zap.Logger, cfg *config.Config) {
 		log.Fatal("Failed to initialize storage", zap.Error(err))
 	}
 
+	binaryFactory := storage.NewBinaryDataFactory(cfg)
+	binaryStorage := binaryFactory.BinaryData()
+
 	jwtManager := jwtutils.New(cfg.JwtKey, 24*time.Hour)
-	serviceFactory := service.NewServiceFactory(storageFactory, jwtManager)
+	serviceFactory := service.NewServiceFactory(storageFactory, binaryStorage, jwtManager)
 
 	// 3. Запуск gRPC сервера с набором сервисов
 	if err := grpc.StartGRPCServer(log, cfg, serviceFactory); err != nil {

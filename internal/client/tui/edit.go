@@ -9,6 +9,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ryabkov82/gophkeeper/internal/client/forms"
+	"github.com/ryabkov82/gophkeeper/internal/client/tui/contracts"
+	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 )
 
 func initEditForm(m Model) Model {
@@ -17,8 +19,7 @@ func initEditForm(m Model) Model {
 
 	if entity, ok := m.editEntity.(forms.FormEntity); ok {
 		formFields := entity.FormFields()
-		m.widgets = initFormInputsFromFields(formFields, m.termWidth)
-		m.focusedInput = 0
+		m.widgets, m.focusedInput = initFormInputsFromFields(formFields, m.termWidth)
 	} else {
 		m.editErr = fmt.Errorf("entity does not implement FormEntity")
 	}
@@ -52,11 +53,7 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 			return focusField(m), nil
 
 		case "esc":
-			m.currentState = "list"
-			m.editEntity = nil
-			m.inputs = nil
-			return m, nil
-
+			return handleListSelection(m, m.currentType)
 		case "ctrl+s":
 			return saveEdit(m)
 
@@ -100,6 +97,44 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 				m = initFullscreenForm(m)
 			}
 			return m, nil
+
+		case "ctrl+u":
+			if m.currentType == contracts.TypeFiles {
+				m = updateEditEntityFromInputs(m)
+				var bd *model.BinaryData
+				if v, ok := m.editEntity.(*model.BinaryData); ok {
+					bd = v
+				}
+				m = initTransferForm(m, modeUpload, bd, "")
+			}
+			return m, nil
+
+		case "ctrl+d":
+			if m.currentType == contracts.TypeFiles {
+				var (
+					bd *model.BinaryData
+					id string
+				)
+				if v, ok := m.editEntity.(*model.BinaryData); ok {
+					bd = v
+					id = v.ID
+				}
+
+				// запрет, если клиент ещё ничего не загружал (ClientPath пуст)
+				if !canSwitchToDownload(bd) {
+					m.editErr = fmt.Errorf("скачивание недоступно: файл ещё не загружался")
+					return m, nil
+				}
+
+				// запрет, если у записи нет ID — нечего скачивать
+				if strings.TrimSpace(id) == "" {
+					m.editErr = fmt.Errorf("скачивание недоступно: сначала сохраните запись")
+					return m, nil
+				}
+
+				m = initTransferForm(m, modeDownload, bd, id)
+			}
+			return m, nil
 		}
 
 		if len(m.widgets) == 0 {
@@ -107,6 +142,9 @@ func updateEdit(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		w := &m.widgets[m.focusedInput]
+		if w.readonly {
+			return m, nil
+		}
 		if w.fullscreen {
 			// не обрабатываем никакой ввод, просто возвращаем модель без изменений
 			return m, nil
@@ -143,7 +181,9 @@ func renderEditForm(m Model) string {
 
 	for i, widget := range m.widgets {
 		label := widget.field.Label + ": "
-		if i == m.focusedInput {
+		if widget.readonly {
+			label = readonlyStyle.Render(label)
+		} else if i == m.focusedInput {
 			label = activeFieldStyle.Render(label)
 		} else {
 			label = inactiveFieldStyle.Render(label)
@@ -168,9 +208,19 @@ func renderEditForm(m Model) string {
 					}
 				*/
 			}
-			b.WriteString(label + "\n" + formBlockStyle.Render(widget.textarea.View()) + "\n")
+			//b.WriteString(label + "\n" + formBlockStyle.Render(widget.textarea.View()) + "\n")
+			blockStyle := formBlockStyle
+			if widget.readonly {
+				blockStyle = blockStyle.Foreground(lipgloss.Color("244"))
+			}
+			b.WriteString(label + "\n" + blockStyle.Render(widget.textarea.View()) + "\n")
 		} else {
-			b.WriteString(label + widget.input.View() + "\n")
+			//b.WriteString(label + widget.input.View() + "\n")
+			inputView := widget.input.View()
+			if widget.readonly {
+				inputView = readonlyStyle.Render(inputView)
+			}
+			b.WriteString(label + inputView + "\n")
 		}
 	}
 
@@ -178,24 +228,43 @@ func renderEditForm(m Model) string {
 		b.WriteString("\n" + errorStyle.Render("Ошибка: "+m.editErr.Error()))
 	}
 
-	b.WriteString("\n" + hintStyle.Render(
-		"Esc: Отмена • Ctrl+S: Сохранить • Tab: Следующее поле • Ctrl+B: переключить видимость пароля\n",
-	))
+	hint := "Esc: Назад • Ctrl+S: Сохранить • Tab: Следующее поле "
+	switch m.currentType {
+	case contracts.TypeFiles:
+		hint += "• Ctrl+U: загрузить файл • Ctrl+D: скачать файл\n"
+	default:
+		hint += "• Ctrl+B: переключить видимость пароля\n"
+	}
+
+	b.WriteString("\n" + hintStyle.Render(hint))
 
 	return b.String()
 }
 
 // moveFocus переключает фокус вперёд (forward=true) или назад (forward=false)
 func moveFocus(m Model, forward bool) Model {
-	if forward {
-		m.focusedInput++
-		if m.focusedInput >= len(m.widgets) {
-			m.focusedInput = 0
+
+	if len(m.widgets) == 0 {
+		return m
+	}
+	start := m.focusedInput
+	for {
+		if forward {
+			m.focusedInput++
+			if m.focusedInput >= len(m.widgets) {
+				m.focusedInput = 0
+			}
+		} else {
+			m.focusedInput--
+			if m.focusedInput < 0 {
+				m.focusedInput = len(m.widgets) - 1
+			}
 		}
-	} else {
-		m.focusedInput--
-		if m.focusedInput < 0 {
-			m.focusedInput = len(m.widgets) - 1
+		if !m.widgets[m.focusedInput].readonly {
+			break
+		}
+		if m.focusedInput == start {
+			break
 		}
 	}
 	return m
@@ -231,15 +300,13 @@ func saveEdit(m Model) (Model, tea.Cmd) {
 	if err != nil {
 		m.editErr = err
 		return m, nil
+	} else {
+		if idGetter, ok := m.editEntity.(forms.Identifiable); ok {
+			return loadAndShowItem(m, idGetter.GetID())
+		}
 	}
 
-	// Успешно
-	m.listItems, _ = m.services[m.currentType].List(m.ctx)
-	m.currentState = "list"
-	m.editEntity = nil
-	m.inputs = nil
-	m.focusedInput = 0
-	return m, nil
+	return handleListSelection(m, m.currentType)
 }
 
 // updateEditEntityFromInputs обновляет m.editEntity значениями из m.inputs.

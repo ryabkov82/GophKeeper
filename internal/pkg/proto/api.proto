@@ -192,6 +192,74 @@ message DeleteTextDataResponse {
     bool success = 1;
 }
 
+// Сообщения для BinaryData
+message UploadBinaryDataRequest {
+    bytes chunk = 1;           // фрагмент файла
+    BinaryDataInfo info = 2;   // метаданные файла
+}
+
+message UploadBinaryDataResponse {
+    string id = 1;             // UUID записи
+}
+
+message DownloadBinaryDataRequest {
+    string id = 1;             // UUID записи
+}
+
+message DownloadBinaryDataResponse {
+    bytes chunk = 1;           // фрагмент файла
+}
+
+message ListBinaryDataRequest {}
+
+message ListBinaryDataResponse {
+    repeated BinaryDataInfo items = 1;
+}
+
+message BinaryDataInfo {
+    string id = 1;
+    string title = 2;
+    string metadata = 3;
+    int64 size = 4;
+    string client_path = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+message DeleteBinaryDataRequest {
+    string id = 1;
+}
+
+message DeleteBinaryDataResponse {}
+
+// Запрос информации о файле
+message GetBinaryDataInfoRequest {
+    string id = 1; // UUID записи
+}
+
+// Ответ с метаданными файла
+message GetBinaryDataInfoResponse {
+    BinaryDataInfo binary_info = 1;
+}
+
+// Запрос для обновления бинарных данных (поток)
+message UpdateBinaryDataRequest {
+    BinaryDataInfo info = 2; // информация о файле (передается в первом пакете)
+}
+
+// Ответ после завершения обновления
+message UpdateBinaryDataResponse {
+    string id = 1;         // ID обновленной записи
+}
+
+message SaveBinaryDataInfoRequest {
+    BinaryDataInfo info = 1;
+}
+
+message SaveBinaryDataInfoResponse {
+    string id = 1;
+}
+
 // Сервис для работы с Credential
 service CredentialService {
     rpc CreateCredential(CreateCredentialRequest) returns (CreateCredentialResponse);
@@ -217,4 +285,15 @@ service TextDataService {
     rpc GetTextDataTitles(GetTextDataTitlesRequest) returns (GetTextDataTitlesResponse);
     rpc UpdateTextData(UpdateTextDataRequest) returns (UpdateTextDataResponse);
     rpc DeleteTextData(DeleteTextDataRequest) returns (DeleteTextDataResponse);
+}
+
+// Сервис для работы с BinaryData
+service BinaryDataService {
+    rpc SaveBinaryDataInfo(SaveBinaryDataInfoRequest) returns (SaveBinaryDataInfoResponse);
+    rpc GetBinaryDataInfo(GetBinaryDataInfoRequest) returns (GetBinaryDataInfoResponse);
+    rpc ListBinaryData(ListBinaryDataRequest) returns (ListBinaryDataResponse);
+    rpc UpdateBinaryDataInfo(UpdateBinaryDataRequest) returns (UpdateBinaryDataResponse);    
+    rpc DeleteBinaryData(DeleteBinaryDataRequest) returns (DeleteBinaryDataResponse);    
+    rpc UploadBinaryData(stream UploadBinaryDataRequest) returns (UploadBinaryDataResponse);
+    rpc DownloadBinaryData(DownloadBinaryDataRequest) returns (stream DownloadBinaryDataResponse);
 }

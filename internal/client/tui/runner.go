@@ -55,6 +55,7 @@ func Run(
 		Credential: services,
 		Bankcard:   services,
 		TextData:   services,
+		BinaryData: services,
 	})
 	p := newProgram(model)
 

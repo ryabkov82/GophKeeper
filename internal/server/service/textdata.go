@@ -69,6 +69,7 @@ func (s *TextDataServiceImpl) Update(ctx context.Context, data *model.TextData) 
 		return errors.New("userID is required for update")
 	}
 
+	/* проверка существования внутри Update
 	// Проверка существования записи перед обновлением
 	existing, err := s.repo.GetByID(ctx, data.UserID, data.ID)
 	if err != nil {
@@ -77,6 +78,7 @@ func (s *TextDataServiceImpl) Update(ctx context.Context, data *model.TextData) 
 	if existing == nil {
 		return errors.New("text data not found")
 	}
+	*/
 
 	data.UpdatedAt = time.Now()
 	return s.repo.Update(ctx, data)

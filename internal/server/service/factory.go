@@ -1,27 +1,34 @@
 package service
 
 import (
+	"io"
+
 	"github.com/ryabkov82/gophkeeper/internal/domain/repository"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
+	"github.com/ryabkov82/gophkeeper/internal/domain/storage"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtutils"
 )
 
 // serviceFactory — конкретная реализация фабрики сервисов.
 type serviceFactory struct {
+	repoCloser io.Closer
 	auth       service.AuthService
 	credential service.CredentialService
 	bankCard   service.BankCardService
 	textData   service.TextDataService
+	binaryData service.BinaryDataService
 }
 
 // NewServiceFactory создает фабрику сервисов.
 // repoFactory — фабрика репозиториев, jwt — менеджер токенов.
-func NewServiceFactory(repoFactory repository.StorageFactory, jwt *jwtutils.TokenManager) service.ServiceFactory {
+func NewServiceFactory(repoFactory repository.StorageFactory, binaryDataStorage storage.BinaryDataStorage, jwt *jwtutils.TokenManager) service.ServiceFactory {
 	return &serviceFactory{
+		repoCloser: repoFactory,
 		auth:       NewAuthService(repoFactory.User(), jwt),
 		credential: NewCredentialService(repoFactory.Credential()),
 		bankCard:   NewBankCardService(repoFactory.BankCard()),
 		textData:   NewTextDataService(repoFactory.TextData()),
+		binaryData: NewBinaryDataService(repoFactory.BinaryData(), binaryDataStorage),
 	}
 }
 
@@ -39,4 +46,18 @@ func (f *serviceFactory) BankCard() service.BankCardService {
 
 func (f *serviceFactory) TextData() service.TextDataService {
 	return f.textData
+}
+
+func (f *serviceFactory) BinaryData() service.BinaryDataService {
+	return f.binaryData
+}
+
+// Close освобождает ресурсы сервисов и репозиториев.
+func (f *serviceFactory) Close() {
+	if f.binaryData != nil {
+		f.binaryData.Close()
+	}
+	if f.repoCloser != nil {
+		_ = f.repoCloser.Close()
+	}
 }
