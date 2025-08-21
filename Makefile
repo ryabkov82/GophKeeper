@@ -1,3 +1,6 @@
+SHELL := bash
+.SHELLFLAGS := -lc
+
 .PHONY: run-client run-server generate test coverage-html mocks
 
 run-client:
@@ -49,7 +52,7 @@ CLIENT_MAIN ?= ./cmd/client
 SERVER_MAIN ?= ./cmd/server
 
 # Полный импорт‑путь до пакета с клиентскими переменными (buildVersion/buildDate/buildCommit)
-TUI_PKG ?= github.com/ryabkov82gGophkeeper/client/tui
+TUI_PKG ?= github.com/ryabkov82/gophkeeper/client/tui
 
 # Куда вкалывать серверные переменные. По умолчанию — в пакет main.
 SERVER_PKG ?= main
@@ -58,11 +61,17 @@ BIN_DIR ?= bin
 GO ?= go
 
 # ----- Матрица платформ -----
-OS   ?= linux darwin windows
-ARCH ?= amd64 arm64
+GOOS_LIST  ?= linux darwin windows
+GOARCH_LIST ?= amd64 arm64
 
 # ----- Версионные метаданные -----
-VERSION ?= $(shell (git describe --tags --abbrev=0 2>/dev/null || true))
+# Если HEAD помечен тегом — используем тег,
+# иначе — человеческое описание (ближайший тег + кол-во коммитов + sha),
+# а если тегов совсем нет — короткий sha.
+VERSION ?= $(shell \
+  (git describe --tags --exact-match 2>/dev/null) || \
+  (git describe --tags --dirty --always 2>/dev/null) || \
+  (git rev-parse --short HEAD 2>/dev/null) )
 ifeq ($(strip $(VERSION)),)
 VERSION := $(shell git rev-parse --short HEAD)
 endif
@@ -102,14 +111,11 @@ endef
         server server-all server-linux server-darwin server-windows \
         clean print-version
 
-# ----- Клиент -----
-client:
-	$(call BUILD_ONE,$(GOOS),$(GOARCH),CLIENT,client,LDFLAGS_CLIENT)
-
+# ===== Клиент =====
 client-all:
-	@for os in $(OS); do \
-	  for arch in $(ARCH); do \
-	    $(MAKE) --no-print-directory _client_one GOOS=$$os GOARCH=$$arch; \
+	@for goos in $(GOOS_LIST); do \
+	  for goarch in $(GOARCH_LIST); do \
+	    $(MAKE) --no-print-directory _client_one GOOS=$$goos GOARCH=$$goarch; \
 	  done; \
 	done
 
@@ -117,20 +123,17 @@ _client_one:
 	$(call BUILD_ONE,$(GOOS),$(GOARCH),CLIENT,client,LDFLAGS_CLIENT)
 
 client-linux:
-	$(MAKE) client-all OS="linux"
+	$(MAKE) client-all GOOS_LIST="linux"
 client-darwin:
-	$(MAKE) client-all OS="darwin"
+	$(MAKE) client-all GOOS_LIST="darwin"
 client-windows:
-	$(MAKE) client-all OS="windows"
+	$(MAKE) client-all GOOS_LIST="windows"
 
-# ----- Сервер -----
-server:
-	$(call BUILD_ONE,$(GOOS),$(GOARCH),SERVER,server,LDFLAGS_SERVER)
-
+# ===== Сервер =====
 server-all:
-	@for os in $(OS); do \
-	  for arch in $(ARCH); do \
-	    $(MAKE) --no-print-directory _server_one GOOS=$$os GOARCH=$$arch; \
+	@for goos in $(GOOS_LIST); do \
+	  for goarch in $(GOARCH_LIST); do \
+	    $(MAKE) --no-print-directory _server_one GOOS=$$goos GOARCH=$$goarch; \
 	  done; \
 	done
 
@@ -138,11 +141,11 @@ _server_one:
 	$(call BUILD_ONE,$(GOOS),$(GOARCH),SERVER,server,LDFLAGS_SERVER)
 
 server-linux:
-	$(MAKE) server-all OS="linux"
+	$(MAKE) server-all GOOS_LIST="linux"
 server-darwin:
-	$(MAKE) server-all OS="darwin"
+	$(MAKE) server-all GOOS_LIST="darwin"
 server-windows:
-	$(MAKE) server-all OS="windows"
+	$(MAKE) server-all GOOS_LIST="windows"
 
 # ----- Вспомогательные цели -----
 print-version:
