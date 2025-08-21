@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # например: v0.1.0
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: '1.23'
+  TUI_PKG: github.com/ryabkov82/gophkeeper/client/tui
+  # Куда «вкалывать» серверные переменные (по умолчанию — main):
+  SERVER_PKG: main
+  CLIENT_MAIN: ./cmd/client
+  SERVER_MAIN: ./cmd/server
+
+jobs:
+  build:
+    name: Build ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goos:   [linux, darwin, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64 # обычно не нужна/не тестируется
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Compute version metadata
+        id: meta
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME}"        | tee -a $GITHUB_ENV
+          echo "DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee -a $GITHUB_ENV
+          echo "COMMIT=$(git rev-parse --short HEAD)" | tee -a $GITHUB_ENV
+
+      - name: Build client
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d "${CLIENT_MAIN}" ]; then
+            echo "Client main not found at ${CLIENT_MAIN}, skipping"
+            exit 0
+          fi
+
+          mkdir -p dist
+          ext=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then ext=".exe"; fi
+
+          out="dist/gophkeeper_client_${{ matrix.goos }}_${{ matrix.goarch }}${ext}"
+          echo ">> Building client -> ${out}"
+
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
+            go build -ldflags "-s -w \
+              -X '${TUI_PKG}.buildVersion=${VERSION}' \
+              -X '${TUI_PKG}.buildDate=${DATE}' \
+              -X '${TUI_PKG}.buildCommit=${COMMIT}'" \
+            -o "${out}" "${CLIENT_MAIN}"
+
+      - name: Build server
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d "${SERVER_MAIN}" ]; then
+            echo "Server main not found at ${SERVER_MAIN}, skipping"
+            exit 0
+          fi
+
+          mkdir -p dist
+          ext=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then ext=".exe"; fi
+
+          out="dist/gophkeeper_server_${{ matrix.goos }}_${{ matrix.goarch }}${ext}"
+          echo ">> Building server -> ${out}"
+
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
+            go build -ldflags "-s -w \
+              -X '${SERVER_PKG}.buildVersion=${VERSION}' \
+              -X '${SERVER_PKG}.buildDate=${DATE}' \
+              -X '${SERVER_PKG}.buildCommit=${COMMIT}'" \
+            -o "${out}" "${SERVER_MAIN}"
+
+      - name: Zip artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          for f in *; do
+            [ -f "$f" ] || continue
+            zip -q "${f}.zip" "$f"
+          done
+
+      - name: Checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          shopt -s nullglob
+          sha256sum *.zip > checksums_${{ matrix.goos }}_${{ matrix.goarch }}.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gophkeeper-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/*.zip
+            dist/checksums_*.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: gophkeeper-*
+          merge-multiple: true
+          path: dist
+
+      - name: Create GitHub Release & upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
