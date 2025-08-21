@@ -32,22 +32,27 @@ func NewServiceFactory(repoFactory repository.StorageFactory, binaryDataStorage 
 	}
 }
 
+// Auth возвращает сервис аутентификации.
 func (f *serviceFactory) Auth() service.AuthService {
 	return f.auth
 }
 
+// Credential возвращает сервис управления учётными данными.
 func (f *serviceFactory) Credential() service.CredentialService {
 	return f.credential
 }
 
+// BankCard возвращает сервис работы с банковскими картами.
 func (f *serviceFactory) BankCard() service.BankCardService {
 	return f.bankCard
 }
 
+// TextData возвращает сервис управления текстовыми данными.
 func (f *serviceFactory) TextData() service.TextDataService {
 	return f.textData
 }
 
+// BinaryData возвращает сервис управления бинарными данными.
 func (f *serviceFactory) BinaryData() service.BinaryDataService {
 	return f.binaryData
 }

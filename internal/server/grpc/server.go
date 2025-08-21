@@ -74,7 +74,7 @@ func NewGRPCServer(cfg *config.Config, logger *zap.Logger, serviceFactory servic
 	return s, nil
 }
 
-// функция запуска gRPC сервера с graceful shutdown
+// ServeGRPC запускает gRPC-сервер и выполняет graceful shutdown при получении сигнала.
 func ServeGRPC(
 	s *grpc.Server,
 	lis net.Listener,

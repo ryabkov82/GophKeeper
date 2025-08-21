@@ -22,6 +22,7 @@ func NewBankCardStorage(db *sql.DB) repository.BankCardRepository {
 	return &bankCardStorage{db: sqlxDB}
 }
 
+// Create сохраняет новую банковскую карту в базе данных.
 func (s *bankCardStorage) Create(ctx context.Context, card *model.BankCard) error {
 	card.ID = uuid.NewString()
 	query := `
@@ -34,6 +35,7 @@ func (s *bankCardStorage) Create(ctx context.Context, card *model.BankCard) erro
 	return err
 }
 
+// GetByID возвращает банковскую карту по её идентификатору.
 func (s *bankCardStorage) GetByID(ctx context.Context, id string) (*model.BankCard, error) {
 	var card model.BankCard
 	err := s.db.GetContext(ctx, &card, "SELECT * FROM bank_cards WHERE id = $1", id)
@@ -43,6 +45,7 @@ func (s *bankCardStorage) GetByID(ctx context.Context, id string) (*model.BankCa
 	return &card, nil
 }
 
+// GetByUser возвращает все банковские карты указанного пользователя.
 func (s *bankCardStorage) GetByUser(ctx context.Context, userID string) ([]model.BankCard, error) {
 	var cards []model.BankCard
 	err := s.db.SelectContext(ctx, &cards, "SELECT * FROM bank_cards WHERE user_id = $1 ORDER BY created_at DESC", userID)
@@ -52,6 +55,7 @@ func (s *bankCardStorage) GetByUser(ctx context.Context, userID string) ([]model
 	return cards, nil
 }
 
+// Update обновляет данные существующей банковской карты.
 func (s *bankCardStorage) Update(ctx context.Context, card *model.BankCard) error {
 	query := `
 		UPDATE bank_cards
@@ -74,6 +78,7 @@ func (s *bankCardStorage) Update(ctx context.Context, card *model.BankCard) erro
 	return nil
 }
 
+// Delete удаляет банковскую карту из базы по идентификатору.
 func (s *bankCardStorage) Delete(ctx context.Context, id string) error {
 	res, err := s.db.ExecContext(ctx, "DELETE FROM bank_cards WHERE id = $1", id)
 	if err != nil {

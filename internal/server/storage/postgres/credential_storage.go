@@ -13,7 +13,7 @@ type PostgresStorage struct {
 	db *sql.DB
 }
 
-// NewPostgresStorage создаёт новый экземпляр PostgresStorage
+// NewCredentialStorage создаёт новый экземпляр PostgresStorage.
 func NewCredentialStorage(db *sql.DB) *PostgresStorage {
 	return &PostgresStorage{db: db}
 }

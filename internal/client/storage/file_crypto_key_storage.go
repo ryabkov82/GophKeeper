@@ -25,6 +25,8 @@ type FileCryptoKeyStorage struct {
 	mkdirAll   func(string, os.FileMode) error
 }
 
+// NewFileCryptoKeyStorage создаёт файловое хранилище ключа шифрования
+// по указанному пути.
 func NewFileCryptoKeyStorage(path string) *FileCryptoKeyStorage {
 	return &FileCryptoKeyStorage{
 		path:       path,

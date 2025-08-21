@@ -38,11 +38,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// TokenManager управляет созданием и проверкой JWT-токенов.
 type TokenManager struct {
 	secret []byte
 	ttl    time.Duration
 }
 
+// ErrTokenInvalid возвращается при попытке разобрать невалидный JWT-токен.
 var ErrTokenInvalid = errors.New("token is invalid")
 
 // New создает новый менеджер токенов

@@ -18,6 +18,7 @@ func makeTestMenuModel() Model {
 			{"Notes", "Текстовые заметки"},
 			{"Files", "Бинарные файлы"},
 			{"Cards", "Банковские карты"},
+			{"About", "О программе"},
 			{"Exit", "Выйти из приложения"},
 		},
 		menuCursor:   0,
@@ -27,21 +28,6 @@ func makeTestMenuModel() Model {
 }
 
 func TestUpdateMenu_KeyHandling(t *testing.T) {
-	baseModel := func() Model {
-		return Model{
-			menuItems: []menuItem{
-				{"Login", "Войти в систему"},
-				{"Register", "Зарегистрироваться"},
-				{"Credentials", "Учётные данные"},
-				{"Notes", "Текстовые заметки"},
-				{"Files", "Бинарные файлы"},
-				{"Cards", "Банковские карты"},
-				{"Exit", "Выйти из приложения"},
-			},
-			menuCursor:   0,
-			currentState: "menu",
-		}
-	}
 
 	tests := []struct {
 		name           string
@@ -74,9 +60,9 @@ func TestUpdateMenu_KeyHandling(t *testing.T) {
 		},
 		{
 			name:           "Cursor does not go above max",
-			initialCursor:  6,
+			initialCursor:  7,
 			keyMsg:         tea.KeyMsg{Type: tea.KeyDown},
-			expectedCursor: 6,
+			expectedCursor: 7,
 			expectedState:  "menu",
 		},
 		{
@@ -108,10 +94,17 @@ func TestUpdateMenu_KeyHandling(t *testing.T) {
 			expectedState:  "list",
 		},
 		{
-			name:           "Enter on Exit returns quit command",
+			name:           "Enter on About sets state about",
 			initialCursor:  6,
 			keyMsg:         tea.KeyMsg{Type: tea.KeyEnter},
 			expectedCursor: 6,
+			expectedState:  "about",
+		},
+		{
+			name:           "Enter on Exit returns quit command",
+			initialCursor:  7,
+			keyMsg:         tea.KeyMsg{Type: tea.KeyEnter},
+			expectedCursor: 7,
 			expectedState:  "menu",
 			expectQuit:     true,
 		},
@@ -127,7 +120,7 @@ func TestUpdateMenu_KeyHandling(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			m := baseModel()
+			m := makeTestMenuModel()
 			m.menuCursor = tc.initialCursor
 
 			m, cmd := updateMenu(m, tc.keyMsg)
@@ -174,8 +167,14 @@ func TestUpdateMenu_EnterSelection(t *testing.T) {
 	assert.Equal(t, "list", m.currentState)
 	assert.NotNil(t, cmd)
 
-	// выбрать Exit — должна вернуться команда Quit
+	// выбрать About — смена currentState на "about"
 	m.menuCursor = 6
+	m, cmd = updateMenu(m, tea.KeyMsg{Type: tea.KeyEnter})
+	assert.Equal(t, "about", m.currentState)
+	assert.Nil(t, cmd)
+
+	// выбрать Exit — должна вернуться команда Quit
+	m.menuCursor = 7
 	m, cmd = updateMenu(m, tea.KeyMsg{Type: tea.KeyEnter})
 	assert.NotNil(t, cmd)
 	msg := cmd()

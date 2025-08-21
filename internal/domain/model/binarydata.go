@@ -75,5 +75,8 @@ func (b *BinaryData) UpdateFromFields(fields []forms.FormField) error {
 }
 
 // Реализация интерфейса forms.Identifiable
-func (b *BinaryData) GetID() string   { return b.ID }
+// GetID возвращает идентификатор бинарных данных.
+func (b *BinaryData) GetID() string { return b.ID }
+
+// SetID устанавливает идентификатор бинарных данных.
 func (b *BinaryData) SetID(id string) { b.ID = id }

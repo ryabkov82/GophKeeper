@@ -243,5 +243,8 @@ func (b *BankCard) UpdateFromFields(fields []forms.FormField) error {
 	return nil
 }
 
-func (b *BankCard) GetID() string   { return b.ID }
+// GetID возвращает идентификатор банковской карты.
+func (b *BankCard) GetID() string { return b.ID }
+
+// SetID устанавливает идентификатор банковской карты.
 func (b *BankCard) SetID(id string) { b.ID = id }

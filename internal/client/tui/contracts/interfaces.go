@@ -67,6 +67,7 @@ type TextDataService interface {
 	DeleteTextData(ctx context.Context, id string) error
 }
 
+// BinaryDataService описывает интерфейс для работы с бинарными данными в TUI.
 type BinaryDataService interface {
 	// UploadBinaryData загружает бинарный объект на сервер с шифрованием содержимого и прогрессом
 	UploadBinaryData(ctx context.Context, data *model.BinaryData, filePath string, progressChan chan<- int64) error

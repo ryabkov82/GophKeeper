@@ -137,7 +137,7 @@ func getConfigFilePath() string {
 	// Проверка флагов командной строки
 	for i, arg := range os.Args[1:] {
 		if arg == "-c" || arg == "--config" {
-			if i+1 < len(os.Args) {
+			if i+2 < len(os.Args) {
 				return os.Args[i+2]
 			}
 		}

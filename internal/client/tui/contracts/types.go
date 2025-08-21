@@ -6,9 +6,13 @@ import "context"
 type DataType int
 
 const (
+	// TypeCredentials представляет тип учётных данных.
 	TypeCredentials DataType = iota
+	// TypeNotes представляет тип текстовых заметок.
 	TypeNotes
+	// TypeFiles представляет тип бинарных файлов.
 	TypeFiles
+	// TypeCards представляет тип данных банковских карт.
 	TypeCards
 )
 

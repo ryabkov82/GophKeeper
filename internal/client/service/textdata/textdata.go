@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// MaxContentSize определяет максимальный размер содержимого текстовых данных в байтах (10 MB).
 const MaxContentSize = 10 * 1024 * 1024 // 10 MB
 
 // TextDataManagerIface описывает интерфейс клиента для работы с текстовыми данными.
