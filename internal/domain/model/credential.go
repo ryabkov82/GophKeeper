@@ -1,11 +1,7 @@
 package model
 
 import (
-	"errors"
-	"strings"
 	"time"
-
-	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 )
 
 // Credential представляет собой пару логин/пароль с дополнительной метаинформацией.
@@ -28,68 +24,6 @@ type Credential struct {
 	Metadata  string // Произвольный текст
 	CreatedAt time.Time
 	UpdatedAt time.Time
-}
-
-// Реализация интерфейса tui.FormEntity
-
-// FormFields возвращает описание полей формы для редактирования Credential
-func (c *Credential) FormFields() []forms.FormField {
-	return []forms.FormField{
-		{
-			Label:       "Title",
-			Value:       c.Title,
-			MaxLength:   150,
-			InputType:   "text",
-			Placeholder: "Название (например, Gmail)",
-		},
-		{
-			Label:       "Login",
-			Value:       c.Login,
-			MaxLength:   50,
-			InputType:   "text",
-			Placeholder: "Логин/Email",
-		},
-		{
-			Label:       "Password",
-			Value:       c.Password,
-			MaxLength:   50,
-			InputType:   "password",
-			Placeholder: "Пароль",
-		},
-		{
-			Label:       "Metadata",
-			Value:       c.Metadata,
-			InputType:   "multiline",
-			Placeholder: "Дополнительные заметки",
-		},
-		{
-			Label:       "UpdatedAt",
-			Value:       c.UpdatedAt.String(),
-			InputType:   "text",
-			ReadOnly:    true,
-			Placeholder: "Дата обновления",
-		},
-	}
-}
-
-// UpdateFromFields обновляет Credential по значениям из формы
-func (c *Credential) UpdateFromFields(fields []forms.FormField) error {
-	if len(fields) != 5 {
-		return errors.New("unexpected number of fields")
-	}
-
-	// Можно добавить валидацию по необходимости, например:
-	if strings.TrimSpace(fields[0].Value) == "" {
-		return errors.New("title cannot be empty")
-	}
-
-	c.Title = fields[0].Value
-	c.Login = fields[1].Value
-	c.Password = fields[2].Value
-	c.Metadata = fields[3].Value
-	c.UpdatedAt = time.Now()
-
-	return nil
 }
 
 // GetID возвращает идентификатор учётных данных.

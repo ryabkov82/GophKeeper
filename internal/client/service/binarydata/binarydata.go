@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 )
@@ -50,14 +51,8 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 	}
 
 	// Отправляем метаданные первым сообщением
-	dataInfo := &pb.BinaryDataInfo{}
-	dataInfo.SetId(data.ID)
-	dataInfo.SetTitle(data.Title)
-	dataInfo.SetMetadata(data.Metadata)
-	dataInfo.SetClientPath(data.ClientPath)
-
 	metaReq := &pb.UploadBinaryDataRequest{}
-	metaReq.SetInfo(dataInfo)
+	metaReq.SetInfo(mapper.BinaryDataToPB(data))
 	if err := stream.Send(metaReq); err != nil {
 		// сервер мог сразу закрыть поток — заберём статус
 		if _, recvErr := stream.CloseAndRecv(); recvErr != nil {
@@ -104,13 +99,8 @@ func (m *BinaryDataManager) Upload(ctx context.Context, data *model.BinaryData, 
 func (m *BinaryDataManager) CreateInfo(ctx context.Context, data *model.BinaryData) error {
 	m.logger.Debug("CreateInfo started", zap.String("title", data.Title))
 
-	dataInfo := &pb.BinaryDataInfo{}
-	dataInfo.SetTitle(data.Title)
-	dataInfo.SetMetadata(data.Metadata)
-	dataInfo.SetClientPath(data.ClientPath)
-
 	req := &pb.SaveBinaryDataInfoRequest{}
-	req.SetInfo(dataInfo)
+	req.SetInfo(mapper.BinaryDataToPB(data))
 
 	resp, err := m.client.SaveBinaryDataInfo(ctx, req)
 	if err != nil {
@@ -126,13 +116,8 @@ func (m *BinaryDataManager) CreateInfo(ctx context.Context, data *model.BinaryDa
 func (m *BinaryDataManager) UpdateInfo(ctx context.Context, data *model.BinaryData) error {
 	m.logger.Debug("UpdateInfo started", zap.String("binaryDataID", data.ID))
 
-	dataInfo := &pb.BinaryDataInfo{}
-	dataInfo.SetId(data.ID)
-	dataInfo.SetTitle(data.Title)
-	dataInfo.SetMetadata(data.Metadata)
-
 	req := &pb.UpdateBinaryDataRequest{}
-	req.SetInfo(dataInfo)
+	req.SetInfo(mapper.BinaryDataToPB(data))
 
 	resp, err := m.client.UpdateBinaryDataInfo(ctx, req)
 	if err != nil {
@@ -193,11 +178,9 @@ func (m *BinaryDataManager) List(ctx context.Context) ([]model.BinaryData, error
 
 	result := make([]model.BinaryData, 0, len(resp.GetItems()))
 	for _, item := range resp.GetItems() {
-		result = append(result, model.BinaryData{
-			ID:       item.GetId(),
-			Title:    item.GetTitle(),
-			Metadata: item.GetMetadata(),
-		})
+		if bd := mapper.BinaryDataFromPB(item); bd != nil {
+			result = append(result, *bd)
+		}
 	}
 
 	m.logger.Info("List succeeded", zap.Int("count", len(result)))
@@ -236,15 +219,7 @@ func (m *BinaryDataManager) GetInfo(ctx context.Context, id string) (*model.Bina
 	if info == nil {
 		return nil, fmt.Errorf("binary data info is nil")
 	}
-
-	data := &model.BinaryData{
-		ID:         info.GetId(),
-		Title:      info.GetTitle(),
-		Metadata:   info.GetMetadata(),
-		Size:       info.GetSize(),
-		ClientPath: info.GetClientPath(),
-		UpdatedAt:  info.GetUpdatedAt().AsTime(),
-	}
+	data := mapper.BinaryDataFromPB(info)
 
 	m.logger.Info("GetInfo succeeded", zap.String("binaryDataID", data.ID))
 	return data, nil

@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // CredentialManagerIface описывает интерфейс управления учётными данными (логины/пароли).
@@ -49,7 +49,7 @@ func (m *CredentialManager) CreateCredential(ctx context.Context, cred *model.Cr
 	)
 
 	req := &pb.CreateCredentialRequest{}
-	req.SetCredential(toProtoCredential(cred))
+	req.SetCredential(mapper.CredentialToPB(cred))
 
 	_, err := m.client.CreateCredential(ctx, req)
 	if err != nil {
@@ -80,7 +80,7 @@ func (m *CredentialManager) GetCredentialByID(ctx context.Context, id string) (*
 		return nil, fmt.Errorf("GetCredentialByID RPC failed: %w", err)
 	}
 
-	cred = fromProtoCredential(resp.GetCredential())
+	cred = mapper.CredentialFromPB(resp.GetCredential())
 
 	m.logger.Info("GetCredentialByID succeeded",
 		zap.String("credentialID", id),
@@ -103,7 +103,7 @@ func (m *CredentialManager) GetCredentials(ctx context.Context) ([]model.Credent
 
 	creds = make([]model.Credential, 0, len(resp.GetCredentials()))
 	for _, pbCred := range resp.GetCredentials() {
-		creds = append(creds, *fromProtoCredential(pbCred))
+		creds = append(creds, *mapper.CredentialFromPB(pbCred))
 	}
 	m.logger.Info("GetCredentialsByUserID succeeded",
 		zap.Int("count", len(creds)),
@@ -118,7 +118,7 @@ func (m *CredentialManager) UpdateCredential(ctx context.Context, cred *model.Cr
 	)
 
 	req := &pb.UpdateCredentialRequest{}
-	req.SetCredential(toProtoCredential(cred))
+	req.SetCredential(mapper.CredentialToPB(cred))
 
 	_, err := m.client.UpdateCredential(ctx, req)
 	if err != nil {
@@ -151,31 +151,4 @@ func (m *CredentialManager) DeleteCredential(ctx context.Context, id string) err
 		zap.String("credentialID", id),
 	)
 	return nil
-}
-
-// Преобразования между model.Credential и pb.Credential
-func toProtoCredential(c *model.Credential) *pb.Credential {
-	cred := &pb.Credential{}
-	cred.SetId(c.ID)
-	cred.SetUserId(c.UserID)
-	cred.SetTitle(c.Title)
-	cred.SetLogin(c.Login)
-	cred.SetPassword(c.Password)
-	cred.SetMetadata(c.Metadata)
-	cred.SetCreatedAt(timestamppb.New(c.CreatedAt))
-	cred.SetUpdatedAt(timestamppb.New(c.UpdatedAt))
-	return cred
-}
-
-func fromProtoCredential(pbCred *pb.Credential) *model.Credential {
-	return &model.Credential{
-		ID:        pbCred.GetId(),
-		UserID:    pbCred.GetUserId(),
-		Title:     pbCred.GetTitle(),
-		Login:     pbCred.GetLogin(),
-		Password:  pbCred.GetPassword(),
-		Metadata:  pbCred.GetMetadata(),
-		CreatedAt: pbCred.GetCreatedAt().AsTime(),
-		UpdatedAt: pbCred.GetUpdatedAt().AsTime(),
-	}
 }

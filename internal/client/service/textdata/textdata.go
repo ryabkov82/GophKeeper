@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // MaxContentSize определяет максимальный размер содержимого текстовых данных в байтах (10 MB).
@@ -58,7 +58,7 @@ func (m *TextDataManager) CreateTextData(ctx context.Context, data *model.TextDa
 	}
 
 	req := &pb.CreateTextDataRequest{}
-	req.SetTextData(toProtoTextData(data))
+	req.SetTextData(mapper.TextDataToPB(data))
 
 	_, err := m.client.CreateTextData(ctx, req)
 	if err != nil {
@@ -80,7 +80,7 @@ func (m *TextDataManager) GetTextDataByID(ctx context.Context, id string) (*mode
 		return nil, fmt.Errorf("GetTextDataByID RPC failed: %w", err)
 	}
 
-	return fromProtoTextData(resp.GetTextData()), nil
+	return mapper.TextDataFromPB(resp.GetTextData()), nil
 }
 
 // GetTextDataTitles возвращает список всех текстовых данных пользователя с их ID и Title.
@@ -94,11 +94,7 @@ func (m *TextDataManager) GetTextDataTitles(ctx context.Context) ([]*model.TextD
 
 	result := make([]*model.TextData, 0, len(resp.GetTextDataTitles()))
 	for _, td := range resp.GetTextDataTitles() {
-		result = append(result, &model.TextData{
-			ID:     td.GetId(),
-			UserID: td.GetUserId(),
-			Title:  td.GetTitle(),
-		})
+		result = append(result, mapper.TextDataFromPB(td))
 	}
 
 	m.logger.Info("GetTextDataTitles succeeded",
@@ -115,7 +111,7 @@ func (m *TextDataManager) UpdateTextData(ctx context.Context, data *model.TextDa
 	}
 
 	req := &pb.UpdateTextDataRequest{}
-	req.SetTextData(toProtoTextData(data))
+	req.SetTextData(mapper.TextDataToPB(data))
 
 	_, err := m.client.UpdateTextData(ctx, req)
 	if err != nil {
@@ -136,30 +132,4 @@ func (m *TextDataManager) DeleteTextData(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-// Преобразование model.TextData -> pb.TextData
-func toProtoTextData(td *model.TextData) *pb.TextData {
-	pbtd := &pb.TextData{}
-	pbtd.SetId(td.ID)
-	pbtd.SetUserId(td.UserID)
-	pbtd.SetTitle(td.Title)
-	pbtd.SetContent(td.Content)
-	pbtd.SetMetadata(td.Metadata)
-	pbtd.SetCreatedAt(timestamppb.New(td.CreatedAt))
-	pbtd.SetUpdatedAt(timestamppb.New(td.UpdatedAt))
-	return pbtd
-}
-
-// Преобразование pb.TextData -> model.TextData
-func fromProtoTextData(pbtd *pb.TextData) *model.TextData {
-	return &model.TextData{
-		ID:        pbtd.GetId(),
-		UserID:    pbtd.GetUserId(),
-		Title:     pbtd.GetTitle(),
-		Content:   pbtd.GetContent(),
-		Metadata:  pbtd.GetMetadata(),
-		CreatedAt: pbtd.GetCreatedAt().AsTime(),
-		UpdatedAt: pbtd.GetUpdatedAt().AsTime(),
-	}
 }
