@@ -36,6 +36,7 @@ type Config struct {
 	EnableTLS           bool   `json:"enable_tls"`             // включить TLS
 	LogLevel            string `json:"log_level"`              // Уровень логирования (debug, info, warn, error)
 	BinaryDataStorePath string `json:"binary_data_store_path"` // путь к директории для бинарных файлов
+	ConfigPath          string `json:"-" env:"CONFIG"`         // Путь к конфиг-файлу
 }
 
 const (
@@ -213,6 +214,8 @@ func loadFromFlags(cfg *Config) error {
 	flag.StringVar(&cfg.DBConnect, "db", cfg.DBConnect, "Database connection string")
 	flag.BoolVar(&cfg.EnableTLS, "s", cfg.EnableTLS, "Enable TLS server")
 	flag.StringVar(&cfg.BinaryDataStorePath, "binary-path", cfg.BinaryDataStorePath, "Path for storing binary data files")
+	flag.StringVar(&cfg.ConfigPath, "config", cfg.ConfigPath, "Path to config file")
+	flag.StringVar(&cfg.ConfigPath, "c", cfg.ConfigPath, "Path to config file (shorthand)")
 
 	flag.Parse()
 

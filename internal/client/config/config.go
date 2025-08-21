@@ -258,6 +258,8 @@ func loadFromFlags(cfg *ClientConfig) error {
 	flagset.StringVar(&cfg.CACertPath, "ca-cert", cfg.CACertPath, "Path to CA certificate")
 	flagset.DurationVar(&cfg.Timeout, "timeout", cfg.Timeout, "Connection timeout")
 	flagset.StringVar(&cfg.LogLevel, "log-level", cfg.LogLevel, "Logging level")
+	flagset.StringVar(&cfg.ConfigPath, "config", cfg.ConfigPath, "Path to config file")
+	flagset.StringVar(&cfg.ConfigPath, "c", cfg.ConfigPath, "Path to config file (shorthand)")
 
 	// Парсим аргументы, игнорируя нераспознанные флаги
 	if err := flagset.Parse(os.Args[1:]); err != nil {
