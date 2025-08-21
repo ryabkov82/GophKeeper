@@ -10,7 +10,7 @@ permissions:
 
 env:
   GO_VERSION: '1.23'
-  TUI_PKG: github.com/ryabkov82/gophkeeper/client/tui
+  TUI_PKG: github.com/ryabkov82/gophkeeper/internal/client/tui
   # Куда «вкалывать» серверные переменные (по умолчанию — main):
   SERVER_PKG: main
   CLIENT_MAIN: ./cmd/client

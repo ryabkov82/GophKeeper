@@ -7,6 +7,7 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // MaxContentSize определяет максимальный размер содержимого текстовых данных в байтах (10 MB).
@@ -145,16 +146,20 @@ func toProtoTextData(td *model.TextData) *pb.TextData {
 	pbtd.SetTitle(td.Title)
 	pbtd.SetContent(td.Content)
 	pbtd.SetMetadata(td.Metadata)
+	pbtd.SetCreatedAt(timestamppb.New(td.CreatedAt))
+	pbtd.SetUpdatedAt(timestamppb.New(td.UpdatedAt))
 	return pbtd
 }
 
 // Преобразование pb.TextData -> model.TextData
 func fromProtoTextData(pbtd *pb.TextData) *model.TextData {
 	return &model.TextData{
-		ID:       pbtd.GetId(),
-		UserID:   pbtd.GetUserId(),
-		Title:    pbtd.GetTitle(),
-		Content:  pbtd.GetContent(),
-		Metadata: pbtd.GetMetadata(),
+		ID:        pbtd.GetId(),
+		UserID:    pbtd.GetUserId(),
+		Title:     pbtd.GetTitle(),
+		Content:   pbtd.GetContent(),
+		Metadata:  pbtd.GetMetadata(),
+		CreatedAt: pbtd.GetCreatedAt().AsTime(),
+		UpdatedAt: pbtd.GetUpdatedAt().AsTime(),
 	}
 }
