@@ -7,12 +7,12 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtauth"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // TextDataHandler реализует gRPC сервер для TextDataService
@@ -65,8 +65,13 @@ func (h *TextDataHandler) CreateTextData(ctx context.Context, req *pb.CreateText
 
 	// Возвращаем только ID и Title
 	resp := &pb.CreateTextDataResponse{}
-	td := &pb.TextData{}
-	td.SetTitle(text.Title)
+	td := mapper.TextDataToPB(text)
+	td.SetUserId("")
+	td.SetContent(nil)
+	td.SetMetadata("")
+	td.SetCreatedAt(nil)
+	td.SetUpdatedAt(nil)
+
 	resp.SetTextData(td)
 
 	return resp, nil
@@ -88,14 +93,7 @@ func (h *TextDataHandler) GetTextDataByID(ctx context.Context, req *pb.GetTextDa
 	}
 
 	resp := &pb.GetTextDataByIDResponse{}
-	resp.SetTextData(&pb.TextData{})
-	resp.GetTextData().SetId(text.ID)
-	resp.GetTextData().SetUserId(text.UserID)
-	resp.GetTextData().SetTitle(text.Title)
-	resp.GetTextData().SetContent(text.Content)
-	resp.GetTextData().SetMetadata(text.Metadata)
-	resp.GetTextData().SetCreatedAt(timestamppb.New(text.CreatedAt))
-	resp.GetTextData().SetUpdatedAt(timestamppb.New(text.UpdatedAt))
+	resp.SetTextData(mapper.TextDataToPB(text))
 	return resp, nil
 }
 
@@ -113,9 +111,12 @@ func (h *TextDataHandler) GetTextDataTitles(ctx context.Context, req *pb.GetText
 
 	resp := &pb.GetTextDataTitlesResponse{}
 	for _, t := range titles {
-		td := &pb.TextData{}
-		td.SetId(t.ID)
-		td.SetTitle(t.Title)
+		td := mapper.TextDataToPB(t)
+		td.SetUserId("")
+		td.SetContent(nil)
+		td.SetMetadata("")
+		td.SetCreatedAt(nil)
+		td.SetUpdatedAt(nil)
 		resp.SetTextDataTitles(append(resp.GetTextDataTitles(), td))
 	}
 	return resp, nil

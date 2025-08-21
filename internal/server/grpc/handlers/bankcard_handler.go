@@ -6,13 +6,13 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtauth"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // BankCardHandler реализует gRPC сервер для BankCardService
@@ -68,7 +68,7 @@ func (h *BankCardHandler) CreateBankCard(ctx context.Context, req *pb.CreateBank
 	)
 
 	resp := &pb.CreateBankCardResponse{}
-	resp.SetBankCard(toProtoBankCard(card))
+	resp.SetBankCard(mapper.BankCardToPB(card))
 	return resp, nil
 
 }
@@ -108,7 +108,7 @@ func (h *BankCardHandler) GetBankCardByID(ctx context.Context, req *pb.GetBankCa
 	)
 
 	resp := &pb.GetBankCardByIDResponse{}
-	resp.SetBankCard(toProtoBankCard(card))
+	resp.SetBankCard(mapper.BankCardToPB(card))
 	return resp, nil
 }
 
@@ -139,7 +139,7 @@ func (h *BankCardHandler) GetBankCards(ctx context.Context, _ *emptypb.Empty) (*
 
 	resp := &pb.GetBankCardsResponse{}
 	for i := range cards {
-		resp.SetBankCards(append(resp.GetBankCards(), toProtoBankCard(&cards[i])))
+		resp.SetBankCards(append(resp.GetBankCards(), mapper.BankCardToPB(&cards[i])))
 	}
 
 	return resp, nil
@@ -193,7 +193,7 @@ func (h *BankCardHandler) UpdateBankCard(ctx context.Context, req *pb.UpdateBank
 	)
 
 	resp := &pb.UpdateBankCardResponse{}
-	resp.SetBankCard(toProtoBankCard(card))
+	resp.SetBankCard(mapper.BankCardToPB(card))
 	return resp, nil
 }
 
@@ -235,20 +235,4 @@ func (h *BankCardHandler) DeleteBankCard(ctx context.Context, req *pb.DeleteBank
 	resp := &pb.DeleteBankCardResponse{}
 	resp.SetSuccess(true)
 	return resp, nil
-}
-
-// toProtoBankCard конвертирует модель BankCard в protobuf структуру BankCard.
-func toProtoBankCard(c *model.BankCard) *pb.BankCard {
-	card := &pb.BankCard{}
-	card.SetId(c.ID)
-	card.SetUserId(c.UserID)
-	card.SetTitle(c.Title)
-	card.SetCardholderName(c.CardholderName)
-	card.SetCardNumber(c.CardNumber)
-	card.SetExpiryDate(c.ExpiryDate)
-	card.SetCvv(c.CVV)
-	card.SetMetadata(c.Metadata)
-	card.SetCreatedAt(timestamppb.New(c.CreatedAt))
-	card.SetUpdatedAt(timestamppb.New(c.UpdatedAt))
-	return card
 }

@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ryabkov82/gophkeeper/internal/client/forms"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -119,157 +118,6 @@ func TestCheckPaymentSystem(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.want, checkPaymentSystem(tt.number))
-		})
-	}
-}
-
-func TestBankCard_FormFields(t *testing.T) {
-	now := time.Now()
-	card := BankCard{
-		ID:             "test-id",
-		UserID:         "user-id",
-		Title:          "Test Card",
-		CardholderName: "John Doe",
-		CardNumber:     "4111111111111111",
-		ExpiryDate:     "12/25",
-		CVV:            "123",
-		Metadata:       "test metadata",
-		CreatedAt:      now,
-		UpdatedAt:      now,
-	}
-
-	fields := card.FormFields()
-
-	assert.Len(t, fields, 7)
-	assert.Equal(t, "Title", fields[0].Label)
-	assert.Equal(t, "Test Card", fields[0].Value)
-	assert.Equal(t, "Cardholder Name", fields[1].Label)
-	assert.Equal(t, "John Doe", fields[1].Value)
-	assert.Equal(t, "Card Number", fields[2].Label)
-	assert.Equal(t, "4111111111111111", fields[2].Value)
-	assert.Equal(t, "Expiry Date", fields[3].Label)
-	assert.Equal(t, "12/25", fields[3].Value)
-	assert.Equal(t, "CVV", fields[4].Label)
-	assert.Equal(t, "123", fields[4].Value)
-	assert.Equal(t, "Metadata", fields[5].Label)
-	assert.Equal(t, "test metadata", fields[5].Value)
-}
-
-func TestBankCard_UpdateFromFields(t *testing.T) {
-	fixedNow := time.Date(2025, time.August, 1, 0, 0, 0, 0, time.UTC)
-	tests := []struct {
-		name      string
-		fields    []forms.FormField
-		wantErr   bool
-		errText   string
-		checkCard func(t *testing.T, card *BankCard)
-	}{
-		{
-			name: "valid update",
-			fields: []forms.FormField{
-				{Value: "Updated Card"},
-				{Value: "Jane Doe"},
-				{Value: "5555555555554444"},
-				{Value: "06/26"},
-				{Value: "456"},
-				{Value: "updated metadata"},
-				{Value: "updated at"},
-			},
-			checkCard: func(t *testing.T, card *BankCard) {
-				assert.Equal(t, "Updated Card", card.Title)
-				assert.Equal(t, "Jane Doe", card.CardholderName)
-				assert.Equal(t, "5555555555554444", card.CardNumber)
-				assert.Equal(t, "06/26", card.ExpiryDate)
-				assert.Equal(t, "456", card.CVV)
-				assert.Equal(t, "updated metadata", card.Metadata)
-				assert.False(t, card.UpdatedAt.IsZero())
-			},
-		},
-		{
-			name: "empty title",
-			fields: []forms.FormField{
-				{Value: ""},
-				{Value: "Jane Doe"},
-				{Value: "5555555555554444"},
-				{Value: "06/26"},
-				{Value: "456"},
-				{Value: "updated metadata"},
-				{Value: "updated at"},
-			},
-			wantErr: true,
-			errText: "title cannot be empty",
-		},
-		{
-			name: "invalid card number",
-			fields: []forms.FormField{
-				{Value: "Updated Card"},
-				{Value: "Jane Doe"},
-				{Value: "5555555555554445"}, // invalid luhn
-				{Value: "06/26"},
-				{Value: "456"},
-				{Value: "updated metadata"},
-				{Value: "updated at"},
-			},
-			wantErr: true,
-			errText: "invalid card number (Luhn check failed)",
-		},
-		{
-			name: "invalid expiry date format",
-			fields: []forms.FormField{
-				{Value: "Updated Card"},
-				{Value: "Jane Doe"},
-				{Value: "5555555555554444"},
-				{Value: "0626"}, // missing slash
-				{Value: "456"},
-				{Value: "updated metadata"},
-				{Value: "updated at"},
-			},
-			wantErr: true,
-			errText: "invalid expiry date format, use MM/YY",
-		},
-		{
-			name: "invalid CVV length",
-			fields: []forms.FormField{
-				{Value: "Updated Card"},
-				{Value: "Jane Doe"},
-				{Value: "5555555555554444"},
-				{Value: "06/26"},
-				{Value: "45"}, // too short
-				{Value: "updated metadata"},
-				{Value: "updated at"},
-			},
-			wantErr: true,
-			errText: "CVV must be 3 digits",
-		},
-		{
-			name: "wrong number of fields",
-			fields: []forms.FormField{
-				{Value: "Updated Card"},
-				{Value: "Jane Doe"},
-			},
-			wantErr: true,
-			errText: "unexpected number of fields",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			// Подменяем time.Now на время из теста
-			oldNow := timeNow
-			timeNow = func() time.Time { return fixedNow }
-			defer func() { timeNow = oldNow }()
-
-			card := &BankCard{}
-			err := card.UpdateFromFields(tt.fields)
-
-			if tt.wantErr {
-				require.Error(t, err)
-				assert.Equal(t, tt.errText, err.Error())
-			} else {
-				require.NoError(t, err)
-				tt.checkCard(t, card)
-			}
 		})
 	}
 }
@@ -406,7 +254,7 @@ func TestValidateExpiryDate(t *testing.T) {
 			timeNow = func() time.Time { return tt.now }
 			defer func() { timeNow = oldNow }()
 
-			err := validateExpiryDate(tt.input)
+			err := ValidateExpiryDate(tt.input)
 
 			if tt.expected == nil {
 				if err != nil {

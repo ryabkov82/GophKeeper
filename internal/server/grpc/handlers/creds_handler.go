@@ -6,13 +6,13 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtauth"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // CredentialHandler реализует gRPC сервер для CredentialService
@@ -68,7 +68,7 @@ func (h *CredentialHandler) CreateCredential(ctx context.Context, req *pb.Create
 	)
 
 	resp := &pb.CreateCredentialResponse{}
-	resp.SetCredential(toProtoCredential(cred))
+	resp.SetCredential(mapper.CredentialToPB(cred))
 	return resp, nil
 }
 
@@ -108,7 +108,7 @@ func (h *CredentialHandler) GetCredentialByID(ctx context.Context, req *pb.GetCr
 	)
 
 	resp := &pb.GetCredentialByIDResponse{}
-	resp.SetCredential(toProtoCredential(cred))
+	resp.SetCredential(mapper.CredentialToPB(cred))
 	return resp, nil
 }
 
@@ -140,7 +140,7 @@ func (h *CredentialHandler) GetCredentials(ctx context.Context, _ *emptypb.Empty
 
 	resp := &pb.GetCredentialsResponse{}
 	for i := range creds {
-		resp.SetCredentials(append(resp.GetCredentials(), toProtoCredential(&creds[i])))
+		resp.SetCredentials(append(resp.GetCredentials(), mapper.CredentialToPB(&creds[i])))
 	}
 
 	return resp, nil
@@ -232,18 +232,4 @@ func (h *CredentialHandler) DeleteCredential(ctx context.Context, req *pb.Delete
 	)
 
 	return &pb.DeleteCredentialResponse{}, nil
-}
-
-// toProtoCredential конвертирует модель Credential в protobuf структуру Credential.
-func toProtoCredential(c *model.Credential) *pb.Credential {
-	cred := &pb.Credential{}
-	cred.SetId(c.ID)
-	cred.SetUserId(c.UserID)
-	cred.SetTitle(c.Title)
-	cred.SetLogin(c.Login)
-	cred.SetPassword(c.Password)
-	cred.SetMetadata(c.Metadata)
-	cred.SetCreatedAt(timestamppb.New(c.CreatedAt))
-	cred.SetUpdatedAt(timestamppb.New(c.UpdatedAt))
-	return cred
 }

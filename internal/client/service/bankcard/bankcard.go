@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // BankCardManagerIface описывает интерфейс управления банковскими картами.
@@ -48,7 +48,7 @@ func (m *BankCardManager) CreateBankCard(ctx context.Context, card *model.BankCa
 	)
 
 	req := &pb.CreateBankCardRequest{}
-	req.SetBankCard(toProtoBankCard(card))
+	req.SetBankCard(mapper.BankCardToPB(card))
 
 	_, err := m.client.CreateBankCard(ctx, req)
 	if err != nil {
@@ -78,7 +78,7 @@ func (m *BankCardManager) GetBankCardByID(ctx context.Context, id string) (*mode
 		return nil, fmt.Errorf("GetBankCardByID RPC failed: %w", err)
 	}
 
-	card := fromProtoBankCard(resp.GetBankCard())
+	card := mapper.BankCardFromPB(resp.GetBankCard())
 
 	m.logger.Info("GetBankCardByID succeeded",
 		zap.String("bankCardID", id),
@@ -98,7 +98,7 @@ func (m *BankCardManager) GetBankCards(ctx context.Context) ([]model.BankCard, e
 
 	cards := make([]model.BankCard, 0, len(resp.GetBankCards()))
 	for _, pbCard := range resp.GetBankCards() {
-		cards = append(cards, *fromProtoBankCard(pbCard))
+		cards = append(cards, *mapper.BankCardFromPB(pbCard))
 	}
 
 	m.logger.Info("GetBankCards succeeded",
@@ -114,7 +114,7 @@ func (m *BankCardManager) UpdateBankCard(ctx context.Context, card *model.BankCa
 	)
 
 	req := &pb.UpdateBankCardRequest{}
-	req.SetBankCard(toProtoBankCard(card))
+	req.SetBankCard(mapper.BankCardToPB(card))
 
 	_, err := m.client.UpdateBankCard(ctx, req)
 	if err != nil {
@@ -147,35 +147,4 @@ func (m *BankCardManager) DeleteBankCard(ctx context.Context, id string) error {
 		zap.String("bankCardID", id),
 	)
 	return nil
-}
-
-// Преобразования между model.BankCard и pb.BankCard
-func toProtoBankCard(c *model.BankCard) *pb.BankCard {
-	card := &pb.BankCard{}
-	card.SetId(c.ID)
-	card.SetUserId(c.UserID)
-	card.SetTitle(c.Title)
-	card.SetCardholderName(c.CardholderName)
-	card.SetCardNumber(c.CardNumber)
-	card.SetExpiryDate(c.ExpiryDate)
-	card.SetCvv(c.CVV)
-	card.SetMetadata(c.Metadata)
-	card.SetCreatedAt(timestamppb.New(c.CreatedAt))
-	card.SetUpdatedAt(timestamppb.New(c.UpdatedAt))
-	return card
-}
-
-func fromProtoBankCard(pbCard *pb.BankCard) *model.BankCard {
-	return &model.BankCard{
-		ID:             pbCard.GetId(),
-		UserID:         pbCard.GetUserId(),
-		Title:          pbCard.GetTitle(),
-		CardholderName: pbCard.GetCardholderName(),
-		CardNumber:     pbCard.GetCardNumber(),
-		ExpiryDate:     pbCard.GetExpiryDate(),
-		CVV:            pbCard.GetCvv(),
-		Metadata:       pbCard.GetMetadata(),
-		CreatedAt:      pbCard.GetCreatedAt().AsTime(),
-		UpdatedAt:      pbCard.GetUpdatedAt().AsTime(),
-	}
 }

@@ -8,11 +8,11 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/model"
 	"github.com/ryabkov82/gophkeeper/internal/domain/service"
 	"github.com/ryabkov82/gophkeeper/internal/pkg/jwtauth"
+	"github.com/ryabkov82/gophkeeper/internal/pkg/mapper"
 	pb "github.com/ryabkov82/gophkeeper/internal/pkg/proto"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // BinaryDataHandler реализует gRPC сервер для BinaryDataService
@@ -44,22 +44,15 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 		return status.Error(codes.InvalidArgument, fmt.Sprintf("failed to receive initial message: %v", err))
 	}
 
-	title := req.GetInfo().GetTitle()
-	id := req.GetInfo().GetId()
-	metadata := req.GetInfo().GetMetadata()
-	clientPath := req.GetInfo().GetClientPath()
-
-	data := &model.BinaryData{
-		ID:         id,
-		UserID:     userID,
-		Title:      title,
-		Metadata:   metadata,
-		ClientPath: clientPath,
+	data := mapper.BinaryDataFromPB(req.GetInfo())
+	if data == nil {
+		return status.Error(codes.InvalidArgument, "info is required")
 	}
+	data.UserID = userID
 
 	h.logger.Debug("UploadBinaryData started",
 		zap.String("userID", userID),
-		zap.String("title", title),
+		zap.String("title", data.Title),
 	)
 
 	pr, pw := io.Pipe()
@@ -94,7 +87,7 @@ func (h *BinaryDataHandler) UploadBinaryData(stream pb.BinaryDataService_UploadB
 		data, err = h.binarySvc.Update(stream.Context(), data, pr)
 	}
 	if err != nil {
-		h.logger.Warn("UploadBinaryData failed", zap.String("userID", userID), zap.String("title", title), zap.Error(err))
+		h.logger.Warn("UploadBinaryData failed", zap.String("userID", userID), zap.String("title", data.Title), zap.Error(err))
 		return err
 	}
 
@@ -112,18 +105,17 @@ func (h *BinaryDataHandler) UpdateBinaryDataInfo(ctx context.Context, req *pb.Up
 		return nil, status.Error(codes.Unauthenticated, "userID not found in context")
 	}
 
-	data := &model.BinaryData{
-		ID:       req.GetInfo().GetId(),
-		UserID:   userID,
-		Title:    req.GetInfo().GetTitle(),
-		Metadata: req.GetInfo().GetMetadata(),
+	data := mapper.BinaryDataFromPB(req.GetInfo())
+	if data == nil {
+		return nil, status.Error(codes.InvalidArgument, "info is required")
 	}
+	data.UserID = userID
 
 	data, err = h.binarySvc.UpdateInfo(ctx, data)
 	if err != nil {
 		h.logger.Warn("UpdateBinaryDataInfo failed",
 			zap.String("userID", userID),
-			zap.String("id", req.GetInfo().GetId()),
+			zap.String("id", data.ID),
 			zap.Error(err),
 		)
 		return nil, err
@@ -199,12 +191,8 @@ func (h *BinaryDataHandler) ListBinaryData(ctx context.Context, req *pb.ListBina
 
 	resp := &pb.ListBinaryDataResponse{}
 	for _, d := range list {
-		item := &pb.BinaryDataInfo{}
-		item.SetId(d.ID)
-		item.SetTitle(d.Title)
-		//item.SetMetadata(d.Metadata)
-		item.SetClientPath(d.ClientPath)
-		resp.SetItems(append(resp.GetItems(), item))
+		d.Metadata = ""
+		resp.SetItems(append(resp.GetItems(), mapper.BinaryDataToPB(d)))
 	}
 
 	h.logger.Info("ListBinaryData succeeded", zap.String("userID", userID), zap.Int("items", len(list)))
@@ -228,16 +216,8 @@ func (h *BinaryDataHandler) GetBinaryDataInfo(ctx context.Context, req *pb.GetBi
 		return nil, err
 	}
 
-	info := &pb.BinaryDataInfo{}
-	info.SetId(data.ID)
-	info.SetTitle(data.Title)
-	info.SetMetadata(data.Metadata)
-	info.SetSize(data.Size)
-	info.SetClientPath(data.ClientPath)
-	info.SetUpdatedAt(timestamppb.New(data.UpdatedAt))
-
 	resp := &pb.GetBinaryDataInfoResponse{}
-	resp.SetBinaryInfo(info)
+	resp.SetBinaryInfo(mapper.BinaryDataToPB(data))
 
 	h.logger.Info("GetBinaryDataInfo succeeded",
 		zap.String("userID", userID),
@@ -255,16 +235,11 @@ func (h *BinaryDataHandler) SaveBinaryDataInfo(ctx context.Context, req *pb.Save
 	}
 
 	info := req.GetInfo()
-	if info == nil {
+	data := mapper.BinaryDataFromPB(info)
+	if data == nil {
 		return nil, status.Error(codes.InvalidArgument, "info is required")
 	}
-
-	data := &model.BinaryData{
-		UserID:     userID,
-		Title:      info.GetTitle(),
-		Metadata:   info.GetMetadata(),
-		ClientPath: info.GetClientPath(),
-	}
+	data.UserID = userID
 
 	var res *model.BinaryData
 	res, err = h.binarySvc.CreateInfo(ctx, data)

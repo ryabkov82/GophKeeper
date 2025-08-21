@@ -16,12 +16,11 @@ import (
 func initEditForm(m Model) Model {
 
 	m.editErr = nil
-
-	if entity, ok := m.editEntity.(forms.FormEntity); ok {
-		formFields := entity.FormFields()
+	if fe, err := forms.Adapt(m.editEntity); err == nil {
+		formFields := fe.FormFields()
 		m.widgets, m.focusedInput = initFormInputsFromFields(formFields, m.termWidth)
 	} else {
-		m.editErr = fmt.Errorf("entity does not implement FormEntity")
+		m.editErr = err
 	}
 
 	return m
@@ -312,10 +311,10 @@ func saveEdit(m Model) (Model, tea.Cmd) {
 // updateEditEntityFromInputs обновляет m.editEntity значениями из m.inputs.
 // Возвращает обновлённую модель (m.editErr заполняется при ошибке).
 func updateEditEntityFromInputs(m Model) Model {
-	// 1) Приведение к forms.FormEntity
-	fe, ok := m.editEntity.(forms.FormEntity)
-	if !ok {
-		m.editErr = fmt.Errorf("entity does not implement forms.FormEntity")
+
+	fe, err := forms.Adapt(m.editEntity)
+	if err != nil {
+		m.editErr = err
 		return m
 	}
 
@@ -327,7 +326,6 @@ func updateEditEntityFromInputs(m Model) Model {
 		return m
 	}
 
-	m.editEntity = fe // для чёткости присвоим
 	m.editErr = nil
 	return m
 }
