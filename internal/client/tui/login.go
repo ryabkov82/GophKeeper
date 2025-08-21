@@ -150,7 +150,10 @@ func loginUser(ctx context.Context, authService contracts.AuthService, login, pa
 }
 
 // Сообщения авторизации
+// LoginSuccessMsg отправляется при успешной авторизации пользователя.
 type LoginSuccessMsg struct{}
+
+// LoginFailedMsg содержит ошибку при неудачной попытке входа.
 type LoginFailedMsg struct {
 	Err error
 }

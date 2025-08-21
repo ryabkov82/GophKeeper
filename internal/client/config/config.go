@@ -313,6 +313,8 @@ func loadFromEnv(cfg *ClientConfig) error {
 	return nil
 }
 
+// UnmarshalJSON реализует кастомный разбор ClientConfig из JSON,
+// корректно обрабатывая значение таймаута.
 func (c *ClientConfig) UnmarshalJSON(data []byte) error {
 	type Alias ClientConfig
 	aux := &struct {

@@ -92,5 +92,8 @@ func (c *Credential) UpdateFromFields(fields []forms.FormField) error {
 	return nil
 }
 
-func (c *Credential) GetID() string   { return c.ID }
+// GetID возвращает идентификатор учётных данных.
+func (c *Credential) GetID() string { return c.ID }
+
+// SetID устанавливает идентификатор учётных данных.
 func (c *Credential) SetID(id string) { c.ID = id }

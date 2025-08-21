@@ -15,10 +15,12 @@ type teaProgram struct {
 	prog *tea.Program
 }
 
+// Run запускает выполнение программы bubbletea.
 func (t *teaProgram) Run() (tea.Model, error) {
 	return t.prog.Run()
 }
 
+// Quit корректно завершает выполнение программы bubbletea.
 func (t *teaProgram) Quit() {
 	t.prog.Quit()
 }

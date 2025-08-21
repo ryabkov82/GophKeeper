@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"os"
 	"path/filepath"
@@ -25,14 +26,24 @@ func TestConfig(t *testing.T) {
 		flag.CommandLine = flag.NewFlagSet("json", flag.PanicOnError)
 		os.Args = []string{"cmd"}
 
-		json := `{
-			"grpc_server_address": "jsonhost:55555",
-			"log_level": "debug",
-			"enable_tls": true,
-			"ssl_cert_file": "certs/cert.pem",
-			"ssl_key_file": "certs/key.pem",
-			"jwt_secret": "json_secret_1234567890123456789012345678"
-		}`
+		dir := t.TempDir()
+		cert := filepath.Join(dir, "cert.pem")
+		key := filepath.Join(dir, "key.pem")
+		require.NoError(t, os.WriteFile(cert, []byte("data"), 0644))
+		require.NoError(t, os.WriteFile(key, []byte("data"), 0644))
+
+		config := Config{
+			GRPCServerAddr: "jsonhost:55555",
+			LogLevel:       "debug",
+			EnableTLS:      true,
+			SSLCertFile:    cert,
+			SSLKeyFile:     key,
+			JwtKey:         "json_secret_1234567890123456789012345678",
+		}
+
+		json, err := json.Marshal(config)
+		require.NoError(t, err)
+
 		tmp := filepath.Join(t.TempDir(), "config.json")
 		require.NoError(t, os.WriteFile(tmp, []byte(json), 0644))
 		t.Setenv("CONFIG", tmp)

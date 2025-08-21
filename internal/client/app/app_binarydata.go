@@ -19,6 +19,8 @@ type progressReader struct {
 	progressChan chan<- int64
 }
 
+// Read реализует io.Reader и отправляет информацию о количестве
+// прочитанных байт в канал прогресса.
 func (r *progressReader) Read(p []byte) (int, error) {
 	n, err := r.reader.Read(p)
 	if n > 0 {
@@ -38,6 +40,7 @@ type progressWriter struct {
 	ch chan<- int64
 }
 
+// Write реализует io.Writer и сообщает о прогрессе записи через канал.
 func (pw *progressWriter) Write(p []byte) (int, error) {
 	n, err := pw.w.Write(p)
 	if n > 0 && pw.ch != nil {
@@ -56,6 +59,7 @@ type ctxReader struct {
 	r   io.Reader
 }
 
+// Read реализует io.Reader с учётом отмены контекста.
 func (cr *ctxReader) Read(p []byte) (int, error) {
 	select {
 	case <-cr.ctx.Done():

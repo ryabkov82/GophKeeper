@@ -75,5 +75,8 @@ func (t *TextData) UpdateFromFields(fields []forms.FormField) error {
 	return nil
 }
 
-func (t *TextData) GetID() string   { return t.ID }
+// GetID возвращает идентификатор текстовых данных.
+func (t *TextData) GetID() string { return t.ID }
+
+// SetID устанавливает идентификатор текстовых данных.
 func (t *TextData) SetID(id string) { t.ID = id }

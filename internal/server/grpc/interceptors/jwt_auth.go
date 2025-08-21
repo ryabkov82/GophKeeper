@@ -50,8 +50,11 @@ type ctxStream struct {
 	ctx context.Context
 }
 
+// Context возвращает контекст, в который был добавлен идентификатор пользователя.
 func (s *ctxStream) Context() context.Context { return s.ctx }
 
+// StreamAuthInterceptor возвращает gRPC StreamServerInterceptor, выполняющий
+// проверку JWT-токена для потоковых RPC-запросов.
 func StreamAuthInterceptor(tm *jwtutils.TokenManager, logger *zap.Logger) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		ctx, err := authenticateCtx(ss.Context(), tm, logger, info.FullMethod)

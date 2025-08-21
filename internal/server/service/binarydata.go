@@ -12,11 +12,13 @@ import (
 	"github.com/ryabkov82/gophkeeper/internal/domain/storage"
 )
 
+// BinaryDataService реализует бизнес-логику работы с бинарными данными.
 type BinaryDataService struct {
 	repo    repository.BinaryDataRepository
 	storage storage.BinaryDataStorage
 }
 
+// NewBinaryDataService создаёт новый сервис для работы с бинарными данными.
 func NewBinaryDataService(repo repository.BinaryDataRepository, storage storage.BinaryDataStorage) *BinaryDataService {
 	return &BinaryDataService{repo: repo, storage: storage}
 }
@@ -175,6 +177,7 @@ func (s *BinaryDataService) Delete(ctx context.Context, userID, id string) error
 	return s.storage.Delete(ctx, data.StoragePath)
 }
 
+// Close освобождает ресурсы, используемые хранилищем бинарных данных.
 func (s *BinaryDataService) Close() {
 	s.storage.Close()
 }

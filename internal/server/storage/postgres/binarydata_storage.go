@@ -35,6 +35,7 @@ func (s *binaryDataStorage) Save(ctx context.Context, data *model.BinaryData) er
 	return err
 }
 
+// Update изменяет метаданные и пути хранения бинарных данных.
 func (s *binaryDataStorage) Update(ctx context.Context, data *model.BinaryData) error {
 	query := `
 		UPDATE binary_data

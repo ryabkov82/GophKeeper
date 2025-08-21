@@ -86,6 +86,7 @@ func NewModel(ctx context.Context, svcs ModelServices) *Model {
 			{"Notes", "Текстовые заметки"},
 			{"Files", "Бинарные файлы"},
 			{"Cards", "Банковские карты"},
+			{"About", "О программе"},
 			{"Exit", "Выйти из приложения"},
 		},
 		inputs:       make([]textinput.Model, 0),
@@ -140,6 +141,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return updateRegister(m, msg)
 	case "registerSuccess":
 		return updateRegisterSuccess(m, msg)
+	case "about":
+		return updateAbout(m, msg)
 	case "list":
 		// Обрабатываем сообщения listLoadedMsg и errMsg
 		switch msg := msg.(type) {
@@ -180,6 +183,8 @@ func (m Model) View() string {
 		return renderRegister(m)
 	case "registerSuccess":
 		return renderRegisterSuccess(m)
+	case "about":
+		return renderAbout(m)
 	case "list":
 		return renderList(m)
 	case "edit", "edit_new":
